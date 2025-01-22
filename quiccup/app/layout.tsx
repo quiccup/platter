@@ -2,10 +2,11 @@
 import { Playfair_Display, Lato } from "next/font/google";
 import './globals.css';
 import { ClientWrapper } from '@/components/client-wrapper';
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import Link from 'next/link';
 
 // Move font configs outside the component
-const playfair = Playfair_Display({ 
+const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: '--font-playfair',
   display: 'swap',
@@ -13,7 +14,7 @@ const playfair = Playfair_Display({
   adjustFontFallback: true
 });
 
-const lato = Lato({ 
+const lato = Lato({
   subsets: ["latin"],
   weight: ['300', '400', '700'],
   variable: '--font-lato',
@@ -35,15 +36,34 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-        <html lang="en">
-          <body className={`${playfair.variable} ${lato.variable} font-sans`}>
-            <main>
-              <ClientWrapper>
-                {children}
-              </ClientWrapper>
-            </main>
-          </body>
-        </html>
+      <html lang="en">
+        <body className={`${playfair.variable} ${lato.variable} font-sans`}>
+          <header className="bg-gradient-to-r from-orange-600 to-red-600 text-white">
+            <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+              <div className="text-2xl font-bold">Quiccup</div>
+
+              <div className="space-x-4">
+                <SignedOut>
+                  {/* Landing page nav items */}
+                  <Link href="/features" className="hover:text-orange-200">Features</Link>
+                  <Link href="/pricing" className="hover:text-orange-200">Pricing</Link>
+                  <SignInButton />
+                </SignedOut>
+
+                <SignedIn>
+                  {/* Authenticated nav items */}
+                  <UserButton />
+                </SignedIn>
+              </div>
+            </nav>
+          </header>
+          <main>
+            <ClientWrapper>
+              {children}
+            </ClientWrapper>
+          </main>
+        </body>
+      </html>
     </ClerkProvider>
   );
 }
