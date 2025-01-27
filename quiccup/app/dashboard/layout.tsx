@@ -29,11 +29,6 @@ export default function DashboardLayout({
                 </Link>
               </div>
             </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-500 mr-4">{user?.emailAddresses[0].emailAddress}</span>
-              <UserButton/>
-              {/* Add user menu dropdown here */}
-            </div>
           </div>
         </div>
       </nav>

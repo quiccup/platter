@@ -1,16 +1,30 @@
 'use client'
 import { useUser, useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import { createClient } from '@supabase/supabase-js';
+import { userService } from "@/lib/services/userService";
 
-interface User {
+interface ClerkUser {
   id: string;
-  clerk_id: string;
   email: string;
-  first_name: string | null;
-  last_name: string | null;
-  created_at: string;
-  updated_at: string;
+  firstName: string | null;
+  lastName: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+async function processUser(clerkUser: ClerkUser, userToken: string | null): Promise<{ error: Error | null }> {
+  if (!userToken) {
+    return {error: new Error("could not process user. userToken not available")};
+  }
+
+  return await userService.upsertUser({
+    clerkId: clerkUser.id,
+    email: clerkUser.email,
+    firstName: clerkUser.firstName,
+    lastName: clerkUser.lastName,
+    createdAt: clerkUser.createdAt,
+    updatedAt: clerkUser.updatedAt,
+  }, userToken);
 }
 
 export function AuthWrapper({ children }: { children: React.ReactNode }) {
@@ -30,36 +44,52 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
         // Get JWT token with custom claims
         const token = await getToken({ template: "supabase" });
 
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-          {
-            global: {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
-          }
-        );
+        // Syncing user with the backend
+        let now = new Date().toISOString();
+        const { error } = await processUser({
+          id: clerkUser.id,
+          email: clerkUser.emailAddresses[0].emailAddress,
+          firstName: clerkUser.firstName,
+          lastName: clerkUser.lastName,
+          createdAt: now,
+          updatedAt: now
+        }, token);
 
-        console.log("syncing user");
-        console.log(clerkUser);
-        // Attempt to upsert the user
-        const { error: upsertError } = await supabase
-          .from('users')
-          .upsert({
-            clerk_id: clerkUser.id,
-            email: clerkUser.emailAddresses[0].emailAddress,
-            first_name: clerkUser.firstName,
-            last_name: clerkUser.lastName,
-            updated_at: new Date().toISOString(),
-          }, {
-            onConflict: 'clerk_id',
-            ignoreDuplicates: false,
-          });
-
-        if (upsertError) throw upsertError;
+        if (error) throw error;
         setIsUserSynced(true);
+        //     // First create restaurant
+        //     const { error: restaurantError } = await supabase
+        //       .from('restaurants')
+        //       .insert({
+        //         user_id: id,
+        //         name: first_name ? `${first_name}'s Restaurant` : 'My Restaurant',
+        //         email: primaryEmail || '',
+        //       })
+
+        //     if (restaurantError) {
+        //       console.error('6. Restaurant creation error:', restaurantError);
+        //       return new Response('Error creating restaurant', { status: 500 });
+        //     }
+
+        //     // Then create billing profile
+        //     const { error: billingError } = await supabase
+        //       .from('billing_profiles')
+        //       .insert({
+        //         user_id: id,
+        //         subscription_tier: 'free',
+        //         trial_ends_at: trialEndDate.toISOString(),
+        //         trial_status: 'active',
+        //         is_active: true,
+        //         current_period_start: new Date().toISOString(),
+        //         current_period_end: trialEndDate.toISOString()
+        //       })
+
+        //     if (billingError) {
+        //       console.error('7. Billing profile creation error:', billingError);
+        //       return new Response('Error creating billing profile', { status: 500 });
+        //     }
+
+        //     console.log('8. Successfully created restaurant and billing profile')
 
       } catch (e) {
         console.error('Error syncing user:', e);
