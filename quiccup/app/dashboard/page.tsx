@@ -15,6 +15,8 @@ interface Website {
 export default function DashboardHome() {
   const router = useRouter()
   const { user } = useUser()
+  console.log('checking user')
+  console.log(user)
   const [isLoading, setIsLoading] = useState(false)
   const [websites, setWebsites] = useState<Website[]>([])
 

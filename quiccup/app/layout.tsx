@@ -1,27 +1,33 @@
-import {
-  ClerkProvider,
-} from '@clerk/nextjs';
+// This remains a Server Component (no 'use client')
 import { Playfair_Display, Lato } from "next/font/google";
 import './globals.css';
+import { ClientWrapper } from '@/components/client-wrapper';
+import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import Link from 'next/link';
 
-// Font configurations
-const playfair = Playfair_Display({ 
+// Move font configs outside the component
+const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: '--font-playfair',
   display: 'swap',
+  preload: true,
+  adjustFontFallback: true
 });
 
-const lato = Lato({ 
+const lato = Lato({
   subsets: ["latin"],
   weight: ['300', '400', '700'],
   variable: '--font-lato',
   display: 'swap',
+  preload: true,
+  adjustFontFallback: true
 });
 
 export const metadata = {
   title: 'Quiccup | Restaurant Platform',
   description: 'Interactive dining experiences and restaurant management',
 };
+
 
 export default function RootLayout({
   children,
@@ -32,17 +38,30 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${playfair.variable} ${lato.variable} font-sans`}>
-           <header >
-          </header> 
-          <main className="min-h-screen">
-            
-            {children}
+          <header className="bg-gradient-to-r from-orange-600 to-red-600 text-white">
+            <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+              <div className="text-2xl font-bold">Quiccup</div>
+
+              <div className="space-x-4">
+                <SignedOut>
+                  {/* Landing page nav items */}
+                  <Link href="/features" className="hover:text-orange-200">Features</Link>
+                  <Link href="/pricing" className="hover:text-orange-200">Pricing</Link>
+                  <SignInButton />
+                </SignedOut>
+
+                <SignedIn>
+                  {/* Authenticated nav items */}
+                  <UserButton />
+                </SignedIn>
+              </div>
+            </nav>
+          </header>
+          <main>
+            <ClientWrapper>
+              {children}
+            </ClientWrapper>
           </main>
-          <footer className="bg-gray-900 text-white py-8">
-            <div className="max-w-7xl mx-auto px-4">
-              <p className="text-center">© {new Date().getFullYear()} Quiccup. All rights reserved.</p>
-            </div>
-          </footer>
         </body>
       </html>
     </ClerkProvider>
