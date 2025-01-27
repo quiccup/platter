@@ -1,9 +1,10 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useUser } from "@clerk/nextjs"
+import { UserButton, useUser } from "@clerk/nextjs"
 import { createClient } from '@supabase/supabase-js'
 import { generateUniqueSubdomain } from '@/lib/utils'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 interface Website {
   id: string
@@ -92,6 +93,30 @@ export default function DashboardHome() {
   
   return (
     <div>
+         <nav className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex">
+              <div className="flex-shrink-0 flex items-center">
+                <span className="text-xl font-bold">Quiccup</span>
+              </div>
+              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                <Link href="/dashboard" className="border-b-2 border-orange-500 text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium">
+                  Dashboard
+                </Link>
+                <Link href="/dashboard/settings" className="text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-sm font-medium">
+                  Settings
+                </Link>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <span className="text-sm text-gray-500 mr-4">{user?.emailAddresses[0].emailAddress}</span>
+              <UserButton/>
+              {/* Add user menu dropdown here */}
+            </div>
+          </div>
+        </div>
+      </nav>
       <div className="md:flex md:items-center md:justify-between mb-8">
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">

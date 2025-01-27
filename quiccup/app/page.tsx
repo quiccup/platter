@@ -1,5 +1,6 @@
 // This is the main landing page
 'use client'
+import { SignInButton } from '@clerk/nextjs'
 import Link from 'next/link'
 
 export default function LandingPage() {
@@ -8,13 +9,15 @@ export default function LandingPage() {
       {/* Hero Section */}
       <header className="bg-gradient-to-r from-orange-600 to-red-600 text-white">
         <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold">Quiccup</div>
+          <div className="text-2xl font-bold">Platter</div>
           <div className="space-x-4">
             <Link href="/features" className="hover:text-orange-200">Features</Link>
             <Link href="/pricing" className="hover:text-orange-200">Pricing</Link>
-            <Link href="/admin" className="bg-white text-orange-600 px-4 py-2 rounded-lg hover:bg-orange-100">
+            <SignInButton mode="modal">
+            <button className="bg-white text-orange-600 px-4 py-2 rounded-lg hover:bg-orange-100">
               Login
-            </Link>
+            </button>
+          </SignInButton>
           </div>
         </nav>
         

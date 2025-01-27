@@ -1,30 +1,34 @@
 'use client'
 
-interface WebsitePreviewProps {
+import { DockBar } from "./components/ui/DockBar";
+import { ChefsFeedDisplay } from "./Sections/ChefsFeed/ChefsFeedDisplay";
+import { GallerySection } from "./Sections/Gallery/GalleryDisplay";
+import { Hero } from "./Sections/Hero/HeroDisplay";
+import { ReviewsSection } from "./Sections/Reviews/ReviewsDisplay";
+
+interface FinalProductProps {
   data: {
-    hero: { heading: string; description: string }
+    hero: { heading: string; subheading: string, buttons: any[] }
     menu: any[]
     chefs: any[]
     about: { content: string }
     contact: { email: string; phone: string }
+    gallery: any[]
+    reviews: any[]
   }
 }
 
-export function WebsitePreview({ data }: WebsitePreviewProps) {
+export function FinalProduct({ data }: FinalProductProps) {
   return (
-    <div className="max-w-5xl mx-auto">
-      {/* Hero Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold text-center mb-6">
-            {data.hero.heading || 'Your Restaurant Name'}
-          </h1>
-          <p className="text-xl text-gray-600 text-center max-w-2xl mx-auto">
-            {data.hero.description || 'Add a description of your restaurant'}
-          </p>
-        </div>
-      </section>
-
+    <div className="">
+      <DockBar />
+             <section>
+    <Hero data={data.hero} />
+    </section>
+         <section>
+    <GallerySection data={data.gallery} />
+    </section>
+    <ReviewsSection />
       {/* Menu Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
@@ -46,24 +50,9 @@ export function WebsitePreview({ data }: WebsitePreviewProps) {
       </section>
 
       {/* Chefs Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Our Chefs</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {data.chefs.length > 0 ? (
-              data.chefs.map((chef, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-32 h-32 rounded-full bg-gray-200 mx-auto mb-4" />
-                  <h3 className="font-semibold">{chef.name}</h3>
-                  <p className="text-gray-600">{chef.role}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500 col-span-3 text-center">Add chefs to see them here</p>
-            )}
-          </div>
-        </div>
-      </section>
+      
+     <ChefsFeedDisplay/>
+   
 
       {/* About Section */}
       <section className="py-16">

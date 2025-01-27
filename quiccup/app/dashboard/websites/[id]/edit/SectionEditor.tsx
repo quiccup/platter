@@ -1,3 +1,7 @@
+import { ReviewsEdit } from "./Sections/Reviews/ReviewsEdit"
+import { HeroEdit } from "./Sections/Hero/HeroEdit"
+import { GalleryEdit } from "./Sections/Gallery/GalleryEdit"
+
 interface SectionEditorProps {
   section: string
   data: any
@@ -9,22 +13,22 @@ export function SectionEditor({ section, data, onChange }: SectionEditorProps) {
     case 'hero':
       return (
         <div className="space-y-4">
-          <input
-            type="text"
-            value={data.heading}
-            onChange={(e) => onChange({ ...data, heading: e.target.value })}
-            placeholder="Heading"
-            className="w-full p-2 border rounded"
-          />
-          <textarea
-            value={data.description}
-            onChange={(e) => onChange({ ...data, description: e.target.value })}
-            placeholder="Description"
-            className="w-full p-2 border rounded"
-            rows={3}
-          />
+         <HeroEdit data={data} onChange={onChange} />
         </div>
       )
-    // Add other section editors...
+    case 'menu':
+      return <div>Menu Section</div>  
+    case 'chefs':
+      return <div>Chefs Section</div>  
+    case 'about':
+      return <div>About Section</div>  
+    case 'contact':
+      return <div>Contact Section</div>  
+    case 'reviews':
+      return <ReviewsEdit/>
+    case 'gallery':
+      return <GalleryEdit data={data} onChange={onChange} /> 
+    default:
+      return null;
   }
 } 
