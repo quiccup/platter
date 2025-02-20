@@ -1,101 +1,100 @@
 "use client";
 
-
-import { motion } from "framer-motion";
-import { useRef, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ChefPost {
   id: string;
   name: string;
-  image: string;
   content: string;
+  images: string[];
+  tags: string[];
   timestamp: string;
 }
 
-export function ChefsFeedDisplay() {
-  const [posts, setPosts] = useState<ChefPost[]>([
-    {
-      id: "1",
-      name: "Chef John",
-      image: "/chef1.jpg",
-      content: "Just finished creating a new seasonal menu! Can't wait for you all to try it 🍽️",
-      timestamp: "2h ago"
-    },
-    // Add more sample posts
-  ]);
-  
-  const [newPost, setNewPost] = useState("");
-  const constraintsRef = useRef(null);
+interface ChefsFeedDisplayProps {
+  data: {
+    posts: ChefPost[]
+  }
+}
 
+export function ChefsFeedDisplay({ data }: ChefsFeedDisplayProps) {
   return (
-    <div className="w-full max-w-3xl mx-auto p-4" ref={constraintsRef}>
-      {/* Post Input */}
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="flex gap-4">
-            <Avatar>
-              <AvatarImage src="/chef1.jpg" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <Input
-                placeholder="What's cooking?"
-                value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
-                className="mb-2"
-              />
-              <Button 
-                onClick={() => {
-                  if (newPost.trim()) {
-                    setPosts([{
-                      id: Date.now().toString(),
-                      name: "Chef John",
-                      image: "/chef1.jpg",
-                      content: newPost,
-                      timestamp: "Just now"
-                    }, ...posts]);
-                    setNewPost("");
-                  }
-                }}
-              >
-                Post
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <section className="w-screen bg-white py-16 md:py-24">
+      <div className="max-w-[100vw] overflow-hidden">
+        <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl">
+          {/* Title */}
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12">
+            Chef's Feed
+          </h2>
+        </div>
 
-      {/* Posts Feed */}
-      <div className="space-y-4">
-        {posts.map((post) => (
-          <motion.div
-            key={post.id}
-            drag="x"
-            dragConstraints={constraintsRef}
-            whileTap={{ scale: 0.95 }}
+        {/* Cards Container */}
+        <div className="relative px-4 md:px-8 lg:px-12">
+          {/* Scrollable cards */}
+          <div className="flex overflow-x-auto snap-x snap-mandatory 
+            gap-4 md:gap-6 pb-4
+            scrollbar-hide md:scrollbar-default md:scrollbar-thin md:scrollbar-thumb-gray-300 md:scrollbar-track-gray-100
+            max-w-[calc(100vw-2rem)] md:max-w-[calc(100vw-4rem)] lg:max-w-[calc(100vw-6rem)] mx-auto"
           >
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4">
-                <Avatar>
-                  <AvatarImage src={post.image} />
-                  <AvatarFallback>{post.name[0]}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold">{post.name}</h3>
-                  <p className="text-sm text-gray-500">{post.timestamp}</p>
+            {data.posts?.map((post) => (
+              <div 
+                key={post.id} 
+                className="flex-none w-[85vw] min-w-[300px] max-w-[450px] sm:w-[400px] md:w-[450px] 
+                  bg-white rounded-2xl overflow-hidden shadow-md snap-center first:ml-0"
+              >
+                <div className="p-6 space-y-6">
+                  {/* Chef info */}
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-10 h-10 border-2">
+                      <AvatarImage src="/chef1.jpg" />
+                      <AvatarFallback>{post.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        {post.name}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {post.timestamp}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Post content */}
+                  <p className="text-2xl md:text-3xl font-bold text-gray-900 leading-relaxed">
+                    "{post.content}"
+                  </p>
+
+                  {/* Image */}
+                  {post.images?.[0] && (
+                    <div className="rounded-xl overflow-hidden">
+                      <img 
+                        src={post.images[0]} 
+                        alt={post.content}
+                        className="w-full h-48 object-cover"
+                      />
+                    </div>
+                  )}
+
+                  {/* Tags */}
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {post.tags.map((tag, i) => (
+                        <span 
+                          key={i}
+                          className="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </CardHeader>
-              <CardContent>
-                <p>{post.content}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

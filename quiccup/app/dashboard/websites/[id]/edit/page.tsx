@@ -3,14 +3,10 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { debounce } from 'lodash'
 import { createClient } from '@supabase/supabase-js'
-import { PreviewButton } from './PreviewButton'
 import { SectionEditor } from './SectionEditor'
 import { FinalProduct } from './FinalProduct'
 import { 
   ChevronLeftIcon, 
-  ChevronRightIcon,
-  ComputerDesktopIcon,
-  DevicePhoneMobileIcon
 } from '@heroicons/react/24/outline'
 import {
   Sidebar,
@@ -36,57 +32,29 @@ import {
   Command,
   AudioWaveform,
   GalleryVerticalEnd,
-  PlusIcon,
-  PencilIcon
+  ChevronRight,
+  Expand,
+  Smartphone
 } from 'lucide-react'
 import { TeamSwitcher } from '@/app/editor/components/team-switcher'
 import { NavUser } from '@/app/editor/components/nav-user'
 import { NavProjects } from '@/app/editor/components/nav-projects'
-import { Separator } from '@/components/ui/separator'
-import { Breadcrumb, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbLink, BreadcrumbItem, BreadcrumbList } from '@/components/ui/breadcrumb'
-import { SectionModal } from './components/section-modal'
-import { Input } from "@/components/ui/input"
-import { Textarea } from '@/components/ui/textarea'
-import { HeroEditor } from './InlineEditors/HeroEditor'
-import { HeroEdit } from './Sections/Hero/HeroEdit'
+import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
+import { WebsiteData } from './types'
 
 export default function EditWebsitePage() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const params = useParams()
   const websiteId = params.id as string
   
   const [mounted, setMounted] = useState(false)
   const [activeSection, setActiveSection] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop')
-  const [websiteData, setWebsiteData] = useState({
-    hero: { heading: '', description: '' },
-    menu: [],
-    chefs: [
-      {
-        title: "Lemon Herb Salmon",
-        description: "Our signature dish combines fresh Atlantic salmon with a delicate blend of Mediterranean herbs and zesty lemon. A perfect harmony of flavors!",
-        duration: "45 min",
-        image: "/images/salmon.jpg"
-      },
-      {
-        title: "Chocolate Truffle Tart",
-        description: "A decadent dessert featuring rich Belgian chocolate and toasted hazelnuts, finished with a gold leaf garnish. Pure indulgence!",
-        duration: "45 min",
-        image: "/images/chocolate-tart.jpg"
-      },
-      {
-        title: "Herb-Crusted Sea Bass",
-        description: "Fresh Mediterranean sea bass encrusted with aromatic herbs and served with seasonal vegetables. A taste of coastal elegance.",
-        duration: "45 min",
-        image: "/images/sea-bass.jpg"
-      }
-    ],
-    about: { content: '' },
-    contact: { email: '', phone: '' },
-    gallery: [],
-    reviews: []
-  })
-  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved')
+  const [isMobileView, setIsMobileView] = useState(false)
+  const router = useRouter()
+
+  // Initialize with null to indicate loading state
+  const [websiteData, setWebsiteData] = useState<WebsiteData | null>(null)
+  const [sidebarWidth, setSidebarWidth] = useState<'collapsed' | 'normal' | 'expanded'>('normal')
 
   const sections = [
     { id: 'hero', label: 'Landing', icon: Home },
@@ -116,7 +84,6 @@ export default function EditWebsitePage() {
     ]
   }
 
-
   // Set mounted on initial client render
   useEffect(() => {
     setMounted(true)
@@ -124,68 +91,82 @@ export default function EditWebsitePage() {
 
   // Load initial data
   useEffect(() => {
-    if (!mounted) return
-
     async function loadWebsiteData() {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
+        
+        const { data, error } = await supabase
+          .from('websites')
+          .select('content')
+          .eq('id', websiteId)
+          .single()
+
+        if (error) throw error
+
+        if (data?.content) {
+          // Validate data structure before setting
+          const content = data.content as WebsiteData
+          setWebsiteData(content)
+        }
+      } catch (error) {
+        console.error('Error loading website data:', error)
+        // Handle error appropriately
+      }
+    }
+    
+    loadWebsiteData()
+  }, [websiteId])
+
+  // Safe update function
+  const handleContentChange = (sectionId: keyof WebsiteData, newData: any) => {
+    if (!websiteData) return // Don't update if no data loaded
+
+    setWebsiteData(prev => {
+      if (!prev) return prev // Extra safety check
+
+      const updatedData = {
+        ...prev,
+        [sectionId]: {
+          ...prev[sectionId],
+          ...newData
+        }
+      }
+
+      // Debounced save
+      debouncedSave(updatedData)
+
+      return updatedData
+    })
+  }
+
+  // Safer save function
+  const saveToDatabase = async (content: WebsiteData) => {
+    try {
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       )
       
-      const { data, error } = await supabase
-        .from('websites')
-        .select('content')
-        .eq('id', websiteId)
-        .single()
-
-      if (data?.content) {
-        setWebsiteData(data.content)
-      }
-    }
-    
-    loadWebsiteData()
-  }, [websiteId, mounted])
-
-  // Auto-save functionality
-  const saveToDatabase = async (content: any) => {
-    if (!mounted) return
-
-    setSaveStatus('saving')
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    
-    try {
-      await supabase
+      const { error } = await supabase
         .from('websites')
         .update({ content })
         .eq('id', websiteId)
-      setSaveStatus('saved')
+
+      if (error) throw error
+      
     } catch (error) {
-      setSaveStatus('error')
-      console.error('Error saving:', error)
+      console.error('Error saving website data:', error)
+      // Handle error appropriately
     }
   }
 
-  // Debounced auto-save
   const debouncedSave = debounce(saveToDatabase, 1000)
 
-  // Call auto-save whenever content changes
-  useEffect(() => {
-    if (!mounted) return
-    debouncedSave(websiteData)
-  }, [websiteData, mounted])
-
-  const handleContentChange = (sectionId: string, newData: any) => {
-    setWebsiteData(prev => ({
-      ...prev,
-      [sectionId]: newData
-    }))
-  }
-
-  // Return loading state until mounted
-  if (!mounted) {
+  // Show loading state if data hasn't loaded
+  if (!websiteData) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -200,137 +181,111 @@ export default function EditWebsitePage() {
 
   return (
     <SidebarProvider>
-        <Sidebar collapsible="icon">
-          <SidebarHeader>
+      <Sidebar 
+        collapsible="icon"
+        className={`transition-all duration-300 ${
+          sidebarWidth === 'collapsed' ? 'w-[50px]' : 
+          'w-[280px]'
+        }`}
+      >
+        <SidebarHeader>
           <TeamSwitcher teams={data.teams} />
-          </SidebarHeader>
-          <SidebarContent>
+        </SidebarHeader>
+        <SidebarContent>
           <SidebarGroup>
-          <SidebarGroupLabel>Sections</SidebarGroupLabel>
-           <SidebarMenu>
-           
-              <nav className="space-y-1">
-                {sections.map((section) => (
+            <SidebarGroupLabel>Sections</SidebarGroupLabel>
+            <SidebarMenu>
+              {sections.map((section) => (
+                <div key={section.id}>
                   <button
-                    key={section.id}
-                    onClick={() => onSectionClick(section.id)} 
-                    className={`w-full px-2 py-2 text-left hover:bg-gray-100 flex items-center gap-3 group ${
+                    onClick={() => setActiveSection(activeSection === section.id ? null : section.id)}
+                    className={`w-full px-2 py-2 text-left hover:bg-gray-100 flex items-center justify-between gap-3 group ${
                       activeSection === section.id ? 'bg-gray-100' : ''
                     }`}
                   >
-                    <section.icon className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate group-[[data-collapsed=true]]:hidden text-sm">
-                      {section.label}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <section.icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate group-[[data-collapsed=true]]:hidden text-sm">
+                        {section.label}
+                      </span>
+                    </div>
+                    <ChevronRight 
+                      className={`w-4 h-4 transition-transform ${
+                        activeSection === section.id ? 'rotate-90' : ''
+                      }`}
+                    />
                   </button>
-                ))}
-              </nav>
-              </SidebarMenu>
-              </SidebarGroup>
-              <NavProjects projects={data.projects} />
-            </SidebarContent>
-            <SidebarFooter>
-              <NavUser user={data.user} />
-            </SidebarFooter>
-      
-          <SidebarRail />     
-        </Sidebar>
+                  
+                  {/* Section Editor Panel */}
+                  {activeSection === section.id && (
+                    <div className="p-4 border-l ml-4 mt-2">
+                      <SectionEditor 
+                        section={section.id}
+                        data={websiteData[section.id]}
+                        onChange={(newData) => handleContentChange(section.id, newData)}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+          <NavProjects projects={data.projects} />
+        </SidebarContent>
+        <SidebarFooter>
+          <NavUser user={data.user} />
+        </SidebarFooter>
+        <SidebarRail />
+        
+        {/* Add resize button at the bottom */}
+        <button
+          onClick={() => setSidebarWidth(state => 
+            state === 'normal' ? 'expanded' : 
+            state === 'expanded' ? 'collapsed' : 
+            'normal'
+          )}
+          className="absolute bottom-4 right-2 p-2 hover:bg-gray-100 rounded-full"
+        >
+          <ChevronLeftIcon className={`w-4 h-4 transition-transform ${
+            sidebarWidth === 'expanded' ? 'rotate-180' : ''
+          }`} />
+        </button>
+      </Sidebar>
 
-        {/* <SidebarInset className="p-0 m-0">
-          <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-            <h2 className="font-medium">Edit Website</h2>
-            <div className="ml-auto flex items-center gap-2">
-              <div className="flex gap-2 border rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('desktop')}
-                  className={`p-2 rounded ${viewMode === 'desktop' ? 'bg-gray-100' : ''}`}
-                >
-                  <ComputerDesktopIcon className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('mobile')}
-                  className={`p-2 rounded ${viewMode === 'mobile' ? 'bg-gray-100' : ''}`}
-                >
-                  <DevicePhoneMobileIcon className="w-5 h-5" />
-                </button>
-              </div>
-              <a
-                href={`/${websiteId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200"
+      {/* Preview Area */}
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger />
+            <h2 className="font-medium">Website Preview</h2>
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsMobileView(!isMobileView)}
+                className="text-gray-600"
               >
-                Preview Website
-              </a>
-            </div>
-          </header>
-
-          <div className="flex h-[calc(100vh-3.5rem)]">
-            <div className="flex overflow-auto p-4">
-              <div className={`mx-auto transition-all duration-300 ${
-                viewMode === 'mobile' ? 'max-w-[375px]' : 'w-full'
-              }`}>
-                <WebsitePreview data={websiteData} />
-              </div>
-            </div>
-          </div>
-        </SidebarInset> */}
-         <SidebarInset>  
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Website
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-            <div className="ml-auto flex items-center gap-2">
-              <div className="flex gap-2 border rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('desktop')}
-                  className={`p-2 rounded ${viewMode === 'desktop' ? 'bg-gray-100' : ''}`}
-                >
-                  <ComputerDesktopIcon className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('mobile')}
-                  className={`p-2 rounded ${viewMode === 'mobile' ? 'bg-gray-100' : ''}`}
-                >
-                  <DevicePhoneMobileIcon className="w-5 h-5" />
-                </button>
-              </div>
-              <a
-                href={`/${websiteId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200"
-              >
-                Preview Website
-              </a>
-            </div>
+                <Smartphone className="w-4 h-4" />
+                <span className="ml-2">{isMobileView ? 'Desktop View' : 'Mobile View'}</span>
+              </Button>
+              <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push(`/dashboard/websites/${params.id}`)}
+              className="text-gray-600"
+            >
+              <Expand className="w-4 h-4" />
+              <span className="ml-2">Full Screen</span>
+            </Button>
           </div>
         </header>
-        {/* <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <FinalProduct data={websiteData} />
-        </div> */}
-          <main className={`h-[calc(100vh-3.5rem)] overflow-auto ${
-            viewMode === 'mobile' ? 'max-w-[375px] mx-auto' : ''
-          }`}>
-          <HeroEdit data={websiteData.hero} onChange={(newData) => handleContentChange('hero', newData)} />    
-          </main> 
+        <main className="h-[calc(100vh-3.5rem)] overflow-auto">      
+            <div className={`bg-white h-full overflow-y-auto
+              ${isMobileView ? ' shadow-lg' : ''}`}
+            >
+              <FinalProduct data={websiteData} />
+            </div>    
+        </main>
       </SidebarInset>
-      <SectionModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          section={activeSection}
-          data={websiteData[activeSection as keyof typeof websiteData]}
-          onChange={(newData) => handleContentChange(activeSection!, newData)}
-        />
     </SidebarProvider>
   )
 }

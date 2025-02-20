@@ -92,87 +92,124 @@ export default function DashboardHome() {
   }
   
   return (
-    <div>
-         <nav className="bg-white border-b">
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <span className="text-xl font-bold">Quiccup</span>
+                <span className="text-xl font-bold text-orange-600">Quiccup</span>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <Link href="/dashboard" className="border-b-2 border-orange-500 text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium">
+                <Link 
+                  href="/dashboard" 
+                  className="border-b-2 border-orange-500 text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
+                >
                   Dashboard
                 </Link>
-                <Link href="/dashboard/settings" className="text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-sm font-medium">
+                <Link 
+                  href="/dashboard/settings" 
+                  className="text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium"
+                >
                   Settings
                 </Link>
               </div>
             </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-500 mr-4">{user?.emailAddresses[0].emailAddress}</span>
-              <UserButton/>
-              {/* Add user menu dropdown here */}
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">{user?.emailAddresses[0].emailAddress}</span>
+              <UserButton afterSignOutUrl="/"/>
             </div>
           </div>
         </div>
       </nav>
-      <div className="md:flex md:items-center md:justify-between mb-8">
-        <div className="flex-1 min-w-0">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-            Welcome {user?.firstName}
-          </h2>
-        </div>
-        <div className="mt-4 flex md:mt-0 md:ml-4">
-          <button 
-            onClick={handleCreateWebsite}
-            disabled={isLoading}
-            className="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
-          >
-            {isLoading ? 'Creating...' : 'Create Your Website'}
-          </button>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {websites.length === 0 ? (
-          <div className="col-span-full bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900">
-              No Websites
-            </h3>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="md:flex md:items-center md:justify-between bg-white p-6 rounded-lg shadow-sm mb-8">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl">
+              Welcome back, {user?.firstName}
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Manage your restaurant websites and settings
+            </p>
           </div>
-        ) : (
-          websites.map((website) => (
-            <div key={website.id} className="bg-white shadow rounded-lg overflow-hidden">
-              {/* Preview Image - placeholder for now */}
-              <div className="h-48 bg-gray-100"></div>
-              
-              <div className="p-6">
-                <h3 className="text-lg font-medium text-gray-900">
-                  {website.subdomain}
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {website.subdomain}.quiccup.com
-                </p>
+          <div className="mt-4 flex md:mt-0 md:ml-4">
+            <button 
+              onClick={handleCreateWebsite}
+              disabled={isLoading}
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 transition-colors"
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                  </svg>
+                  Creating...
+                </>
+              ) : (
+                'Create New Website'
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Websites Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {websites.length === 0 ? (
+            <div className="col-span-full bg-white shadow-sm rounded-lg p-8 text-center">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No Websites Yet
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Create your first website to get started
+              </p>
+              <button
+                onClick={handleCreateWebsite}
+                disabled={isLoading}
+                className="inline-flex items-center px-4 py-2 border border-orange-600 rounded-md text-sm font-medium text-orange-600 bg-white hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 transition-colors"
+              >
+                Create Website
+              </button>
+            </div>
+          ) : (
+            websites.map((website) => (
+              <div key={website.id} className="bg-white shadow-sm rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                {/* Preview Image */}
+                <div className="h-48 bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center">
+                  <span className="text-orange-300 text-xl font-medium">Preview</span>
+                </div>
                 
-                <div className="mt-4 flex gap-2">
-                  <a
-                    href={`/dashboard/websites/${website.id}/edit`}
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    WEBSITE
-                  </a>
-                  <button
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    SETTINGS
-                  </button>
+                <div className="p-6">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {website.subdomain}
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {website.subdomain}.quiccup.com
+                  </p>
+                  
+                  <div className="mt-4 flex gap-2">
+                    <Link
+                      href={`/dashboard/websites/${website.id}/edit`}
+                      className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors"
+                    >
+                      Edit Website
+                    </Link>
+                    <button
+                      className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors"
+                    >
+                      Settings
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
-        )}
-      </div>
+            ))
+          )}
+        </div>
+      </main>
     </div>
   )
 }

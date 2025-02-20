@@ -17,7 +17,7 @@ export async function uploadImage(file: File, path: string) {
 
     if (error) throw error
 
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = await supabase.storage
       .from('restaurant-images')
       .getPublicUrl(filePath)
 
