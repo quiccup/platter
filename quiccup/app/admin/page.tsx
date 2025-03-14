@@ -15,7 +15,7 @@ export default function AdminPage() {
             <div className="max-w-md w-full space-y-8">
                 <div>
                     <h2 className="mt-6 text-center font-display text-3xl font-bold text-gray-900">
-                        Sign Up to Quiccup
+                        Sign Up to Platter
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
                         Sign in to manage your restaurant content
