@@ -18,8 +18,6 @@ interface Website {
 export default function DashboardPage() {
   const router = useRouter()
   const { user } = useUser()
-  console.log('checking user')
-  console.log(user)
   const [isLoading, setIsLoading] = useState(false)
   const [websites, setWebsites] = useState<Website[]>([])
 
@@ -27,27 +25,31 @@ export default function DashboardPage() {
     async function loadWebsites() {
       if (!user) return
       
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
 
-      // First get the user's restaurant
-      const { data: restaurant } = await supabase
-        .from('restaurants')
-        .select('id')
-        .eq('user_id', user.id)
-        .single()
+        // First get the user's restaurant
+        const { data: restaurant } = await supabase
+          .from('restaurants')
+          .select('id')
+          .eq('user_id', user.id)
+          .single()
 
-      if (!restaurant) return
+        if (!restaurant) return
 
-      // Then get websites for that restaurant
-      const { data: websiteData } = await supabase
-        .from('websites')
-        .select('*')
-        .eq('restaurant_id', restaurant.id)
+        // Then get websites for that restaurant
+        const { data: websiteData } = await supabase
+          .from('websites')
+          .select('*')
+          .eq('restaurant_id', restaurant.id)
 
-      setWebsites(websiteData || [])
+        setWebsites(websiteData || [])
+      } catch (error) {
+        console.error('Error loading websites:', error)
+      }
     }
     loadWebsites()
   }, [user])
@@ -62,34 +64,52 @@ export default function DashboardPage() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       )
 
-      const { data: restaurant, error: restaurantError } = await supabase
+      // First check if user has a restaurant
+      const { data: restaurant } = await supabase
         .from('restaurants')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle()
 
-      if (!restaurant) throw new Error('No restaurant found')
+      let restaurantId = restaurant?.id
 
-      // Generate subdomain from restaurant name
-      const subdomain = await generateUniqueSubdomain(restaurant.name)
+      // If no restaurant exists, create one
+      if (!restaurantId) {
+        const userName = user.firstName || 'restaurant'
+        const { data: newRestaurant, error: restaurantError } = await supabase
+          .from('restaurants')
+          .insert({
+            user_id: user.id,
+            name: `${userName}'s Restaurant`
+          })
+          .select()
+          .single()
+          
+        if (restaurantError) throw restaurantError
+        restaurantId = newRestaurant.id
+      }
+
+      // Generate subdomain from user name
+      const userName = user.firstName || 'restaurant'
+      const subdomain = await generateUniqueSubdomain(userName)
 
       // Create website
       const { data: website, error } = await supabase
         .from('websites')
         .insert({
-          restaurant_id: restaurant.id,
+          restaurant_id: restaurantId,
           subdomain: subdomain,
+          template: 'default'
         })
         .select()
         .single()
 
       if (error) throw error
 
-      // Redirect to edit page
+      // Redirect to the new website's edit page
       router.push(`/dashboard/websites/${website.id}/edit`)
     } catch (error) {
       console.error('Error creating website:', error)
-      // Add error handling UI here
     } finally {
       setIsLoading(false)
     }
@@ -104,7 +124,7 @@ export default function DashboardPage() {
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center">
-              <span className="text-orange-500 font-bold">Q</span>
+              <span className="text-orange-500 font-bold">P</span>
             </div>
             <span className="text-xl font-medium text-gray-200">Platter</span>
           </div>
@@ -116,14 +136,8 @@ export default function DashboardPage() {
             </nav>
             
             <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-400">{user?.emailAddresses[0].emailAddress}</span>
-              <div className="h-8 w-8 bg-gray-800 rounded-full overflow-hidden">
-                <img 
-                  src={user?.imageUrl || `https://ui-avatars.com/api/?name=${firstName}&background=1e293b&color=fff`} 
-                  alt={firstName}
-                  className="h-full w-full object-cover" 
-                />
-              </div>
+              <span className="text-sm text-gray-400">{user?.emailAddresses[0]?.emailAddress}</span>
+              <UserButton afterSignOutUrl="/" />
             </div>
           </div>
         </div>
@@ -142,13 +156,14 @@ export default function DashboardPage() {
               <h1 className="text-3xl font-bold mb-1">Welcome back, {firstName}</h1>
               <p className="text-gray-400">Manage your restaurant websites and settings</p>
             </div>
-            <Link 
-              href="/dashboard/websites/new" 
-              className="flex items-center justify-center gap-2 bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors"
+            <button 
+              onClick={handleCreateWebsite}
+              disabled={isLoading}
+              className="flex items-center justify-center gap-2 bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:hover:bg-orange-500"
             >
               <Plus className="h-5 w-5" />
-              <span>Create New Website</span>
-            </Link>
+              <span>{isLoading ? 'Creating...' : 'Create New Website'}</span>
+            </button>
           </div>
         </motion.div>
         

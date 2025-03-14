@@ -25,6 +25,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
+    "loadash": "^1.0.0",
     "lucide-react": "^0.468.0",
     "motion": "^11.18.1",
     "next": "latest",
@@ -36,6 +37,7 @@
     "tesseract.js": "^6.0.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.16",
     "@types/node": "22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "19.0.2",

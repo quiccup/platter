@@ -41,6 +41,13 @@ interface FinalProductProps {
   }
 }
 
+function ensureGalleryData(gallery: any): { images: string[], captions: Record<string, string> } {
+  return {
+    images: gallery.images || [],
+    captions: gallery.captions || {}
+  };
+}
+
 export function FinalProduct({ data }: FinalProductProps) {
   return (
     <ThemeProvider>
@@ -67,7 +74,7 @@ export function FinalProduct({ data }: FinalProductProps) {
           </section>
 
           <section>
-            <GallerySection data={data.gallery} />
+            <GallerySection data={ensureGalleryData(data.gallery)} />
           </section>
 
           <section>

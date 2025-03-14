@@ -174,10 +174,10 @@ export default function EditWebsitePage() {
     )
   }
 
-  const onSectionClick = (sectionId: string) => {
-    setActiveSection(sectionId)
-    setIsModalOpen(true)
-  }
+  // const onSectionClick = (sectionId: string) => {
+  //   setActiveSection(sectionId)
+  //   setIsModalOpen(true)
+  // }
 
   return (
     <SidebarProvider>
@@ -222,7 +222,7 @@ export default function EditWebsitePage() {
                       <div className="p-4 border-l ml-4 mt-2">
                         <SectionEditor 
                           section={section.id}
-                          data={websiteData[section.id]}
+                          data={(websiteData as any)[section.id]}
                           onChange={(newData) => handleContentChange(section.id, newData)}
                         />
                       </div>

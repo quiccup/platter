@@ -15,6 +15,11 @@ export interface ChefPost {
   timestamp: string
 }
 
+export interface GalleryData {
+  images: string[]
+  captions: Record<string, string> // Map of image URLs to captions
+}
+
 export interface WebsiteData {
   hero: {
     heading: string
@@ -36,8 +41,6 @@ export interface WebsiteData {
     email: string
     phone: string
   }
-  gallery: {
-    images: string[]
-  }
+  gallery: GalleryData
   reviews: any[]
 } 
