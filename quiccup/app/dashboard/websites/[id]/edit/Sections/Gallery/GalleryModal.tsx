@@ -11,16 +11,20 @@ interface GalleryModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   images: string[]
+  captions: { [key: string]: string }
   onImageAdd: (url: string) => void
   onImageDelete: (index: number) => void
+  onCaptionChange: (imageUrl: string, caption: string) => void
 }
 
 export function GalleryModal({ 
   open, 
   onOpenChange, 
   images, 
+  captions,
   onImageAdd, 
-  onImageDelete 
+  onImageDelete,
+  onCaptionChange
 }: GalleryModalProps) {
   const [isUploading, setIsUploading] = useState(false)
 
@@ -80,20 +84,29 @@ export function GalleryModal({
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto p-1">
             {images.map((image, index) => (
-              <div key={index} className="relative group aspect-square">
-                <img
-                  src={image}
-                  alt={`Gallery image ${index + 1}`}
-                  className="w-full h-full object-cover rounded-lg"
+              <div key={index} className="space-y-2">
+                <div className="relative group aspect-square">
+                  <img
+                    src={image}
+                    alt={`Gallery image ${index + 1}`}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute top-2 right-2 text-white bg-black/20 hover:bg-black/40 
+                      opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => onImageDelete(index)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+                <Input
+                  value={captions[image] || ''}
+                  onChange={(e) => onCaptionChange(image, e.target.value)}
+                  placeholder="Add caption"
+                  className="text-sm"
                 />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-2 right-2 text-white bg-black/20 hover:bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => onImageDelete(index)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
               </div>
             ))}
           </div>

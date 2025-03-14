@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ChefPostModal } from "./Sections/ChefsFeed/ChefPostModal"
 import { useState } from "react"
 import { ChefHat, Trash2 } from "lucide-react"
+import { AboutEdit } from "./Sections/About/AboutEdit"
 
 interface SectionEditorProps {
   section: string
@@ -60,7 +61,7 @@ export function SectionEditor({ section, data, onChange }: SectionEditorProps) {
         </div>
       )
     case 'about':
-      return <div>About Section</div>  
+      return <AboutEdit data={data} onChange={onChange} />
     case 'contact':
       return <div>Contact Section</div>  
     case 'reviews':

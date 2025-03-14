@@ -5,25 +5,50 @@ import { GalleryModal } from './GalleryModal'
 
 interface GalleryData {
   images: string[]
+  captions: { [key: string]: string }
 }
 
-export function GalleryEdit({ data, onChange }: { data: GalleryData, onChange: (data: GalleryData) => void }) {
-  const [modalOpen, setModalOpen] = useState(false)
+interface GalleryEditProps {
+  data: GalleryData
+  onChange: (data: GalleryData) => void
+}
 
-  const handleAddImage = (url: string) => {
-    const newImages = [...(data.images || []), url]
-    onChange({ ...data, images: newImages })
+export function GalleryEdit({ data, onChange }: GalleryEditProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleImageAdd = (url: string) => {
+    onChange({
+      ...data,
+      images: [...(data.images || []), url]
+    })
   }
 
-  const handleDeleteImage = (index: number) => {
+  const handleImageDelete = (index: number) => {
     const newImages = data.images.filter((_, i) => i !== index)
-    onChange({ ...data, images: newImages })
+    const newCaptions = { ...data.captions }
+    delete newCaptions[data.images[index]]
+    
+    onChange({
+      ...data,
+      images: newImages,
+      captions: newCaptions
+    })
+  }
+
+  const handleCaptionChange = (imageUrl: string, caption: string) => {
+    onChange({
+      ...data,
+      captions: {
+        ...(data.captions || {}),
+        [imageUrl]: caption
+      }
+    })
   }
 
   return (
     <div className="space-y-4">
       <Button 
-        onClick={() => setModalOpen(true)} 
+        onClick={() => setIsModalOpen(true)} 
         variant="default"
         className="w-full"
       >
@@ -34,11 +59,13 @@ export function GalleryEdit({ data, onChange }: { data: GalleryData, onChange: (
       </p>
 
       <GalleryModal 
-        open={modalOpen}
-        onOpenChange={setModalOpen}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
         images={data.images || []}
-        onImageAdd={handleAddImage}
-        onImageDelete={handleDeleteImage}
+        captions={data.captions || {}}
+        onImageAdd={handleImageAdd}
+        onImageDelete={handleImageDelete}
+        onCaptionChange={handleCaptionChange}
       />
     </div>
   )

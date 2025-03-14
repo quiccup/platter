@@ -20,14 +20,14 @@ interface MenuDisplayProps {
 }
 
 export function MenuDisplay({ data }: MenuDisplayProps) {
-  const [selectedTag, setSelectedTag] = useState('All')
+  const [selectedTag, setSelectedTag] = useState<string>('All')
 
-  const filteredItems = data.items?.filter(item => 
-    selectedTag === 'All' || item.tags?.includes(selectedTag)
-  )
+  const filteredItems = selectedTag === 'All'
+    ? data.items
+    : data.items?.filter(item => item.tags?.includes(selectedTag))
 
   return (
-    <section className="w-full bg-white pt-16 md:pt-24">
+    <section className="w-full pt-16 md:pt-24">
       <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-[1400px]">
         {/* Title */}
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
@@ -60,7 +60,7 @@ export function MenuDisplay({ data }: MenuDisplayProps) {
           gap-6 md:gap-8 auto-rows-auto content-start">
           {filteredItems?.map((item) => (
             <div 
-              key={item.id}
+              key={item.title + item.price}
               className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 
                 transform hover:-translate-y-1"
             >
@@ -89,7 +89,7 @@ export function MenuDisplay({ data }: MenuDisplayProps) {
                   <div className="flex flex-wrap gap-1.5 mt-3">
                     {item.tags.map((tag, i) => (
                       <span 
-                        key={i}
+                        key={tag + '-' + i}
                         className="text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-600"
                       >
                         {tag}

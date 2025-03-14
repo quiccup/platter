@@ -124,7 +124,7 @@ export function PlayDisplay({ data }: PlayDisplayProps) {
   }
 
   return (
-    <section className="w-full bg-white text-black py-16 md:py-24">
+    <section className="w-full text-black py-16 md:py-24">
       <div className="container mx-auto px-4 max-w-lg text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">
           Answer Wordles to Earn Points

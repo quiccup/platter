@@ -4,20 +4,21 @@ import { useMemo } from "react"
 
 interface GalleryData {
   images: string[]
+  captions: { [key: string]: string }
 }
 
 export function GallerySection({ data }: { data: GalleryData }) {
   const getRandomRotation = () => {
-    // Smaller rotation on mobile for better visibility
+    // Even smaller rotation on mobile
     return window.innerWidth < 768 
-      ? Math.random() * 10 - 5  // -5 to 5 degrees on mobile
+      ? Math.random() * 6 - 3   // -3 to 3 degrees on mobile
       : Math.random() * 20 - 10 // -10 to 10 degrees on desktop
   }
 
   const getRandomOffset = () => {
-    // Smaller offsets on mobile
+    // Minimal offsets on mobile
     return window.innerWidth < 768
-      ? Math.random() * 10 - 5  // -5 to 5 pixels on mobile
+      ? Math.random() * 4 - 2   // -2 to 2 pixels on mobile
       : Math.random() * 20 - 10 // -10 to 10 pixels on desktop
   }
 
@@ -27,8 +28,9 @@ export function GallerySection({ data }: { data: GalleryData }) {
       rotation: getRandomRotation(),
       offsetX: getRandomOffset(),
       offsetY: getRandomOffset(),
+      caption: data.captions?.[url] || 'Your Text Here'
     }))
-  }, [data.images])
+  }, [data.images, data.captions])
 
   if (!data?.images?.length) {
     return (
@@ -42,26 +44,29 @@ export function GallerySection({ data }: { data: GalleryData }) {
 
   return (
     <section id="photos" className="py-16 md:py-24 bg-zinc-900">
-      <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl">
+      <div className="container mx-auto px-2 md:px-8 lg:px-12 max-w-7xl">
         {/* Title */}
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-white">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12 text-white">
           Our Gallery
         </h2>
         
         {/* Gallery Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 lg:gap-12 p-2 sm:p-4 md:p-6">
+        <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-1 sm:gap-3 md:gap-6 lg:gap-8 
+          p-1 sm:p-2 md:p-6">
           {polaroids?.map((polaroid, idx) => (
             <BlurFade key={polaroid.url} delay={0.25 + idx * 0.05} inView>
               <div 
-                className="group relative transition-transform duration-300 hover:scale-105 hover:z-10 mx-auto max-w-[300px]"
+                className="group relative transition-transform duration-300 hover:scale-105 hover:z-10 
+                  mx-auto w-full max-w-[120px] md:max-w-[300px]"
                 style={{
                   transform: `rotate(${polaroid.rotation}deg) translate(${polaroid.offsetX}px, ${polaroid.offsetY}px)`,
                 }}
               >
                 {/* Polaroid frame */}
-                <div className="relative bg-white p-2 sm:p-3 pb-10 sm:pb-12 rounded shadow-2xl">
+                <div className="relative bg-white p-1 sm:p-2 md:p-3 pb-6 sm:pb-8 md:pb-12 
+                  rounded-lg shadow-xl">
                   {/* Image container */}
-                  <div className="aspect-square overflow-hidden mb-2 sm:mb-4">
+                  <div className="aspect-square overflow-hidden mb-1 sm:mb-2 md:mb-4 ">
                     <img
                       src={polaroid.url}
                       alt={`Gallery image ${idx + 1}`}
@@ -69,16 +74,16 @@ export function GallerySection({ data }: { data: GalleryData }) {
                     />
                   </div>
                   {/* Polaroid bottom text area */}
-                  <div className="absolute bottom-3 sm:bottom-4 left-0 right-0 text-center">
-                    <p className="text-gray-500 text-xs sm:text-sm font-handwriting">
-                      {`Your Text Here`}
+                  <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 left-0 right-0 text-center px-1">
+                    <p className="text-[10px] sm:text-xs md:text-sm font-handwriting text-gray-500 truncate">
+                      {polaroid.caption}
                     </p>
                   </div>
                 </div>
                 {/* Drop shadow effect */}
                 <div 
-                  className="absolute inset-0 -z-10 blur-sm bg-black/20 
-                    transform translate-y-1 translate-x-1 rounded opacity-75"
+                  className="absolute inset-0 -z-10 blur-[2px] md:blur-sm bg-black/20 
+                    transform translate-y-0.5 translate-x-0.5 md:translate-y-1 md:translate-x-1 rounded-2xl opacity-75"
                 />
               </div>
             </BlurFade>

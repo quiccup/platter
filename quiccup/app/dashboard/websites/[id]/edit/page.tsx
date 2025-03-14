@@ -181,84 +181,85 @@ export default function EditWebsitePage() {
 
   return (
     <SidebarProvider>
-      <Sidebar 
-        collapsible="icon"
-        className={`transition-all duration-300 ${
-          sidebarWidth === 'collapsed' ? 'w-[50px]' : 
-          'w-[280px]'
-        }`}
-      >
-        <SidebarHeader>
-          <TeamSwitcher teams={data.teams} />
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Sections</SidebarGroupLabel>
-            <SidebarMenu>
-              {sections.map((section) => (
-                <div key={section.id}>
-                  <button
-                    onClick={() => setActiveSection(activeSection === section.id ? null : section.id)}
-                    className={`w-full px-2 py-2 text-left hover:bg-gray-100 flex items-center justify-between gap-3 group ${
-                      activeSection === section.id ? 'bg-gray-100' : ''
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <section.icon className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate group-[[data-collapsed=true]]:hidden text-sm">
-                        {section.label}
-                      </span>
-                    </div>
-                    <ChevronRight 
-                      className={`w-4 h-4 transition-transform ${
-                        activeSection === section.id ? 'rotate-90' : ''
-                      }`}
-                    />
-                  </button>
-                  
-                  {/* Section Editor Panel */}
-                  {activeSection === section.id && (
-                    <div className="p-4 border-l ml-4 mt-2">
-                      <SectionEditor 
-                        section={section.id}
-                        data={websiteData[section.id]}
-                        onChange={(newData) => handleContentChange(section.id, newData)}
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </SidebarMenu>
-          </SidebarGroup>
-          <NavProjects projects={data.projects} />
-        </SidebarContent>
-        <SidebarFooter>
-          <NavUser user={data.user} />
-        </SidebarFooter>
-        <SidebarRail />
-        
-        {/* Add resize button at the bottom */}
-        <button
-          onClick={() => setSidebarWidth(state => 
-            state === 'normal' ? 'expanded' : 
-            state === 'expanded' ? 'collapsed' : 
-            'normal'
-          )}
-          className="absolute bottom-4 right-2 p-2 hover:bg-gray-100 rounded-full"
+      <div className="grid grid-cols-[auto,1fr] h-screen">
+        <Sidebar 
+          collapsible="icon"
+          className={`transition-all duration-300 border-r ${
+            sidebarWidth === 'collapsed' ? 'w-[50px]' : 
+            'w-[280px]'
+          }`}
         >
-          <ChevronLeftIcon className={`w-4 h-4 transition-transform ${
-            sidebarWidth === 'expanded' ? 'rotate-180' : ''
-          }`} />
-        </button>
-      </Sidebar>
+          <SidebarHeader>
+            <TeamSwitcher teams={data.teams} />
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>Sections</SidebarGroupLabel>
+              <SidebarMenu>
+                {sections.map((section) => (
+                  <div key={section.id}>
+                    <button
+                      onClick={() => setActiveSection(activeSection === section.id ? null : section.id)}
+                      className={`w-full px-2 py-2 text-left hover:bg-gray-100 flex items-center justify-between gap-3 group ${
+                        activeSection === section.id ? 'bg-gray-100' : ''
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <section.icon className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate group-[[data-collapsed=true]]:hidden text-sm">
+                          {section.label}
+                        </span>
+                      </div>
+                      <ChevronRight 
+                        className={`w-4 h-4 transition-transform ${
+                          activeSection === section.id ? 'rotate-90' : ''
+                        }`}
+                      />
+                    </button>
+                    
+                    {/* Section Editor Panel */}
+                    {activeSection === section.id && (
+                      <div className="p-4 border-l ml-4 mt-2">
+                        <SectionEditor 
+                          section={section.id}
+                          data={websiteData[section.id]}
+                          onChange={(newData) => handleContentChange(section.id, newData)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </SidebarMenu>
+            </SidebarGroup>
+            <NavProjects projects={data.projects} />
+          </SidebarContent>
+          <SidebarFooter>
+            <NavUser user={data.user} />
+          </SidebarFooter>
+          <SidebarRail />
+          
+          {/* Add resize button at the bottom */}
+          <button
+            onClick={() => setSidebarWidth(state => 
+              state === 'normal' ? 'expanded' : 
+              state === 'expanded' ? 'collapsed' : 
+              'normal'
+            )}
+            className="absolute bottom-4 right-2 p-2 hover:bg-gray-100 rounded-full"
+          >
+            <ChevronLeftIcon className={`w-4 h-4 transition-transform ${
+              sidebarWidth === 'expanded' ? 'rotate-180' : ''
+            }`} />
+          </button>
+        </Sidebar>
 
-      {/* Preview Area */}
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger />
-            <h2 className="font-medium">Website Preview</h2>
-            <Button
+        {/* Preview Area */}
+        <SidebarInset className="w-full min-w-0">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger />
+              <h2 className="font-medium">Website Preview</h2>
+              <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsMobileView(!isMobileView)}
@@ -268,24 +269,25 @@ export default function EditWebsitePage() {
                 <span className="ml-2">{isMobileView ? 'Desktop View' : 'Mobile View'}</span>
               </Button>
               <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push(`/dashboard/websites/${params.id}`)}
-              className="text-gray-600"
-            >
-              <Expand className="w-4 h-4" />
-              <span className="ml-2">Full Screen</span>
-            </Button>
-          </div>
-        </header>
-        <main className="h-[calc(100vh-3.5rem)] overflow-auto">      
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push(`/dashboard/websites/${params.id}`)}
+                className="text-gray-600"
+              >
+                <Expand className="w-4 h-4" />
+                <span className="ml-2">Full Screen</span>
+              </Button>
+            </div>
+          </header>
+          <main className="h-[calc(100vh-4rem)] overflow-auto">      
             <div className={`bg-white h-full overflow-y-auto
-              ${isMobileView ? ' shadow-lg' : ''}`}
+              ${isMobileView ? 'max-w-md mx-auto shadow-xl' : ''}`}
             >
               <FinalProduct data={websiteData} />
             </div>    
-        </main>
-      </SidebarInset>
+          </main>
+        </SidebarInset>
+      </div>
     </SidebarProvider>
   )
 }
