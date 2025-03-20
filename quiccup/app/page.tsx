@@ -44,7 +44,7 @@ export default function LandingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          Your menu, simplified
+          A game-changing restaurant website builder.
         </motion.h1>
         <motion.p 
           className="text-xl text-gray-400 max-w-3xl mx-auto mb-16"
