@@ -7,14 +7,16 @@ import { ChefPostModal } from "./Sections/ChefsFeed/ChefPostModal"
 import { useState } from "react"
 import { ChefHat, Trash2 } from "lucide-react"
 import { AboutEdit } from "./Sections/About/AboutEdit"
+import { LeaderboardEdit } from './Sections/Leaderboard/LeaderboardEdit'
 
 interface SectionEditorProps {
   section: string
   data: any
   onChange: (newData: any) => void
+  websiteId: string
 }
 
-export function SectionEditor({ section, data, onChange }: SectionEditorProps) {
+export function SectionEditor({ section, data, onChange, websiteId }: SectionEditorProps) {
   const [chefPostModalOpen, setChefPostModalOpen] = useState(false)
 
   switch (section) {
@@ -68,6 +70,14 @@ export function SectionEditor({ section, data, onChange }: SectionEditorProps) {
       return <ReviewsEdit/>
     case 'gallery':
       return <GalleryEdit data={data} onChange={onChange} /> 
+    case 'leaderboard':
+      return (
+        <LeaderboardEdit 
+          data={data} 
+          onChange={onChange} 
+          websiteId={websiteId} 
+        />
+      )
     default:
       return null;
   }

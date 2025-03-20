@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { useState, useEffect } from 'react'
 import { FinalProduct } from '../dashboard/websites/[id]/edit/FinalProduct'
 import { motion, AnimatePresence } from 'framer-motion'
+import { PreviewThemeProvider } from '@/components/preview-theme-provider'
 
 export default function WebsitePage() {
   const params = useParams()
@@ -28,17 +29,20 @@ export default function WebsitePage() {
         if (data?.content) {
           setWebsiteData(data.content)
         }
+      } catch (error) {
+        console.error('Error loading website data:', error)
       } finally {
-        // Add a small delay to ensure smooth transition
-        setTimeout(() => setIsLoading(false), 500)
+        setIsLoading(false)
       }
     }
     
     loadWebsiteData()
   }, [websiteId])
 
+  const theme = websiteData?.theme || 'dark'
+  
   return (
-    <>
+    <PreviewThemeProvider initialTheme={theme}>
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -63,6 +67,6 @@ export default function WebsitePage() {
       </AnimatePresence>
 
       {websiteData && <FinalProduct data={websiteData} />}
-    </>
+    </PreviewThemeProvider>
   )
 } 

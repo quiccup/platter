@@ -2,16 +2,13 @@
 import { Playfair_Display, Lato } from "next/font/google";
 import './globals.css';
 import { ClientWrapper } from '@/components/client-wrapper';
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
-import Link from 'next/link';
+import { ClerkProvider } from '@clerk/nextjs'
 
 // Move font configs outside the component
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: '--font-playfair',
   display: 'swap',
-  preload: true,
-  adjustFontFallback: true
 });
 
 const lato = Lato({
@@ -19,15 +16,12 @@ const lato = Lato({
   weight: ['300', '400', '700'],
   variable: '--font-lato',
   display: 'swap',
-  preload: true,
-  adjustFontFallback: true
 });
 
 export const metadata = {
   title: 'Platter | Restaurant Platform',
   description: 'Interactive dining experiences and restaurant management',
 };
-
 
 export default function RootLayout({
   children,
@@ -37,13 +31,11 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
+        <head />
         <body className={`${playfair.variable} ${lato.variable} font-sans`}>
-          <main>
-            <ClientWrapper>
-              {children}
-            </ClientWrapper>
-          </main>
-      
+          <ClientWrapper>
+            {children}
+          </ClientWrapper>
         </body>
       </html>
     </ClerkProvider>

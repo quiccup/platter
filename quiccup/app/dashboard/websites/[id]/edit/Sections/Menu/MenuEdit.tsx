@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { createWorker } from 'tesseract.js'
 import { MenuItemsModal } from './MenuItemsModal'
-import { ListPlus } from 'lucide-react'
+import { ListPlus, Upload, Trash2, PlusCircle } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'react-hot-toast'
 
 interface MenuItem {
   title: string
@@ -28,6 +31,10 @@ export function MenuEditor({ data, onChange }: MenuEditorProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [ocrStatus, setOcrStatus] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
+  const [showJsonImporter, setShowJsonImporter] = useState(false)
+  const [jsonInput, setJsonInput] = useState('')
+  const [jsonError, setJsonError] = useState<string | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   const processImage = async (file: File) => {
     setOcrStatus('Processing...')
@@ -138,17 +145,128 @@ export function MenuEditor({ data, onChange }: MenuEditorProps) {
     }
   }
 
+  // Process JSON menu items
+  const processJsonMenuItems = () => {
+    try {
+      setJsonError(null)
+      const menuData = JSON.parse(jsonInput)
+      
+      const newMenuItems: MenuItem[] = []
+      
+      // Process each category
+      Object.entries(menuData).forEach(([category, items]: [string, any]) => {
+        // Skip if not an array
+        if (!Array.isArray(items)) return
+        
+        // Process each item in the category
+        items.forEach((item: any) => {
+          if (!item.name || !item.price) return
+          
+          let description = item.description || ''
+          
+          // Add serves info to description if available
+          if (item.serves) {
+            description += description ? ` (Serves ${item.serves})` : `Serves ${item.serves}`
+          }
+          
+          newMenuItems.push({
+            title: item.name,
+            description,
+            price: typeof item.price === 'number' ? item.price.toString() : item.price,
+            tags: [category],
+            image: ''
+          })
+        })
+      })
+      
+      // If successfully parsed items, add them to the menu
+      if (newMenuItems.length > 0) {
+        const updatedItems = [...data.items, ...newMenuItems]
+        onChange({ ...data, items: updatedItems })
+        setShowJsonImporter(false)
+        setJsonInput('')
+      } else {
+        setJsonError('No valid menu items found in the JSON')
+      }
+    } catch (error) {
+      console.error('Error parsing JSON:', error)
+      setJsonError('Invalid JSON format. Please check your input.')
+    }
+  }
+
+  const regenerateAiRecommendations = async () => {
+    try {
+      setIsGenerating(true)
+      const response = await fetch('/api/generate-menu-recommendations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          websiteId,
+          menuItems: data.items
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate menu recommendations')
+      }
+      
+      toast.success('Menu recommendations updated!')
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to update menu recommendations')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button 
-          onClick={() => setModalOpen(true)}
-          variant="outline"
-        >
-          <ListPlus className="w-4 h-4 mr-2" />
-          Add Menu Items
-        </Button>
+      <div className="flex">
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowJsonImporter(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import JSON
+          </Button>
+          <Button onClick={() => setModalOpen(true)} variant="default">
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add Menu Item
+          </Button>
+        </div>
       </div>
+      
+      {/* JSON Import Dialog */}
+      <Dialog open={showJsonImporter} onOpenChange={setShowJsonImporter}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Import Menu Items from JSON</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 my-4">
+            <Label htmlFor="json-input">Paste your menu JSON below</Label>
+            <Textarea 
+              id="json-input"
+              value={jsonInput}
+              onChange={(e) => setJsonInput(e.target.value)}
+              placeholder='{"Category": [{"name": "Item name", "description": "Item description", "price": 10.99}]}'
+              rows={12}
+              className="font-mono text-sm"
+            />
+            
+            {jsonError && (
+              <p className="text-destructive text-sm">{jsonError}</p>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowJsonImporter(false)}>
+              Cancel
+            </Button>
+            <Button onClick={processJsonMenuItems}>
+              Add Items
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <MenuItemsModal 
         open={modalOpen}
@@ -157,7 +275,13 @@ export function MenuEditor({ data, onChange }: MenuEditorProps) {
         onItemsChange={(items) => onChange({ ...data, items })}
       />
 
-  
+      <Button 
+        onClick={regenerateAiRecommendations} 
+        disabled={isGenerating}
+        variant="outline"
+      >
+        {isGenerating ? 'Updating AI Recommendations...' : 'Update AI Recommendations'}
+      </Button>
     </div>
   )
 }

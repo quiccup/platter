@@ -1,17 +1,15 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Upload, FileSpreadsheet, X } from "lucide-react"
+import { Plus, Upload, FileSpreadsheet, X, Trash2 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { uploadImage } from "@/lib/uploadImage"
-
-interface MenuItem {
-  title: string
-  description: string
-  price: string
-  image?: string
-  tags: string[]
-}
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { MenuItem } from '../../types'
 
 interface MenuItemsModalProps {
   open: boolean
@@ -145,6 +143,9 @@ export function MenuItemsModal({ open, onOpenChange, items, onItemsChange }: Men
     'Sharing Plate'
   ].sort()) // Sort alphabetically for easier selection
   const [newTag, setNewTag] = useState('')
+  const [showJsonImporter, setShowJsonImporter] = useState(false)
+  const [jsonInput, setJsonInput] = useState('')
+  const [jsonError, setJsonError] = useState<string | null>(null)
 
   // Update local items when props items change
   useEffect(() => {
@@ -181,39 +182,145 @@ export function MenuItemsModal({ open, onOpenChange, items, onItemsChange }: Men
     }
   }
 
+  // Process JSON menu items
+  const processJsonMenuItems = () => {
+    try {
+      setJsonError(null)
+      const menuData = JSON.parse(jsonInput)
+      
+      const newMenuItems: MenuItem[] = []
+      
+      // Process each category
+      Object.entries(menuData).forEach(([category, categoryItems]: [string, any]) => {
+        // Skip if not an array
+        if (!Array.isArray(categoryItems)) return
+        
+        // Process each item in the category
+        categoryItems.forEach((item: any) => {
+          if (!item.name || !item.price) return
+          
+          let description = item.description || ''
+          
+          // Add serves info to description if available
+          if (item.serves) {
+            description += description ? ` (Serves ${item.serves})` : `Serves ${item.serves}`
+          }
+          
+          newMenuItems.push({
+            title: item.name,
+            description,
+            price: typeof item.price === 'number' ? item.price.toString() : item.price,
+            tags: [category],
+            image: ''
+          })
+        })
+      })
+      
+      // If successfully parsed items, add them to the menu
+      if (newMenuItems.length > 0) {
+        onItemsChange([...items, ...newMenuItems])
+        setShowJsonImporter(false)
+        setJsonInput('')
+      } else {
+        setJsonError('No valid menu items found in the JSON')
+      }
+    } catch (error) {
+      console.error('Error parsing JSON:', error)
+      setJsonError('Invalid JSON format. Please check your input.')
+    }
+  }
+
+  // Add function to delete a menu item
+  const handleDeleteItem = (index: number) => {
+    const newItems = [...localItems];
+    newItems.splice(index, 1);
+    setLocalItems(newItems);
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col my-15">
-        {/* <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>Menu Items</DialogTitle>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <FileSpreadsheet className="w-4 h-4 mr-2" />
-                Import CSV
-              </Button>
-              <Button variant="outline" size="sm">
-                <Upload className="w-4 h-4 mr-2" />
-                Import Image
-              </Button>
+        <DialogHeader>
+          <DialogTitle>Menu Items</DialogTitle>
+        </DialogHeader>
+
+        {/* JSON Import Button */}
+        <div className="flex justify-between mb-4">
+          <Button
+            onClick={() => {
+              const newItem: MenuItem = {
+                title: "",
+                description: "",
+                price: "",
+                tags: [],
+              };
+              setLocalItems([...localItems, newItem]);
+            }}
+            variant="default"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Item
+          </Button>
+          <Button variant="outline" onClick={() => setShowJsonImporter(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import JSON
+          </Button>
+        </div>
+
+        {/* JSON Import Dialog */}
+        {showJsonImporter && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-background p-6 rounded-lg w-[600px] max-w-[90vw] max-h-[90vh] overflow-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Import Menu Items from JSON</h3>
+                <Button variant="ghost" size="icon" onClick={() => setShowJsonImporter(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="space-y-4 my-4">
+                <Label htmlFor="json-input">Paste your menu JSON below</Label>
+                <Textarea 
+                  id="json-input"
+                  value={jsonInput}
+                  onChange={(e) => setJsonInput(e.target.value)}
+                  placeholder='{"Category": [{"name": "Item name", "description": "Item description", "price": 10.99}]}'
+                  rows={12}
+                  className="font-mono text-sm"
+                />
+                
+                {jsonError && (
+                  <p className="text-destructive text-sm">{jsonError}</p>
+                )}
+              </div>
+              
+              <div className="flex justify-end gap-2 mt-4">
+                <Button variant="outline" onClick={() => setShowJsonImporter(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={processJsonMenuItems}>
+                  Add Items
+                </Button>
+              </div>
             </div>
           </div>
-        </DialogHeader> */}
+        )}
 
         <div className="flex-1 overflow-y-auto min-h-0">
           {/* Table Header - Make it sticky with no top gap */}
-          <div className="sticky top-0 z-10 grid grid-cols-12 gap-4 px-4 py-2 bg-gray-100 rounded-t-lg border-b">
-            <div className="col-span-3 font-medium">Title</div>
-            <div className="col-span-3 font-medium">Description</div>
-            <div className="col-span-2 font-medium">Price</div>
-            <div className="col-span-2 font-medium">Tags</div>
-            <div className="col-span-2 font-medium">Image</div>
+          <div className="sticky top-0 z-10 grid grid-cols-[3fr,3fr,2fr,2fr,1.5fr,0.5fr] gap-4 px-4 py-2 bg-gray-100 rounded-t-lg border-b">
+            <div className="font-medium">Title</div>
+            <div className="font-medium">Description</div>
+            <div className="font-medium">Price</div>
+            <div className="font-medium">Tags</div>
+            <div className="font-medium">Image</div>
+            <div className="font-medium"></div> {/* Column for delete button */}
           </div>
 
           {/* Table Body with padding */}
           <div className="space-y-2 p-4">
             {localItems.map((item, index) => (
-              <div key={index} className="grid grid-cols-12 gap-4 px-4 py-2 bg-white rounded-lg border">
+              <div key={index} className="grid grid-cols-[3fr,3fr,2fr,2fr,1.5fr,0.5fr] gap-4 px-4 py-2 bg-white rounded-lg border">
                 <div className="col-span-3">
                   <Input
                     value={item.title}
@@ -305,37 +412,31 @@ export function MenuItemsModal({ open, onOpenChange, items, onItemsChange }: Men
                     }}
                   />
                 </div>
+                {/* Delete button column */}
+                <div className="flex items-center justify-center">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => handleDeleteItem(index)}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
-
-            <Button 
-              onClick={() => {
-                setLocalItems([...localItems, { 
-                  title: '', 
-                  description: '', 
-                  price: '', 
-                  tags: [], 
-                  image: '' 
-                }])
-              }} 
-              variant="outline" 
-              className="w-full mt-4"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Item
-            </Button>
           </div>
         </div>
 
-        {/* Footer with Save button */}
-        <div className="flex justify-end gap-2 pt-4 border-t">
+        {/* Dialog footer with Save/Cancel buttons */}
+        <DialogFooter className="pt-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={handleSave}>
             Save Changes
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

@@ -8,16 +8,23 @@ export interface MenuItem {
 
 export interface ChefPost {
   id: string
-  name: string
-  content: string
+  name?: string
+  avatar?: string
+  content?: string
   images: string[]
   tags: string[]
-  timestamp: string
+  timestamp?: string
 }
 
 export interface GalleryData {
   images: string[]
   captions: Record<string, string> // Map of image URLs to captions
+}
+
+export interface LeaderboardData {
+  title: string
+  subtitle?: string
+  featuredItems: string[] // IDs of the menu items
 }
 
 export interface WebsiteData {
@@ -43,4 +50,5 @@ export interface WebsiteData {
   }
   gallery: GalleryData
   reviews: any[]
+  leaderboard?: LeaderboardData
 } 

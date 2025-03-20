@@ -13,8 +13,10 @@ export default function LandingPage() {
       {/* Header */}
       <nav className="container mx-auto px-6 py-6 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center">
-            <Check className="h-5 w-5 text-gray-200" />
+          <div className="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center relative">
+            <div className="absolute h-4 w-4 bg-orange-500 rounded-full -translate-x-1 translate-y-1 opacity-80"></div>
+            <div className="absolute h-4 w-4 bg-orange-400 rounded-full translate-x-1 translate-y-1 opacity-80"></div>
+            <div className="absolute h-4 w-4 bg-orange-300 rounded-full translate-y-0 opacity-80"></div>
           </div>
           <div className="text-xl font-medium text-gray-200">platter</div>
         </div>
@@ -152,9 +154,11 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="h-7 w-7 bg-gray-800 rounded-full flex items-center justify-center">
-                  <Check className="h-4 w-4 text-gray-200" />
-                </div>
+              <div className="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center relative">
+            <div className="absolute h-4 w-4 bg-orange-500 rounded-full -translate-x-1 translate-y-1 opacity-80"></div>
+            <div className="absolute h-4 w-4 bg-orange-400 rounded-full translate-x-1 translate-y-1 opacity-80"></div>
+            <div className="absolute h-4 w-4 bg-orange-300 rounded-full translate-y-0 opacity-80"></div>
+          </div>
                 <span className="font-medium">platter</span>
               </div>
               <p className="text-gray-400 text-sm">
