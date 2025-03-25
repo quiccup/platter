@@ -7,7 +7,7 @@ import { MenuItem } from '../../types'
 import { FullMenuTab } from './Tabs/FullMenuTab'
 import { BudgetBasedTab } from './Tabs/BudgetBasedTab'
 import { PartyOrdersTab } from './Tabs/PartyOrdersTab'
-import { Utensils, DollarSign, Users } from 'lucide-react'
+import { Sparkles, Users, Menu as MenuIcon } from 'lucide-react'
 import { Dock, DockIcon } from '@/components/ui/dock'
 
 interface MenuDisplayProps {
@@ -19,73 +19,117 @@ interface MenuDisplayProps {
 
 export function MenuDisplay({ data, websiteId }: MenuDisplayProps) {
   const { theme } = usePreviewTheme()
-  const [activeTab, setActiveTab] = useState("budget-based")
-  const menuItems = data?.items || []
+  const [activeTab, setActiveTab] = useState('full')
+  
+  if (!data?.items || data.items.length === 0) return null
+  
+  // Tab button component for consistent styling
+  const TabButton = ({ id, label, icon, active }: { id: string, label: string, icon: React.ReactNode, active: boolean }) => (
+    <button
+      onClick={() => setActiveTab(id)}
+      className={`relative flex-1 py-4 px-2 flex flex-col items-center justify-center gap-1.5 transition-all duration-200 ${
+        active 
+          ? theme === 'dark' 
+            ? 'text-white' 
+            : 'text-gray-900' 
+          : theme === 'dark'
+            ? 'text-gray-400 hover:text-gray-200' 
+            : 'text-gray-500 hover:text-gray-800'
+      }`}
+    >
+      {/* Icon */}
+      <div className={`transition-all duration-200 ${active ? 'scale-110' : 'scale-100'}`}>
+        {icon}
+      </div>
+      
+      {/* Label */}
+      <span className="text-sm font-medium whitespace-nowrap">{label}</span>
+      
+      {/* Active indicator */}
+      {active && (
+        <motion.div 
+          className={`absolute bottom-0 inset-x-0 h-1 rounded-t-full ${
+            theme === 'dark' ? 'bg-blue-500' : 'bg-blue-600'
+          }`}
+          layoutId="activeMenuTab"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        />
+      )}
+    </button>
+  )
   
   return (
-    <div className={`py-3 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+    <div className={`w-full pb-12 pt-8 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
       <div className="container mx-auto px-4">
-        
-        <div className="max-w-4xl mx-auto">
-          {/* Magic UI Dock for navigation */}
-          <div className="flex justify-center mb-10">
-            <Dock 
-              direction="middle" 
-              className="relative bg-white dark:bg-gray-800 py-4 px-6 rounded-full shadow-md w-auto flex justify-center items-center gap-12"
-            >
-              <DockIcon 
-                className={`flex flex-col items-center ${
-                  activeTab === 'full-menu' 
-                    ? 'text-blue-600 dark:text-blue-400' 
-                    : 'text-gray-600 dark:text-gray-400'
-                } hover:text-blue-500 dark:hover:text-blue-300 transition-colors`}
-                onClick={() => setActiveTab('full-menu')}
-              >
-                <Utensils className="w-6 h-6 mb-1.5" />
-                <span className="text-xs font-medium">Full Menu</span>
-              </DockIcon>
-              
-              <DockIcon
-                className={`flex flex-col items-center ${
-                  activeTab === 'budget-based' 
-                    ? 'text-blue-600 dark:text-blue-400' 
-                    : 'text-gray-600 dark:text-gray-400'
-                } hover:text-blue-500 dark:hover:text-blue-300 transition-colors relative`}
-                onClick={() => setActiveTab('budget-based')}
-              >
-                <DollarSign className="w-6 h-6 mb-1.5" />
-                <span className="text-xs font-medium">Budget Based</span>
-                {activeTab !== 'budget-based' && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: [0, 1.2, 1] }}
-                    transition={{ duration: 0.5, repeat: 2, repeatDelay: 3 }}
-                    className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-blue-500"
-                  />
-                )}
-              </DockIcon>
-              
-              <DockIcon
-                className={`flex flex-col items-center ${
-                  activeTab === 'party-orders' 
-                    ? 'text-blue-600 dark:text-blue-400' 
-                    : 'text-gray-600 dark:text-gray-400'
-                } hover:text-blue-500 dark:hover:text-blue-300 transition-colors`}
-                onClick={() => setActiveTab('party-orders')}
-              >
-                <Users className="w-6 h-6 mb-1.5" />
-                <span className="text-xs font-medium">Party Orders</span>
-              </DockIcon>
-            </Dock>
+        {/* Menu Tabs */}
+        <div className="max-w-xl mx-auto mb-8">
+          <div className={`flex rounded-full shadow-md ${
+            theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+          }`}>
+            <TabButton 
+              id="full" 
+              label="Full Menu" 
+              icon={<MenuIcon className={`h-5 w-5 ${activeTab === 'full' ? 'text-blue-500' : ''}`} />} 
+              active={activeTab === 'full'} 
+            />
+            
+            <TabButton 
+              id="budget" 
+              label="Budget Based" 
+              icon={<Sparkles className={`h-5 w-5 ${activeTab === 'budget' ? 'text-blue-500' : ''}`} />} 
+              active={activeTab === 'budget'} 
+            />
+            
+            <TabButton 
+              id="party" 
+              label="Party Orders" 
+              icon={<Users className={`h-5 w-5 ${activeTab === 'party' ? 'text-blue-500' : ''}`} />} 
+              active={activeTab === 'party'} 
+            />
           </div>
-          
-          {/* Tab content with AnimatePresence for smooth transitions */}
-          <AnimatePresence mode="wait">
-            {activeTab === 'full-menu' && <FullMenuTab menuItems={menuItems} />}
-            {activeTab === 'budget-based' && <BudgetBasedTab menuItems={menuItems} websiteId={websiteId} />}
-            {activeTab === 'party-orders' && <PartyOrdersTab />}
-          </AnimatePresence>
         </div>
+        
+        {/* Tab Content */}
+        <AnimatePresence mode="wait">
+          {activeTab === 'full' && (
+            <motion.div
+              key="full-menu"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <FullMenuTab items={data.items} />
+            </motion.div>
+          )}
+          
+          {activeTab === 'budget' && (
+            <motion.div
+              key="budget-based"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <BudgetBasedTab items={data.items} websiteId={websiteId} />
+            </motion.div>
+          )}
+          
+          {activeTab === 'party' && (
+            <motion.div
+              key="party-orders"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <PartyOrdersTab items={data.items} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       
       {/* Custom CSS to hide scrollbar but keep functionality */}

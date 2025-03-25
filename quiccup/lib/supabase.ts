@@ -1,22 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
-import { auth } from '@clerk/nextjs/server'
 
-export async function createServerSupabaseClient() {
-  const { getToken } = await auth()
+// Create a client-safe version without server dependencies
+export const createSupabaseClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
   
-  const supabaseAccessToken = await getToken({ template: 'supabase' })
-  
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${supabaseAccessToken}`
-        }
-      }
-    }
-  )
+  return createClient(supabaseUrl, supabaseKey);
 }
 
 // Create a single supabase client for the entire app

@@ -89,7 +89,7 @@ export function HeroEdit({ data, onChange }: HeroEditProps) {
   const removeImage = (indexToRemove: number) => {
     onChange({
       ...data,
-      coverImages: data.coverImages.filter((_, i) => i !== indexToRemove)
+      coverImages: data?.coverImages?.filter((_, i) => i !== indexToRemove) || []
     })
   }
 
@@ -99,7 +99,7 @@ export function HeroEdit({ data, onChange }: HeroEditProps) {
       <div className="space-y-4">
         <Label>Logo</Label>
         <div className="flex items-center gap-4">
-          {data.logo && (
+          {data?.logo && (
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm">
               <img 
                 src={data.logo} 

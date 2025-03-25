@@ -47,7 +47,7 @@ export function SectionEditor({ section, data, onChange, websiteId }: SectionEdi
           <ChefPostModal 
             open={chefPostModalOpen}
             onOpenChange={setChefPostModalOpen}
-            posts={data.posts || []}
+            posts={data?.posts || []}
             onSave={(post) => {
               const currentPosts = data.posts || []
               onChange({ 
@@ -63,7 +63,7 @@ export function SectionEditor({ section, data, onChange, websiteId }: SectionEdi
         </div>
       )
     case 'about':
-      return <AboutEdit data={data} onChange={onChange} />
+      return <AboutEdit data={data || {}} onChange={onChange} />
     case 'contact':
       return <div>Contact Section</div>  
     case 'reviews':

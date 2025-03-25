@@ -21,10 +21,10 @@ export function BudgetBasedTab({ menuItems, websiteId }: BudgetBasedTabProps) {
   
   // Budget optimization algorithm
   const getBudgetBasedRecommendations = useMemo(() => {
-    if (!menuItems.length || budget <= 0) return []
+    if (!menuItems?.length || budget <= 0) return []
     
     // Convert prices to numbers and filter out invalid ones
-    const validItems = menuItems.filter(item => {
+    const validItems = menuItems?.filter(item => {
       const price = parseFloat(item.price.replace(/[^0-9.]/g, ''))
       return !isNaN(price) && price > 0 && price <= budget
     })

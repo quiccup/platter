@@ -19,14 +19,14 @@ export function GalleryEdit({ data, onChange }: GalleryEditProps) {
   const handleImageAdd = (url: string) => {
     onChange({
       ...data,
-      images: [...(data.images || []), url]
+      images: [...(data?.images || []), url]
     })
   }
 
   const handleImageDelete = (index: number) => {
-    const newImages = data.images.filter((_, i) => i !== index)
-    const newCaptions = { ...data.captions }
-    delete newCaptions[data.images[index]]
+    const newImages = data?.images?.filter((_, i) => i !== index) || []
+    const newCaptions = { ...data?.captions }
+    delete newCaptions[data?.images?.[index]]
     
     onChange({
       ...data,
@@ -39,7 +39,7 @@ export function GalleryEdit({ data, onChange }: GalleryEditProps) {
     onChange({
       ...data,
       captions: {
-        ...(data.captions || {}),
+        ...(data?.captions || {}),
         [imageUrl]: caption
       }
     })
@@ -61,8 +61,8 @@ export function GalleryEdit({ data, onChange }: GalleryEditProps) {
       <GalleryModal 
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        images={data.images || []}
-        captions={data.captions || {}}
+        images={data?.images || []}
+        captions={data?.captions || {}}
         onImageAdd={handleImageAdd}
         onImageDelete={handleImageDelete}
         onCaptionChange={handleCaptionChange}

@@ -5,33 +5,39 @@ import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { MenuItem } from '../../../types'
 import { usePreviewTheme } from '@/components/preview-theme-provider'
+import { Badge } from '@/components/ui/badge'
 
 interface FullMenuTabProps {
-  menuItems: MenuItem[]
+  items: MenuItem[]
 }
 
-export function FullMenuTab({ menuItems }: FullMenuTabProps) {
+export function FullMenuTab({ items = [] }: FullMenuTabProps) {
   const { theme } = usePreviewTheme()
   const [activeCategory, setActiveCategory] = useState('All')
   const scrollRef = useRef<HTMLDivElement | null>(null)
   
-  // Extract unique categories from menu items
+  // Safely compute all categories
   const allCategories = useMemo(() => {
     const categories = new Set(['All'])
-    menuItems.forEach(item => {
-      if (item.tags && item.tags.length > 0) {
-        item.tags.forEach(tag => categories.add(tag))
-      }
-    })
+    
+    // Safely check if items exists and is an array before using forEach
+    if (Array.isArray(items)) {
+      items.forEach(item => {
+        if (item.tags && item.tags.length > 0) {
+          item.tags.forEach(tag => categories.add(tag))
+        }
+      })
+    }
+    
     return Array.from(categories)
-  }, [menuItems])
+  }, [items])
   
   // Filter items based on active category
   const filteredItems = useMemo(() => {
     return activeCategory === 'All' 
-      ? menuItems 
-      : menuItems.filter(item => item.tags?.includes(activeCategory))
-  }, [activeCategory, menuItems])
+      ? items 
+      : items.filter(item => item.tags?.includes(activeCategory))
+  }, [activeCategory, items])
   
   // Scroll functions for category scrolling
   const scrollLeft = () => {

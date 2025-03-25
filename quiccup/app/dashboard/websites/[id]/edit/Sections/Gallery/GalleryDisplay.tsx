@@ -1,13 +1,24 @@
 'use client'
 import BlurFade from "@/components/ui/blur-fade"
 import { useMemo } from "react"
+import { usePreviewTheme } from '@/components/preview-theme-provider'
 
 interface GalleryData {
   images: string[]
   captions: { [key: string]: string }
 }
 
-export function GallerySection({ data }: { data: GalleryData }) {
+interface GalleryDisplayProps {
+  data: {
+    images?: string[]
+    captions?: { [key: string]: string }
+  }
+}
+
+export function GallerySection({ data }: GalleryDisplayProps) {
+  const { theme } = usePreviewTheme()
+  const { images = [], captions = {} } = data
+  
   const getRandomRotation = () => {
     // Even smaller rotation on mobile
     return window.innerWidth < 768 
@@ -23,73 +34,49 @@ export function GallerySection({ data }: { data: GalleryData }) {
   }
 
   const polaroids = useMemo(() => {
-    return data.images?.map((url) => ({
+    return images?.map((url) => ({
       url,
       rotation: getRandomRotation(),
       offsetX: getRandomOffset(),
       offsetY: getRandomOffset(),
-      caption: data.captions?.[url] || 'Your Text Here'
+      caption: captions?.[url] || ''
     }))
-  }, [data.images, data.captions])
+  }, [images, captions])
 
-  if (!data?.images?.length) {
-    return (
-      <section id="photos" className="py-12">
-        <div className="text-center text-gray-500">
-          Add photos to your gallery
-        </div>
-      </section>
-    )
-  }
-
+  if (images.length === 0) return null
+  
   return (
-    <section id="photos" className="py-16 md:py-24 bg-zinc-900">
-      <div className="container mx-auto px-2 md:px-8 lg:px-12 max-w-7xl">
-        {/* Title */}
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12 text-white">
-          Our Gallery
+    <div className={`py-12 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+      <div className="container mx-auto px-4">
+        <h2 className={`text-3xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          Gallery
         </h2>
         
-        {/* Gallery Grid */}
-        <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-1 sm:gap-3 md:gap-6 lg:gap-8 
-          p-1 sm:p-2 md:p-6">
-          {polaroids?.map((polaroid, idx) => (
-            <BlurFade key={polaroid.url} delay={0.25 + idx * 0.05} inView>
-              <div 
-                className="group relative transition-transform duration-300 hover:scale-105 hover:z-10 
-                  mx-auto w-full max-w-[120px] md:max-w-[300px]"
-                style={{
-                  transform: `rotate(${polaroid.rotation}deg) translate(${polaroid.offsetX}px, ${polaroid.offsetY}px)`,
-                }}
-              >
-                {/* Polaroid frame */}
-                <div className="relative bg-white p-1 sm:p-2 md:p-3 pb-6 sm:pb-8 md:pb-12 
-                  rounded-lg shadow-xl">
-                  {/* Image container */}
-                  <div className="aspect-square overflow-hidden mb-1 sm:mb-2 md:mb-4 ">
-                    <img
-                      src={polaroid.url}
-                      alt={`Gallery image ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  {/* Polaroid bottom text area */}
-                  <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 left-0 right-0 text-center px-1">
-                    <p className="text-[10px] sm:text-xs md:text-sm font-handwriting text-gray-500 truncate">
-                      {polaroid.caption}
-                    </p>
-                  </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {images.map((image, index) => (
+            <div 
+              key={index} 
+              className="transform transition-transform hover:-rotate-2 hover:scale-105"
+            >
+              <div className="bg-white p-3 shadow-lg rounded-sm">
+                <div className="aspect-square overflow-hidden mb-2">
+                  <img 
+                    src={image} 
+                    alt={captions[image] || `Gallery image ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                {/* Drop shadow effect */}
-                <div 
-                  className="absolute inset-0 -z-10 blur-[2px] md:blur-sm bg-black/20 
-                    transform translate-y-0.5 translate-x-0.5 md:translate-y-1 md:translate-x-1 rounded-2xl opacity-75"
-                />
+                
+                {captions[image] && (
+                  <div className="text-center text-gray-700 p-2">
+                    {captions[image]}
+                  </div>
+                )}
               </div>
-            </BlurFade>
+            </div>
           ))}
         </div>
       </div>
-    </section>
+    </div>
   )
 }

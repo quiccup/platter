@@ -2,24 +2,24 @@
 import { useRouter } from 'next/navigation'
 import { UserButton, useUser } from "@clerk/nextjs"
 import { createClient } from '@supabase/supabase-js'
-import { generateUniqueSubdomain } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Plus, Edit, Settings } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { CreateWebsiteModal } from '@/components/create-website-modal'
 
 interface Website {
   id: string
   subdomain: string
+  name: string
   created_at: string
-  restaurant_id: string
 }
 
 export default function DashboardPage() {
   const router = useRouter()
   const { user } = useUser()
-  const [isLoading, setIsLoading] = useState(false)
   const [websites, setWebsites] = useState<Website[]>([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     async function loadWebsites() {
@@ -31,20 +31,11 @@ export default function DashboardPage() {
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         )
 
-        // First get the user's restaurant
-        const { data: restaurant } = await supabase
-          .from('restaurants')
-          .select('id')
-          .eq('user_id', user.id)
-          .single()
-
-        if (!restaurant) return
-
-        // Then get websites for that restaurant
+        // Get websites for the user
         const { data: websiteData } = await supabase
           .from('websites')
           .select('*')
-          .eq('restaurant_id', restaurant.id)
+          .eq('user_id', user.id)
 
         setWebsites(websiteData || [])
       } catch (error) {
@@ -54,67 +45,6 @@ export default function DashboardPage() {
     loadWebsites()
   }, [user])
 
-  const handleCreateWebsite = async () => {
-    if (!user) return
-    setIsLoading(true)
-
-    try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-
-      // First check if user has a restaurant
-      const { data: restaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      let restaurantId = restaurant?.id
-
-      // If no restaurant exists, create one
-      if (!restaurantId) {
-        const userName = user.firstName || 'restaurant'
-        const { data: newRestaurant, error: restaurantError } = await supabase
-          .from('restaurants')
-          .insert({
-            user_id: user.id,
-            name: `${userName}'s Restaurant`
-          })
-          .select()
-          .single()
-          
-        if (restaurantError) throw restaurantError
-        restaurantId = newRestaurant.id
-      }
-
-      // Generate subdomain from user name
-      const userName = user.firstName || 'restaurant'
-      const subdomain = await generateUniqueSubdomain(userName)
-
-      // Create website
-      const { data: website, error } = await supabase
-        .from('websites')
-        .insert({
-          restaurant_id: restaurantId,
-          subdomain: subdomain,
-          template: 'default'
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-
-      // Redirect to the new website's edit page
-      router.push(`/dashboard/websites/${website.id}/edit`)
-    } catch (error) {
-      console.error('Error creating website:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-  
   const firstName = user?.firstName || 'there'
   
   return (
@@ -157,12 +87,11 @@ export default function DashboardPage() {
               <p className="text-gray-400">Manage your restaurant websites and settings</p>
             </div>
             <button 
-              onClick={handleCreateWebsite}
-              disabled={isLoading}
-              className="flex items-center justify-center gap-2 bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:hover:bg-orange-500"
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center justify-center gap-2 bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors"
             >
               <Plus className="h-5 w-5" />
-              <span>{isLoading ? 'Creating...' : 'Create New Website'}</span>
+              <span>Create New Website</span>
             </button>
           </div>
         </motion.div>
@@ -184,7 +113,7 @@ export default function DashboardPage() {
               
               {/* Website Info */}
               <div className="p-6">
-                <h3 className="font-medium text-xl mb-1">{website.subdomain}</h3>
+                <h3 className="font-medium text-xl mb-1">{website.name || website.subdomain}</h3>
                 <p className="text-gray-400 text-sm mb-6">{website.subdomain}.platter.com</p>
                 
                 <div className="flex gap-3">
@@ -207,6 +136,12 @@ export default function DashboardPage() {
           ))}
         </div>
       </main>
+
+      {/* Create Website Modal */}
+      <CreateWebsiteModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   )
 }

@@ -201,7 +201,7 @@ export function MenuEditor({ data, onChange }: MenuEditorProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          websiteId,
+          websiteId: data.id,
           menuItems: data.items
         })
       })
@@ -271,7 +271,7 @@ export function MenuEditor({ data, onChange }: MenuEditorProps) {
       <MenuItemsModal 
         open={modalOpen}
         onOpenChange={setModalOpen}
-        items={data.items || []}
+        items={data?.items || []}
         onItemsChange={(items) => onChange({ ...data, items })}
       />
 

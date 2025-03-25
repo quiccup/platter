@@ -16,6 +16,7 @@ import { usePreviewTheme } from '@/components/preview-theme-provider'
 import { NavBar } from './components/NavBar'
 import { useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import { AboutDisplay } from './Sections/About/AboutDisplay';
 
 interface FinalProductProps {
   data: {
@@ -50,8 +51,8 @@ interface FinalProductProps {
 
 function ensureGalleryData(gallery: any): { images: string[], captions: Record<string, string> } {
   return {
-    images: gallery.images || [],
-    captions: gallery.captions || {}
+    images: gallery?.images || [],
+    captions: gallery?.captions || {}
   };
 }
 
@@ -66,19 +67,24 @@ export function FinalProduct({ data }: FinalProductProps) {
     }
   }, [data.theme, setTheme, theme])
   
+  // Temporary test to ensure data is provided correctly
+  console.log('FinalProduct - About data:', data.about);
+  
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} transition-colors duration-200 relative`}>
+    <div className={`w-full min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} transition-colors duration-200 relative`}>
       <NavBar 
         logo={data.hero?.logo} 
         companyName={data.hero?.heading || 'Restaurant Name'} 
       />
       
-      {/* Chef Stories - Moved to the top */}
-      <section className="mb-8">
-        <ChefsFeedDisplay posts={data.chefs?.posts} />
-      </section>
+      {/* Chef Stories - Only show if there are posts */}
+      {data.chefs?.posts && data.chefs.posts.length > 0 && (
+        <section className="mb-8">
+          <ChefsFeedDisplay posts={data.chefs.posts} />
+        </section>
+      )}
       
-      <main>
+      <main className="w-full">
         <div className="py-0 space-y-3">
 
         <section>
@@ -108,10 +114,7 @@ export function FinalProduct({ data }: FinalProductProps) {
           </section>
           
           <section className="max-w-5xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-8">About Us</h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto text-center">
-              {data.about.content || 'Add your restaurant\'s story'}
-            </p>
+            <AboutDisplay data={data.about} /> 
           </section>
           
           <section className="max-w-5xl mx-auto bg-muted py-16 rounded-2xl">
@@ -119,11 +122,11 @@ export function FinalProduct({ data }: FinalProductProps) {
             <div className="max-w-md mx-auto text-center">
               <p className="mb-2">
                 <span className="font-semibold">Email:</span>{' '}
-                {data.contact.email || 'Add your email'}
+                {data.contact?.email || 'Add your email'}
               </p>
               <p>
                 <span className="font-semibold">Phone:</span>{' '}
-                {data.contact.phone || 'Add your phone number'}
+                {data.contact?.phone || 'Add your phone number'}
               </p>
             </div>
           </section>
