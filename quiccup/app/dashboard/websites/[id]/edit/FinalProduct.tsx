@@ -14,6 +14,7 @@ import { useParams } from 'next/navigation'
 import { AboutDisplay } from './Sections/About/AboutDisplay';
 import { SectionContainer } from './components/SectionContainer';
 import { NavbarDisplay } from "./Sections/Navbar/NavbarDisplay";
+import { SectionWrapper } from './components/SectionWrapper';
 
 interface FinalProductProps {
   data: {
@@ -23,6 +24,7 @@ interface FinalProductProps {
       buttons: any[]
       logo?: string
       coverImage?: string
+      address?: string
     }
     menu: { 
       items: MenuItem[] 
@@ -68,59 +70,57 @@ export function FinalProduct({ data }: FinalProductProps) {
   console.log('FinalProduct - About data:', data.about);
   
   return (
-    <div className={`w-full min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} transition-colors duration-200 relative`}>
+    <div className={`w-full min-h-screen ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'} transition-colors duration-200`}>
       <NavbarDisplay
         logo={data.hero?.logo} 
         companyName={data.hero?.heading || 'Restaurant Name'} 
+        address={data.hero?.address}
       />
       
       <main className="w-full">
-        {/* Chef Stories - Only show if there are posts */}
+        {/* Chef Stories - Dark background */}
         {data.chefs?.posts && data.chefs.posts.length > 0 && (
-          <SectionContainer>
-            <ChefsFeedDisplay posts={data.chefs.posts} />
-          </SectionContainer>
+          <ChefsFeedDisplay posts={data.chefs.posts} />
         )}
         
-        {/* Menu Display */}
-        <SectionContainer noPadding>
-          <MenuDisplay 
-            data={data.menu}
-            websiteId={params.id}
-          />
-        </SectionContainer>
+        {/* Menu Display - Already handled in component */}
+        <MenuDisplay 
+          data={data.menu}
+          websiteId={params.id as string}
+        />
         
-        {/* Leaderboard section */}
+        {/* Leaderboard - Rounded container */}
         {data.leaderboard && (
-        
+          <SectionWrapper darkBackground>
             <LeaderboardDisplay 
               data={data.leaderboard} 
               menuItems={data.menu?.items || []} 
             />
-    
+          </SectionWrapper>
         )}
         
-        {/* Gallery */}
-        <SectionContainer title="Gallery">
-          <GallerySection data={ensureGalleryData(data.gallery)} />
-        </SectionContainer>
+        {/* Gallery - Dark background */}
+        <SectionWrapper darkBackground fullWidth>
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8 text-white">Gallery</h2>
+            <GallerySection data={ensureGalleryData(data.gallery)} />
+          </div>
+        </SectionWrapper>
         
-        {/* Play Display */}
-        <SectionContainer alternateBackground noPadding>
+        {/* Play Display - Rounded container */}
+        <SectionWrapper>
           <PlayDisplay />
-        </SectionContainer>
+        </SectionWrapper>
         
-        {/* About Us */}
-        <SectionContainer noPadding fullWidth>
-          <AboutDisplay data={data.about} /> 
-        </SectionContainer>
+    
+        <SectionWrapper darkBackground >
+          <AboutDisplay data={data.about} />
+        </SectionWrapper>
         
-        {/* Contact */}
-        <SectionContainer 
-          title="Contact Us" 
-          alternateBackground
-        >
+        {/* Contact - Rounded container */}
+        <SectionWrapper>
           <div className="max-w-md mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-8">Contact Us</h2>
             <p className="mb-2">
               <span className="font-semibold">Email:</span>{' '}
               {data.contact?.email || 'Add your email'}
@@ -130,7 +130,7 @@ export function FinalProduct({ data }: FinalProductProps) {
               {data.contact?.phone || 'Add your phone number'}
             </p>
           </div>
-        </SectionContainer>
+        </SectionWrapper>
       </main>
     </div>
   )

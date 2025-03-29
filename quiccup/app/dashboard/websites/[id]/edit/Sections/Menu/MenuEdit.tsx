@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -6,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { createWorker } from 'tesseract.js'
 import { MenuItemsModal } from './MenuItemsModal'
-import { ListPlus, Upload, Trash2, PlusCircle } from 'lucide-react'
+import { ListPlus, Upload, Trash2, PlusCircle, Pencil } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'react-hot-toast'
@@ -35,6 +37,8 @@ export function MenuEditor({ data, onChange }: MenuEditorProps) {
   const [jsonInput, setJsonInput] = useState('')
   const [jsonError, setJsonError] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [menuItemsModalOpen, setMenuItemsModalOpen] = useState(false)
 
   const processImage = async (file: File) => {
     setOcrStatus('Processing...')
@@ -220,68 +224,76 @@ export function MenuEditor({ data, onChange }: MenuEditorProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex">
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowJsonImporter(true)}>
-            <Upload className="h-4 w-4 mr-2" />
-            Import JSON
-          </Button>
-          <Button onClick={() => setModalOpen(true)} variant="default">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Add Menu Item
+    <div>
+      {/* Preview/Summary */}
+      <div className="space-y-4 p-4 border rounded-lg">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-semibold">Menu</h2>
+            <p className="text-sm text-gray-500">
+              {data.items.length} items
+            </p>
+          </div>
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Pencil className="w-4 h-4 mr-2" />
+            Edit Menu
           </Button>
         </div>
       </div>
-      
-      {/* JSON Import Dialog */}
-      <Dialog open={showJsonImporter} onOpenChange={setShowJsonImporter}>
-        <DialogContent className="sm:max-w-[600px]">
+
+      {/* Edit Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Import Menu Items from JSON</DialogTitle>
+            <DialogTitle>Edit Menu</DialogTitle>
           </DialogHeader>
-          
-          <div className="space-y-4 my-4">
-            <Label htmlFor="json-input">Paste your menu JSON below</Label>
-            <Textarea 
-              id="json-input"
-              value={jsonInput}
-              onChange={(e) => setJsonInput(e.target.value)}
-              placeholder='{"Category": [{"name": "Item name", "description": "Item description", "price": 10.99}]}'
-              rows={12}
-              className="font-mono text-sm"
-            />
-            
-            {jsonError && (
-              <p className="text-destructive text-sm">{jsonError}</p>
-            )}
+
+          <div className="space-y-6">
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setMenuItemsModalOpen(true)}>
+                <ListPlus className="h-4 w-4 mr-2" />
+                Add Items
+              </Button>
+              <Button variant="outline" onClick={() => setShowJsonImporter(true)}>
+                <Upload className="h-4 w-4 mr-2" />
+                Import JSON
+              </Button>
+            </div>
+
+            {/* Existing menu items list */}
+            <div className="space-y-4">
+              {data.items.map((item, index) => (
+                <div key={index} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">{item.title}</h3>
+                      <p className="text-sm text-gray-500">{item.price}</p>
+                    </div>
+                    {/* Add edit/delete buttons for individual items */}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Button 
+              onClick={regenerateAiRecommendations} 
+              disabled={isGenerating}
+              variant="outline"
+              className="w-full"
+            >
+              {isGenerating ? 'Updating AI Recommendations...' : 'Update AI Recommendations'}
+            </Button>
           </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowJsonImporter(false)}>
-              Cancel
-            </Button>
-            <Button onClick={processJsonMenuItems}>
-              Add Items
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
+      {/* Keep existing modals */}
       <MenuItemsModal 
-        open={modalOpen}
-        onOpenChange={setModalOpen}
+        open={menuItemsModalOpen}
+        onOpenChange={setMenuItemsModalOpen}
         items={data?.items || []}
         onItemsChange={(items) => onChange({ ...data, items })}
       />
-
-      <Button 
-        onClick={regenerateAiRecommendations} 
-        disabled={isGenerating}
-        variant="outline"
-      >
-        {isGenerating ? 'Updating AI Recommendations...' : 'Update AI Recommendations'}
-      </Button>
     </div>
   )
 }

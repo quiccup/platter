@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ChefPost } from '../../types'
 import { usePreviewTheme } from '@/components/preview-theme-provider'
 import { X } from 'lucide-react'
+import { SectionWrapper } from '../../components/SectionWrapper'
 
 interface ChefsFeedDisplayProps {
   posts?: ChefPost[]
@@ -27,9 +28,8 @@ export function ChefsFeedDisplay({ posts = [] }: ChefsFeedDisplayProps) {
   }
   
   return (
-    <div className={`w-full py-8 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <div className="container mx-auto px-4">
-        
+    <div >
+      <div className="container mx-auto px-4 py-10">
         {/* Stories Thumbnails - Showing Food Images */}
         <div className="flex overflow-x-auto gap-5 pb-4 no-scrollbar">
           {posts.map((post) => (

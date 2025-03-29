@@ -1,9 +1,9 @@
 'use client'
 import { usePreviewTheme } from '@/components/preview-theme-provider'
-import Image from 'next/image'
 import { useState } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
+import Marquee from '@/components/ui/marquee'
 
 interface GallerySectionProps {
   data: {
@@ -40,32 +40,54 @@ export function GallerySection({ data }: GallerySectionProps) {
     setSelectedImage(data.images[newIndex])
   }
   
+  // Split images into two groups for alternating directions
+  const firstHalf = data.images.slice(0, Math.ceil(data.images.length / 2))
+  const secondHalf = data.images.slice(Math.ceil(data.images.length / 2))
+  
+  const ImageCard = ({ image, index }: { image: string; index: number }) => (
+    <div 
+      className="relative w-64 h-64 mx-1 cursor-pointer rounded-lg overflow-hidden border-2 border-white/10 hover:border-white/20 transition-all"
+      onClick={() => openLightbox(image, index)}
+    >
+      <img
+        src={image}
+        alt={data.captions?.[image] || `Gallery image ${index + 1}`}
+        className="w-full h-full object-cover"
+      />
+    </div>
+  )
+
   return (
     <>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-        {data.images.map((image, index) => (
-          <div 
-            key={index} 
-            className="relative aspect-square cursor-pointer rounded-lg overflow-hidden border-2 border-white dark:border-gray-800 shadow-md hover:shadow-lg transition-shadow"
-            onClick={() => openLightbox(image, index)}
-          >
-            <img
-              src={image}
-              alt={data.captions?.[image] || `Gallery image ${index + 1}`}
-              className="w-full h-full object-cover"
+      <div className="space-y-2">
+        {/* First row - left to right */}
+        <Marquee className="py-2" pauseOnHover repeat={2}>
+          {firstHalf.map((image, index) => (
+            <ImageCard key={index} image={image} index={index} />
+          ))}
+        </Marquee>
+
+        {/* Second row - right to left */}
+        <Marquee className="py-2" reverse pauseOnHover repeat={2}>
+          {secondHalf.map((image, index) => (
+            <ImageCard 
+              key={index + firstHalf.length} 
+              image={image} 
+              index={index + firstHalf.length} 
             />
-          </div>
-        ))}
+          ))}
+        </Marquee>
       </div>
       
+      {/* Lightbox Dialog */}
       {selectedImage && (
-        <Dialog open={!!selectedImage} onOpenChange={() => closeLightbox()}>
+        <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
           <DialogContent className="max-w-5xl p-0 bg-transparent border-none">
             <div className="relative">
               <button 
                 onClick={(e) => {
                   e.stopPropagation()
-                  closeLightbox()
+                  setSelectedImage(null)
                 }}
                 className="absolute top-4 right-4 z-10 p-2 bg-black/50 text-white rounded-full"
               >
@@ -76,7 +98,9 @@ export function GallerySection({ data }: GallerySectionProps) {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    goToPrevious()
+                    const newIndex = selectedIndex === 0 ? data.images.length - 1 : selectedIndex - 1
+                    setSelectedIndex(newIndex)
+                    setSelectedImage(data.images[newIndex])
                   }}
                   className="p-2 bg-black/50 text-white rounded-full"
                 >
@@ -86,7 +110,9 @@ export function GallerySection({ data }: GallerySectionProps) {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    goToNext()
+                    const newIndex = selectedIndex === data.images.length - 1 ? 0 : selectedIndex + 1
+                    setSelectedIndex(newIndex)
+                    setSelectedImage(data.images[newIndex])
                   }}
                   className="p-2 bg-black/50 text-white rounded-full"
                 >

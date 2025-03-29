@@ -5,6 +5,7 @@ import { usePreviewTheme } from '@/components/preview-theme-provider'
 import { MenuItem } from '../../types'
 import { FullMenuTab } from './Tabs/FullMenuTab'
 import { BudgetBasedTab } from './Tabs/BudgetBasedTab'
+import { SectionWrapper } from '../../components/SectionWrapper'
 
 interface MenuDisplayProps {
   data: {
@@ -19,21 +20,21 @@ export function MenuDisplay({ data, websiteId }: MenuDisplayProps) {
   if (!data?.items || data.items.length === 0) return null
   
   return (
-    <div className="w-full">
-      {/* Budget Planner Section (Above Full Menu) */}
-      <div className={`py-6 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-        <div className="container mx-auto px-4">
+    <>
+      {/* Budget Planner in rounded container */}
+      <SectionWrapper>
+        <div className="mb-12">
           <BudgetBasedTab menuItems={data.items} websiteId={websiteId} />
         </div>
-      </div>
+      </SectionWrapper>
       
-      {/* Full Menu Section (Below Budget Planner) */}
-      <div className="py-8">
+      {/* Full Menu with dark background */}
+      <SectionWrapper darkBackground fullWidth>
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-6">Full Menu</h2>
+          <h2 className="text-3xl font-bold mb-8 text-white">Our Menu</h2>
           <FullMenuTab items={data.items} />
         </div>
-      </div>
-    </div>
+      </SectionWrapper>
+    </>
   )
 }

@@ -7,9 +7,10 @@ import { usePreviewTheme } from '@/components/preview-theme-provider'
 interface NavBarProps {
   logo?: string
   companyName: string
+  address?: string
 }
 
-export function NavbarDisplay({ logo, companyName }: NavBarProps) {
+export function NavbarDisplay({ logo, companyName, address }: NavBarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { theme } = usePreviewTheme()
 
@@ -47,7 +48,7 @@ export function NavbarDisplay({ logo, companyName }: NavBarProps) {
                 {companyName}
               </span>
               <span className={`text-[10px] md:text-xs truncate ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                123 Restaurant Street, Foodville
+                {address || 'Add your restaurant address'}
               </span>
             </div>
           </div>

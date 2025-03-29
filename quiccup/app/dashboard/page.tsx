@@ -101,20 +101,17 @@ export default function DashboardPage() {
           {websites.map((website, index) => (
             <motion.div 
               key={website.id}
-              className="bg-gray-900 rounded-xl overflow-hidden"
+              className="border border-white/10 rounded-xl p-6 bg-gray-900"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 * (index + 1) }}
             >
-              {/* Preview Area */}
-              <div className="aspect-video bg-gray-800 flex items-center justify-center border-b border-gray-800">
-                <span className="text-gray-400">Preview</span>
-              </div>
-              
               {/* Website Info */}
-              <div className="p-6">
-                <h3 className="font-medium text-xl mb-1">{website.name || website.subdomain}</h3>
-                <p className="text-gray-400 text-sm mb-6">{website.subdomain}.platter.com</p>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-medium text-xl mb-1">{website.name || website.subdomain}</h3>
+                  <p className="text-gray-400 text-sm">{website.subdomain}.platter.com</p>
+                </div>
                 
                 <div className="flex gap-3">
                   <Link

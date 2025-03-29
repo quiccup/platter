@@ -93,7 +93,7 @@ export default function EditWebsitePage() {
 
   const sections = [
     { id: 'leaderboard', label: 'Top Dishes', icon: Trophy },
-    { id: 'hero', label: 'Landing', icon: Home },
+    { id: 'hero', label: 'Navbar', icon: Home },
     { id: 'menu', label: 'Menu', icon: UtensilsCrossed },
     { id: 'chefs', label: 'Chefs Feed', icon: ChefHat },
     { id: 'about', label: 'About Us', icon: Info },
