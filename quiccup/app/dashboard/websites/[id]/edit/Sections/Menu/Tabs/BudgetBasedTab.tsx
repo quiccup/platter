@@ -179,116 +179,156 @@ export function BudgetBasedTab({ menuItems, websiteId }: BudgetBasedTabProps) {
           </motion.div>
         )}
 
-        {/* Enhanced budget input section */}
+        {/* Enhanced AI-powered budget search section */}
         <motion.div 
           className={`p-8 rounded-xl mb-8 ${
             theme === 'dark' 
-              ? 'bg-gradient-to-br from-gray-800/90 to-gray-900/90' 
-              : 'bg-gradient-to-br from-blue-50 to-indigo-50'
-          } shadow-lg border ${
-            theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
-          }`}
-          initial={{ scale: 0.98 }}
-          whileInView={{ scale: 1 }}
+              ? 'bg-gradient-to-br from-gray-800/90 via-gray-800/70 to-gray-900/90 border-gray-700' 
+              : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-blue-200'
+          } shadow-xl border-2`}
+          initial={{ scale: 0.98, y: 20 }}
+          whileInView={{ scale: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 15 }}
         >
-          <div className="flex items-center mb-4">
-            <h3 className="text-2xl font-bold">Set Your Budget</h3>
+          <div className="flex items-center mb-6">
             <motion.div 
-              className={`ml-auto ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}
-              initial={{ rotate: 0 }}
-              animate={{ rotate: [0, 15, 0, -15, 0] }}
-              transition={{ 
-                duration: 1.2,
-                repeat: 1,
-                repeatDelay: 3,
-                ease: "easeInOut" 
-              }}
+              initial={{ scale: 1 }}
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
+              className="mr-3"
             >
-              <Sparkles className="w-6 h-6" />
+              <div className={`p-2 rounded-full ${theme === 'dark' ? 'bg-blue-500/20' : 'bg-blue-500/10'}`}>
+                <Sparkles className={`w-6 h-6 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+              </div>
             </motion.div>
+            <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+              AI Budget Planner
+            </h3>
           </div>
           
-          <p className={`mb-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-            Our AI will create the perfect combination of menu items that fit your budget
+          <p className={`mb-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} max-w-xl`}>
+            Our advanced AI analyzes thousands of meal combinations to create the perfect dining experience within your budget.
           </p>
           
-          <div className="flex flex-col items-center gap-4 mb-6">
+          <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
             <div className="w-full max-w-md relative">
-              <DollarSign className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
-              <motion.div
-                whileTap={{ scale: 0.98 }}
-                className="w-full"
+              <DollarSign className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                type="number"
+                value={budget}
+                onChange={(e) => setBudget(Number(e.target.value))}
+                min={5}
+                max={200}
+                className={`w-full pl-12 pr-4 py-6 text-xl font-bold rounded-l-full ${
+                  theme === 'dark' 
+                    ? 'bg-gray-700 border-gray-600 text-white focus:bg-gray-600' 
+                    : 'bg-white border-gray-200 text-gray-800 focus:bg-blue-50'
+                } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-16`}
+                placeholder="Enter your budget"
+              />
+              
+              <motion.button
+                whileHover={{ scale: 1.03, boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.5)" }}
+                whileTap={{ scale: 0.97 }}
+                className={`absolute right-0 top-0 h-full px-8 flex items-center justify-center font-bold text-white rounded-r-full 
+                  ${theme === 'dark' 
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700' 
+                    : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700'
+                  } transition-all duration-300 text-lg`}
               >
-                <Input
-                  type="number"
-                  value={budget}
-                  onChange={(e) => setBudget(Number(e.target.value))}
-                  min={5}
-                  max={200}
-                  className={`w-full pl-12 pr-4 py-4 text-2xl font-bold rounded-full border-2 text-center ${
-                    theme === 'dark' 
-                      ? 'bg-gray-700 border-gray-600 text-white' 
-                      : 'bg-white border-gray-200 text-gray-800'
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                />
-              </motion.div>
+                <span className="mr-2">Find</span>
+                <motion.div
+                  animate={{ 
+                    x: [0, 5, 0],
+                    opacity: [1, 0.8, 1]
+                  }}
+                  transition={{ 
+                    duration: 1.5,
+                    repeat: Infinity,
+                    repeatType: "loop"
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13 5L20 12L13 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M20 12H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </motion.div>
+              </motion.button>
             </div>
           </div>
           
-          {/* AI or Algorithmic Recommendations heading */}
-          {isLoadingRecommendations ? (
-            <div className="text-center py-4">
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.05, 1],
-                  opacity: [0.7, 1, 0.7]
-                }}
-                transition={{ 
-                  duration: 1.5,
-                  repeat: Infinity,
-                  repeatType: "reverse"
-                }}
-              >
-                <p className="text-lg font-medium">Finding the perfect combination for you...</p>
-              </motion.div>
+          <div className="flex items-center mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className={`flex items-center px-3 py-1 rounded-full ${
+              theme === 'dark' ? 'bg-blue-900/30 text-blue-200' : 'bg-blue-100 text-blue-800'
+            }`}>
+              <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="text-sm font-medium">AI-powered</span>
             </div>
-          ) : aiRecommendations ? (
-            <div className="space-y-4">
-              <motion.div 
-                className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-blue-900/30' : 'bg-blue-50'} border ${
-                  theme === 'dark' ? 'border-blue-800' : 'border-blue-200'
-                }`}
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                <p className="text-lg italic mb-4">{aiRecommendations.explanation}</p>
-                <div className="flex justify-between">
-                  <div className="flex items-center">
-                    <Sparkles className={`mr-2 h-4 w-4 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-500'}`} />
-                    <p className="font-medium">AI Recommended Combo</p>
-                  </div>
-                  <p className="font-bold">${aiRecommendations.totalPrice.toFixed(2)}</p>
-                </div>
-              </motion.div>
+            <div className={`flex items-center px-3 py-1 rounded-full ml-3 ${
+              theme === 'dark' ? 'bg-purple-900/30 text-purple-200' : 'bg-purple-100 text-purple-800'
+            }`}>
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm font-medium">Instant results</span>
             </div>
-          ) : (
-            <div className="flex justify-between items-center">
-              <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Best combination for your budget
-              </p>
-              <motion.p 
-                className="text-xl font-bold"
-                initial={{ scale: 1 }}
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                ${totalBudgetBasedPrice} <span className="text-sm font-normal text-gray-500">/ ${budget}</span>
-              </motion.p>
-            </div>
-          )}
+          </div>
         </motion.div>
+        
+        {/* AI or Algorithmic Recommendations heading */}
+        {isLoadingRecommendations ? (
+          <div className="text-center py-4">
+            <motion.div
+              animate={{ 
+                scale: [1, 1.05, 1],
+                opacity: [0.7, 1, 0.7]
+              }}
+              transition={{ 
+                duration: 1.5,
+                repeat: Infinity,
+                repeatType: "reverse"
+              }}
+            >
+              <p className="text-lg font-medium">Finding the perfect combination for you...</p>
+            </motion.div>
+          </div>
+        ) : aiRecommendations ? (
+          <div className="space-y-4">
+            <motion.div 
+              className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-blue-900/30' : 'bg-blue-50'} border ${
+                theme === 'dark' ? 'border-blue-800' : 'border-blue-200'
+              }`}
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <p className="text-lg italic mb-4">{aiRecommendations.explanation}</p>
+              <div className="flex justify-between">
+                <div className="flex items-center">
+                  <Sparkles className={`mr-2 h-4 w-4 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-500'}`} />
+                  <p className="font-medium">AI Recommended Combo</p>
+                </div>
+                <p className="font-bold">${aiRecommendations.totalPrice.toFixed(2)}</p>
+              </div>
+            </motion.div>
+          </div>
+        ) : (
+          <div className="flex justify-between items-center">
+            <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+              Best combination for your budget
+            </p>
+            <motion.p 
+              className="text-xl font-bold"
+              initial={{ scale: 1 }}
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              ${totalBudgetBasedPrice} <span className="text-sm font-normal text-gray-500">/ ${budget}</span>
+            </motion.p>
+          </div>
+        )}
         
         {/* Recommendations display */}
         {isLoadingRecommendations ? (

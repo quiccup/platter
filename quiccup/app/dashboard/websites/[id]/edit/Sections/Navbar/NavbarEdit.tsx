@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2, Upload, X } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 
-interface HeroData {
+interface NavbarData {
   heading: string
   subheading: string
   buttons: Array<{ label: string; url: string; openInNewTab: boolean }>
@@ -17,19 +17,19 @@ interface HeroData {
   coverImages?: string[]
 }
 
-interface HeroEditProps {
-  data: HeroData
-  onChange: (data: HeroData) => void
+interface NavbarEditProps {
+  data: NavbarData
+  onChange: (data: NavbarData) => void
 }
 
-export function HeroEdit({ data, onChange }: HeroEditProps) {
+export function NavbarEdit({ data, onChange }: NavbarEditProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false)
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
 
   // Initialize data with empty buttons array if it doesn't exist
   React.useEffect(() => {
-    if (!data.buttons) {
+    if (!data?.buttons) {
       onChange({ ...data, buttons: [] });
     }
   }, []);
@@ -146,7 +146,7 @@ export function HeroEdit({ data, onChange }: HeroEditProps) {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Label>Cover Images</Label>
-          {(data.coverImages?.length || 0) < 3 && (
+          {(data?.coverImages?.length || 0) < 3 && (
             <Button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
@@ -169,7 +169,7 @@ export function HeroEdit({ data, onChange }: HeroEditProps) {
         </div>
 
         <div className="grid grid-cols-3 gap-4">
-          {data.coverImages?.map((image, index) => (
+          {data?.coverImages?.map((image, index) => (
             <div key={index} className="relative group">
               <img
                 src={image}
@@ -204,7 +204,7 @@ export function HeroEdit({ data, onChange }: HeroEditProps) {
         <div>
           <Label>Heading</Label>
           <Input
-            value={data.heading || ''}
+            value={data?.heading || ''}
             onChange={(e) => onChange({ ...data, heading: e.target.value })}
             placeholder="Enter heading"
           />
@@ -213,7 +213,7 @@ export function HeroEdit({ data, onChange }: HeroEditProps) {
         <div>
           <Label>Subheading</Label>
           <Input
-            value={data.subheading || ''}
+            value={data?.subheading || ''}
             onChange={(e) => onChange({ ...data, subheading: e.target.value })}
             placeholder="Enter subheading"
           />
@@ -224,7 +224,7 @@ export function HeroEdit({ data, onChange }: HeroEditProps) {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">Buttons</h3>
-          {data.buttons.length < 2 && (
+          {data?.buttons?.length < 2 && (
             <Button 
               onClick={handleAddButton}
               size="sm"
@@ -235,7 +235,7 @@ export function HeroEdit({ data, onChange }: HeroEditProps) {
           )}
         </div>
 
-        {data.buttons.map((button, index) => (
+        {data?.buttons?.map((button, index) => (
           <div key={index} className="space-y-3 p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-between">
               <h4 className="font-medium">Button {index + 1}</h4>

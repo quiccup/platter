@@ -29,9 +29,6 @@ export function ChefsFeedDisplay({ posts = [] }: ChefsFeedDisplayProps) {
   return (
     <div className={`w-full py-8 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="container mx-auto px-4">
-        <h2 className={`text-2xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-          Chef Stories
-        </h2>
         
         {/* Stories Thumbnails - Showing Food Images */}
         <div className="flex overflow-x-auto gap-5 pb-4 no-scrollbar">

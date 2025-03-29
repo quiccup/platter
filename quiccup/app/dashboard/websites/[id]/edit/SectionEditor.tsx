@@ -1,5 +1,5 @@
 import { ReviewsEdit } from "./Sections/Reviews/ReviewsEdit"
-import { HeroEdit } from "./Sections/Hero/HeroEdit"
+import { NavbarEdit } from "./Sections/Navbar/NavbarEdit"
 import { GalleryEdit } from "./Sections/Gallery/GalleryEdit"
 import { MenuEditor } from "./Sections/Menu/MenuEdit"
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,7 @@ export function SectionEditor({ section, data, onChange, websiteId }: SectionEdi
     case 'hero':
       return (
         <div className="space-y-4">
-         <HeroEdit data={data} onChange={onChange} />
+         <NavbarEdit data={data} onChange={onChange} />
         </div>
       )
     case 'menu':

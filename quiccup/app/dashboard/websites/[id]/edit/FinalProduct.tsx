@@ -1,10 +1,6 @@
 'use client'
-
-import { ThemeProvider } from '@/providers/theme-provider'
-import { DockBar } from "./components/ui/DockBar";
 import { ChefsFeedDisplay } from "./Sections/ChefsFeed/ChefsFeedDisplay";
 import { GallerySection } from "./Sections/Gallery/GalleryDisplay";
-import { HeroDisplay } from "./Sections/Hero/HeroDisplay";
 import { MenuDisplay } from "./Sections/Menu/MenuDisplay";
 import { ReviewsSection } from "./Sections/Reviews/ReviewsDisplay";
 import { PlayDisplay } from "./Sections/Play/PlayDisplay";
@@ -13,10 +9,11 @@ import { MenuItem } from './Sections/Menu/types';
 import { ChefPost } from './types';
 import { LeaderboardDisplay } from './Sections/Leaderboard/LeaderboardDisplay'
 import { usePreviewTheme } from '@/components/preview-theme-provider'
-import { NavBar } from './components/NavBar'
 import { useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { AboutDisplay } from './Sections/About/AboutDisplay';
+import { SectionContainer } from './components/SectionContainer';
+import { NavbarDisplay } from "./Sections/Navbar/NavbarDisplay";
 
 interface FinalProductProps {
   data: {
@@ -72,65 +69,68 @@ export function FinalProduct({ data }: FinalProductProps) {
   
   return (
     <div className={`w-full min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} transition-colors duration-200 relative`}>
-      <NavBar 
+      <NavbarDisplay
         logo={data.hero?.logo} 
         companyName={data.hero?.heading || 'Restaurant Name'} 
       />
       
-      {/* Chef Stories - Only show if there are posts */}
-      {data.chefs?.posts && data.chefs.posts.length > 0 && (
-        <section className="mb-8">
-          <ChefsFeedDisplay posts={data.chefs.posts} />
-        </section>
-      )}
-      
       <main className="w-full">
-        <div className="py-0 space-y-3">
-
-        <section>
-            <MenuDisplay 
-              data={data.menu}
-              websiteId={params.id}
-            />
-          </section>
-          
-          {/* Leaderboard section */}
-          {data.leaderboard && (
-            <section className="mb-12">
-              <LeaderboardDisplay 
-                data={data.leaderboard} 
-                menuItems={data.menu?.items || []} 
-              />
-            </section>
-          )}
+        {/* Chef Stories - Only show if there are posts */}
+        {data.chefs?.posts && data.chefs.posts.length > 0 && (
+          <SectionContainer>
+            <ChefsFeedDisplay posts={data.chefs.posts} />
+          </SectionContainer>
+        )}
         
-          
-          <section>
-            <GallerySection data={ensureGalleryData(data.gallery)} />
-          </section>
-          
-          <section>
-            <PlayDisplay />
-          </section>
-          
-          <section className="max-w-5xl mx-auto">
-            <AboutDisplay data={data.about} /> 
-          </section>
-          
-          <section className="max-w-5xl mx-auto bg-muted py-16 rounded-2xl">
-            <h2 className="text-3xl font-bold text-center mb-8">Contact Us</h2>
-            <div className="max-w-md mx-auto text-center">
-              <p className="mb-2">
-                <span className="font-semibold">Email:</span>{' '}
-                {data.contact?.email || 'Add your email'}
-              </p>
-              <p>
-                <span className="font-semibold">Phone:</span>{' '}
-                {data.contact?.phone || 'Add your phone number'}
-              </p>
-            </div>
-          </section>
-        </div>
+        {/* Menu Display */}
+        <SectionContainer noPadding>
+          <MenuDisplay 
+            data={data.menu}
+            websiteId={params.id}
+          />
+        </SectionContainer>
+        
+        {/* Leaderboard section */}
+        {data.leaderboard && (
+        
+            <LeaderboardDisplay 
+              data={data.leaderboard} 
+              menuItems={data.menu?.items || []} 
+            />
+    
+        )}
+        
+        {/* Gallery */}
+        <SectionContainer title="Gallery">
+          <GallerySection data={ensureGalleryData(data.gallery)} />
+        </SectionContainer>
+        
+        {/* Play Display */}
+        <SectionContainer alternateBackground noPadding>
+          <PlayDisplay />
+        </SectionContainer>
+        
+        {/* About Us */}
+        <SectionContainer noPadding fullWidth>
+          <AboutDisplay data={data.about} /> 
+        </SectionContainer>
+        
+        {/* Contact */}
+        <SectionContainer 
+          title="Contact Us" 
+          alternateBackground
+        >
+          <div className="max-w-md mx-auto text-center">
+            <p className="mb-2">
+              <span className="font-semibold">Email:</span>{' '}
+              {data.contact?.email || 'Add your email'}
+            </p>
+            <p>
+              <span className="font-semibold">Phone:</span>{' '}
+              {data.contact?.phone || 'Add your phone number'}
+            </p>
+          </div>
+        </SectionContainer>
       </main>
     </div>
   )

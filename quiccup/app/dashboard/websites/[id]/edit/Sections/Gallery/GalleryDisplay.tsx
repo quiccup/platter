@@ -1,82 +1,118 @@
 'use client'
-import BlurFade from "@/components/ui/blur-fade"
-import { useMemo } from "react"
 import { usePreviewTheme } from '@/components/preview-theme-provider'
+import Image from 'next/image'
+import { useState } from 'react'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 
-interface GalleryData {
-  images: string[]
-  captions: { [key: string]: string }
-}
-
-interface GalleryDisplayProps {
+interface GallerySectionProps {
   data: {
-    images?: string[]
-    captions?: { [key: string]: string }
+    images: string[]
+    captions?: Record<string, string>
   }
 }
 
-export function GallerySection({ data }: GalleryDisplayProps) {
+export function GallerySection({ data }: GallerySectionProps) {
   const { theme } = usePreviewTheme()
-  const { images = [], captions = {} } = data
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number>(0)
   
-  const getRandomRotation = () => {
-    // Even smaller rotation on mobile
-    return window.innerWidth < 768 
-      ? Math.random() * 6 - 3   // -3 to 3 degrees on mobile
-      : Math.random() * 20 - 10 // -10 to 10 degrees on desktop
+  if (!data?.images || data.images.length === 0) return null
+  
+  const openLightbox = (image: string, index: number) => {
+    setSelectedImage(image)
+    setSelectedIndex(index)
   }
-
-  const getRandomOffset = () => {
-    // Minimal offsets on mobile
-    return window.innerWidth < 768
-      ? Math.random() * 4 - 2   // -2 to 2 pixels on mobile
-      : Math.random() * 20 - 10 // -10 to 10 pixels on desktop
+  
+  const closeLightbox = () => {
+    setSelectedImage(null)
   }
-
-  const polaroids = useMemo(() => {
-    return images?.map((url) => ({
-      url,
-      rotation: getRandomRotation(),
-      offsetX: getRandomOffset(),
-      offsetY: getRandomOffset(),
-      caption: captions?.[url] || ''
-    }))
-  }, [images, captions])
-
-  if (images.length === 0) return null
+  
+  const goToPrevious = () => {
+    const newIndex = selectedIndex === 0 ? data.images.length - 1 : selectedIndex - 1
+    setSelectedIndex(newIndex)
+    setSelectedImage(data.images[newIndex])
+  }
+  
+  const goToNext = () => {
+    const newIndex = selectedIndex === data.images.length - 1 ? 0 : selectedIndex + 1
+    setSelectedIndex(newIndex)
+    setSelectedImage(data.images[newIndex])
+  }
   
   return (
-    <div className={`py-12 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
-      <div className="container mx-auto px-4">
-        <h2 className={`text-3xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-          Gallery
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {images.map((image, index) => (
-            <div 
-              key={index} 
-              className="transform transition-transform hover:-rotate-2 hover:scale-105"
-            >
-              <div className="bg-white p-3 shadow-lg rounded-sm">
-                <div className="aspect-square overflow-hidden mb-2">
-                  <img 
-                    src={image} 
-                    alt={captions[image] || `Gallery image ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                
-                {captions[image] && (
-                  <div className="text-center text-gray-700 p-2">
-                    {captions[image]}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+    <>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+        {data.images.map((image, index) => (
+          <div 
+            key={index} 
+            className="relative aspect-square cursor-pointer rounded-lg overflow-hidden border-2 border-white dark:border-gray-800 shadow-md hover:shadow-lg transition-shadow"
+            onClick={() => openLightbox(image, index)}
+          >
+            <img
+              src={image}
+              alt={data.captions?.[image] || `Gallery image ${index + 1}`}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ))}
       </div>
-    </div>
+      
+      {selectedImage && (
+        <Dialog open={!!selectedImage} onOpenChange={() => closeLightbox()}>
+          <DialogContent className="max-w-5xl p-0 bg-transparent border-none">
+            <div className="relative">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation()
+                  closeLightbox()
+                }}
+                className="absolute top-4 right-4 z-10 p-2 bg-black/50 text-white rounded-full"
+              >
+                <X size={20} />
+              </button>
+              
+              <div className="flex justify-between absolute inset-y-0 w-full items-center px-4">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    goToPrevious()
+                  }}
+                  className="p-2 bg-black/50 text-white rounded-full"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    goToNext()
+                  }}
+                  className="p-2 bg-black/50 text-white rounded-full"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-center h-[80vh]">
+                <img 
+                  src={selectedImage} 
+                  alt={data.captions?.[selectedImage] || 'Gallery image'}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+              
+              {data.captions?.[selectedImage] && (
+                <div className="absolute bottom-4 left-0 right-0 text-center">
+                  <div className="bg-black/70 text-white p-2 mx-auto max-w-lg rounded">
+                    {data.captions[selectedImage]}
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   )
 }

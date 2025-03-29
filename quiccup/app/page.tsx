@@ -3,7 +3,7 @@
 import { SignInButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Check, Github, Twitter, Instagram, ArrowRight } from 'lucide-react'
+import { Check, Github, Twitter, Instagram, ArrowRight, Sparkles, Users, Gift, ChefHat, Brain, PartyPopper, Star, Utensils } from 'lucide-react'
 
 export default function LandingPage() {
   const { isSignedIn, user } = useUser();
@@ -44,7 +44,7 @@ export default function LandingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          Build game changing restaurant websites.
+          A game changing way of showing your restaurant online!
         </motion.h1>
         <motion.p 
           className="text-xl text-gray-400 max-w-3xl mx-auto mb-16"
@@ -75,6 +75,138 @@ export default function LandingPage() {
             </SignInButton>
           )}
           <div className="text-gray-500 text-sm mt-3">v1.0.1 • macOS 12+</div>
+        </motion.div>
+      </section>
+      
+      {/* Feature Cards Section */}
+      <section className="container mx-auto px-6 py-24 relative">
+        {/* Background gradient effects */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-1/2 -right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-1/2 -left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
+        </div>
+
+        {/* Floating cards grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
+          {/* AI Recommendations Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            whileHover={{ scale: 1.05, rotate: 1 }}
+            className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-xl rounded-2xl p-6 border border-gray-800"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-blue-500/20 rounded-xl">
+                <Brain className="h-6 w-6 text-blue-400" />
+              </div>
+              <h3 className="text-xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                AI Menu Magic
+              </h3>
+            </div>
+            <p className="text-gray-400 mb-4">
+              Smart recommendations that help customers discover their perfect meal combinations
+            </p>
+            <div className="flex items-center text-sm text-blue-400">
+              <Sparkles className="h-4 w-4 mr-2" />
+              <span>Powered by advanced AI</span>
+            </div>
+          </motion.div>
+
+          {/* Party Orders Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            whileHover={{ scale: 1.05, rotate: -1 }}
+            className="bg-gradient-to-br from-orange-500/10 to-red-500/10 backdrop-blur-xl rounded-2xl p-6 border border-gray-800"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-orange-500/20 rounded-xl">
+                <PartyPopper className="h-6 w-6 text-orange-400" />
+              </div>
+              <h3 className="text-xl font-semibold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
+                Party Perfect
+              </h3>
+            </div>
+            <p className="text-gray-400 mb-4">
+              Specialized recommendations for group orders and party planning
+            </p>
+            <div className="flex items-center text-sm text-orange-400">
+              <Users className="h-4 w-4 mr-2" />
+              <span>Group ordering made easy</span>
+            </div>
+          </motion.div>
+
+          {/* Rewards Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            whileHover={{ scale: 1.05, rotate: 1 }}
+            className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-xl rounded-2xl p-6 border border-gray-800"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-green-500/20 rounded-xl">
+                <Gift className="h-6 w-6 text-green-400" />
+              </div>
+              <h3 className="text-xl font-semibold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                Play & Win
+              </h3>
+            </div>
+            <p className="text-gray-400 mb-4">
+              Engage customers with interactive games and reward their loyalty
+            </p>
+            <div className="flex items-center text-sm text-green-400">
+              <Star className="h-4 w-4 mr-2" />
+              <span>Gamified rewards system</span>
+            </div>
+          </motion.div>
+
+          {/* Chef Stories Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            whileHover={{ scale: 1.05, rotate: -1 }}
+            className="bg-gradient-to-br from-yellow-500/10 to-amber-500/10 backdrop-blur-xl rounded-2xl p-6 border border-gray-800"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-yellow-500/20 rounded-xl">
+                <ChefHat className="h-6 w-6 text-yellow-400" />
+              </div>
+              <h3 className="text-xl font-semibold bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
+                Chef Stories
+              </h3>
+            </div>
+            <p className="text-gray-400 mb-4">
+              Share your culinary journey and connect with your customers personally
+            </p>
+            <div className="flex items-center text-sm text-yellow-400">
+              <Utensils className="h-4 w-4 mr-2" />
+              <span>Behind the scenes</span>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Central feature highlight */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, delay: 0.8 }}
+          className="mt-16 text-center"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-800/50 backdrop-blur-xl border border-gray-700 mb-8">
+            <Sparkles className="h-4 w-4 text-blue-400" />
+            <span className="text-sm text-gray-300">Powered by advanced AI technology</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-orange-400 bg-clip-text text-transparent mb-6">
+            Everything you need to succeed online
+          </h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            From AI-powered recommendations to engaging customer experiences, 
+            Platter provides all the tools you need to take your restaurant to the next level.
+          </p>
         </motion.div>
       </section>
       
