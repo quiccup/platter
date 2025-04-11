@@ -29,17 +29,13 @@ import {
   PhoneCall,
   Star,
   Image,
-  Command,
-  AudioWaveform,
-  GalleryVerticalEnd,
   ChevronRight,
+  ChevronLeft,
   Expand,
   Smartphone,
   Trophy,
-  Moon,
-  Sun
 } from 'lucide-react'
-import { TeamSwitcher } from '@/app/editor/components/team-switcher'
+
 import { NavUser } from '@/app/editor/components/nav-user'
 import { NavProjects } from '@/app/editor/components/nav-projects'
 import { Button } from "@/components/ui/button"
@@ -51,6 +47,8 @@ import { EditorSection } from './EditorSection'
 import { sectionsConfig } from './config'
 import { WebsiteData } from './types'
 import { toast } from 'sonner'
+import { MenuEditor } from './Sections/Menu/MenuEdit'
+import { ChefsFeedEdit } from './Sections/ChefsFeed/ChefsFeedEdit'
 
 export default function EditWebsitePage() {
   const params = useParams()
@@ -63,15 +61,16 @@ export default function EditWebsitePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isPublishing, setIsPublishing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [data, setData] = useState<{ user: { name: string, email: string, avatar: string }}|null>(null)
+  const [data, setData] = useState<any>({})
   const [websiteData, setWebsiteData] = useState<WebsiteData>({
-    hero: {
+    navbar: {
       heading: '',
       subheading: '',
       buttons: [],
     },
     menu: {
-      items: []
+      items: [],
+      budgetCombos: {}
     },
     chefs: {
       posts: []
@@ -90,10 +89,24 @@ export default function EditWebsitePage() {
     theme: 'dark' // Default theme
   })
   const [sidebarWidth, setSidebarWidth] = useState<'collapsed' | 'normal' | 'expanded'>('normal')
+  const [sectionOrder, setSectionOrder] = useState([
+    'navbar',
+    'leaderboard',
+    'menu',
+    'chefs',
+    'gallery',
+    'about',
+    'contact',
+    'reviews'
+  ])
+  const [isCollapsed, setIsCollapsed] = useState(false)
+
+  // Track if there are unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   const sections = [
     { id: 'leaderboard', label: 'Top Dishes', icon: Trophy },
-    { id: 'hero', label: 'Navbar', icon: Home },
+    { id: 'navbar', label: 'Navbar', icon: Home },
     { id: 'menu', label: 'Menu', icon: UtensilsCrossed },
     { id: 'chefs', label: 'Chefs Feed', icon: ChefHat },
     { id: 'about', label: 'About Us', icon: Info },
@@ -107,7 +120,7 @@ export default function EditWebsitePage() {
     setMounted(true)
   }, [])
 
-  // Load initial data
+  // Load initial data - update to also load section_order
   useEffect(() => {
     async function loadWebsiteData() {
       try {
@@ -118,104 +131,119 @@ export default function EditWebsitePage() {
         
         const { data, error } = await supabase
           .from('websites')
-          .select('content')
+          .select('content, section_order')
           .eq('id', websiteId)
           .single()
 
         if (error) throw error
 
         if (data?.content) {
-          // Validate data structure before setting
-          const content = data.content as WebsiteData
-          setWebsiteData(content)
+          setWebsiteData(data.content)
+        }
+        
+        // Set section order if it exists in database
+        if (data?.section_order) {
+          setSectionOrder(data.section_order)
         }
       } catch (error) {
         console.error('Error loading website data:', error)
-        // Handle error appropriately
+        toast.error('Failed to load website data')
       }
     }
     
     loadWebsiteData()
   }, [websiteId])
 
-  // Safe update function
+  // Update handleContentChange to better handle nested updates
   const handleContentChange = (sectionId: keyof WebsiteData, newData: any) => {
-    if (!websiteData) return // Don't update if no data loaded
-
+    console.log('Content change:', sectionId, newData); // Debug log
+    
     setWebsiteData(prev => {
-      if (!prev) return prev // Extra safety check
+      if (!prev) return prev;
+
+      let updatedSection;
+      if (sectionId === 'chefs') {
+        // Special handling for chefs section
+        updatedSection = {
+          ...prev[sectionId],
+          ...newData,
+          posts: Array.isArray(newData.posts) ? newData.posts : prev[sectionId].posts
+        };
+      } else {
+        // General handling for other sections
+        updatedSection = typeof newData === 'object' && newData !== null
+          ? { ...prev[sectionId], ...newData }
+          : newData;
+      }
 
       const updatedData = {
         ...prev,
-        [sectionId]: {
-          ...prev[sectionId],
-          ...newData
-        }
-      }
+        [sectionId]: updatedSection
+      };
 
-      // Debounced save
-      debouncedSave(updatedData)
+      console.log('Updated website data:', updatedData); // Debug log
+      setHasUnsavedChanges(true);
+      return updatedData;
+    });
+  };
 
-      return updatedData
-    })
+  // Update section order handler
+  const handleSectionOrderChange = (newOrder: string[]) => {
+    setSectionOrder(newOrder)
+    setHasUnsavedChanges(true)
   }
 
-  // Safer save function
-  const saveToDatabase = async (content: WebsiteData) => {
-    try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-      
-      const { error } = await supabase
-        .from('websites')
-        .update({ content })
-        .eq('id', websiteId)
-
-      if (error) throw error
-      
-    } catch (error) {
-      console.error('Error saving website data:', error)
-      // Handle error appropriately
-    }
-  }
-
-  const debouncedSave = debounce(saveToDatabase, 1000)
-
-  const handleThemeChange = (newTheme: 'dark' | 'light') => {
-    setWebsiteData(prevData => ({
-      ...prevData,
-      theme: newTheme
-    }))
-  }
-
-  const saveWebsite = async () => {
-    setIsSaving(true)
+  // Update saveAllChanges to include better error handling and logging
+  const saveAllChanges = async () => {
+    setIsSaving(true);
+    console.log('Saving website data:', websiteData); // Debug log
     
     try {
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      );
       
-      const { error } = await supabase
+      // First, validate the data structure
+      if (!websiteData.chefs?.posts) {
+        console.error('Invalid chefs data structure');
+        toast.error('Invalid data structure');
+        return;
+      }
+
+      const { data, error } = await supabase
         .from('websites')
-        .update({ content: websiteData })
+        .update({ 
+          content: websiteData,
+          section_order: sectionOrder 
+        })
         .eq('id', websiteId)
-        
+        .select();
+      
       if (error) {
-        console.error('Error saving website:', error)
-        toast.error('Failed to save website')
-      } else {
-        toast.success('Website saved successfully')
+        console.error('Error saving website:', error);
+        toast.error('Failed to save changes');
+        return;
+      }
+
+      console.log('Save successful:', data); // Debug log
+      toast.success('Changes saved successfully');
+      setHasUnsavedChanges(false);
+
+      // Refresh the data after saving
+      if (data?.[0]?.content) {
+        setWebsiteData(data[0].content);
       }
     } catch (error) {
-      console.error('Error saving website:', error)
-      toast.error('Failed to save website')
+      console.error('Error saving website:', error);
+      toast.error('Failed to save changes');
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
+  };
+
+  const handleThemeChange = (newTheme: 'dark' | 'light') => {
+    handleContentChange('theme', newTheme)
   }
 
   const publishWebsite = async () => {
@@ -223,7 +251,7 @@ export default function EditWebsitePage() {
     
     try {
       // Save first
-      await saveWebsite()
+      await saveAllChanges()
       
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -262,77 +290,60 @@ export default function EditWebsitePage() {
     <PreviewThemeProvider initialTheme={websiteData.theme || 'dark'}>
       <SidebarProvider>
         <div className="grid grid-cols-[auto,1fr] h-screen">
-          <Sidebar 
-            collapsible="icon"
-            className={`transition-all duration-300 border-r ${
-              sidebarWidth === 'collapsed' ? 'w-[50px]' : 
-              'w-[280px]'
-            }`}
-          >
-            <SidebarHeader>
-              <TeamSwitcher teams={data?.teams || []} />
-            </SidebarHeader>
-            <SidebarContent>
-              <SidebarGroup>
-                <SidebarGroupLabel>Sections</SidebarGroupLabel>
-                <SidebarMenu>
-                  {sections.map((section) => (
-                    <div key={section.id}>
-                      <button
-                        onClick={() => setActiveSection(activeSection === section.id ? null : section.id)}
-                        className={`w-full px-2 py-2 text-left hover:bg-gray-100 flex items-center justify-between gap-3 group ${
-                          activeSection === section.id ? 'bg-gray-100' : ''
-                        }`}
+          <div className="relative">
+            <Sidebar className={`transition-all duration-200 ${isCollapsed ? 'w-16' : 'w-64'}`}>
+              <div 
+                className="absolute -right-3 top-6 z-50 cursor-pointer"
+                onClick={() => setIsCollapsed(!isCollapsed)}
+              >
+                <div className="h-6 w-6 rounded-full bg-background border shadow-sm hover:bg-accent flex items-center justify-center">
+                  {isCollapsed ? (
+                    <ChevronRight className="h-3 w-3" />
+                  ) : (
+                    <ChevronLeft className="h-3 w-3" />
+                  )}
+                </div>
+              </div>
+
+              <SidebarContent>
+                <div className="flex flex-col h-full">
+                  <div className="py-3 px-4">
+                    {!isCollapsed && (
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start -ml-2 text-sm"
+                        onClick={() => router.push('/dashboard')}
                       >
-                        <div className="flex items-center gap-3">
-                          <section.icon className="w-4 h-4 flex-shrink-0" />
-                          <span className="truncate group-[[data-collapsed=true]]:hidden text-sm">
-                            {section.label}
-                          </span>
-                        </div>
-                        <ChevronRight 
-                          className={`w-4 h-4 transition-transform ${
-                            activeSection === section.id ? 'rotate-90' : ''
-                          }`}
-                        />
-                      </button>
-                      
-                      {/* Section Editor Panel */}
-                      {activeSection === section.id && (
-                        <div className="p-4 border-l ml-4 mt-2">
-                          <SectionEditor 
-                            section={section.id}
-                            data={(websiteData as any)[section.id]}
-                            onChange={(newData) => handleContentChange(section.id, newData)}
-                            websiteId={websiteId}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroup>
-              <NavProjects projects={data?.projects || []} />
-            </SidebarContent>
-            <SidebarFooter>
-              <NavUser user={data?.user || { name: '', email: '', avatar: '' }} />
-            </SidebarFooter>
-            <SidebarRail />
-            
-            {/* Add resize button at the bottom */}
-            <button
-              onClick={() => setSidebarWidth(state => 
-                state === 'normal' ? 'expanded' : 
-                state === 'expanded' ? 'collapsed' : 
-                'normal'
-              )}
-              className="absolute bottom-4 right-2 p-2 hover:bg-gray-100 rounded-full"
-            >
-              <ChevronLeftIcon className={`w-4 h-4 transition-transform ${
-                sidebarWidth === 'expanded' ? 'rotate-180' : ''
-              }`} />
-            </button>
-          </Sidebar>
+                        <ChevronLeft className="h-4 w-4 mr-2" />
+                        Back to Dashboard
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="px-2 flex-1">
+                    {!isCollapsed && (
+                      <div className="mb-2 px-2">
+                        <h2 className="text-sm font-medium text-muted-foreground">Sections</h2>
+                      </div>
+                    )}
+
+                    <SectionEditor 
+                      sectionOrder={sectionOrder}
+                      onOrderChange={handleSectionOrderChange}
+                      data={websiteData}
+                      onChange={handleContentChange}
+                      websiteId={websiteId}
+                      isCollapsed={isCollapsed}
+                    />
+                  </div>
+
+                  <SidebarFooter className="px-4 py-4 mt-auto">
+                    <NavUser collapsed={isCollapsed} />
+                  </SidebarFooter>
+                </div>
+              </SidebarContent>
+            </Sidebar>
+          </div>
 
           {/* Preview Area */}
           <SidebarInset className="w-full min-w-0">
@@ -344,9 +355,33 @@ export default function EditWebsitePage() {
                 </Button>
               </div>
               
-              {/* Add the preview theme toggle */}
-              <PreviewThemeToggle />
-              
+              <div className="flex items-center gap-2">
+                <PreviewThemeToggle />
+                
+                {/* Add Save Button */}
+                <Button 
+                  onClick={saveAllChanges}
+                  disabled={isSaving}
+                  variant="outline"
+                  size="sm"
+                  className={`
+                    ${hasUnsavedChanges 
+                      ? "border-2 border-black text-black hover:bg-black hover:text-white transition-colors rounded-full px-6" 
+                      : "text-muted-foreground"
+                    }
+                  `}
+                >
+                  {isSaving ? (
+                    <>
+                      <span className="animate-spin mr-2">⏳</span>
+                      Saving...
+                    </>
+                  ) : (
+                    hasUnsavedChanges ? "Save" : "Saved"
+                  )}
+                </Button>
+              </div>
+
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
@@ -373,7 +408,10 @@ export default function EditWebsitePage() {
               <div className={`bg-white rounded-lg border overflow-hidden ${
                 isMobileView ? 'max-w-md mx-auto shadow-xl' : ''}`}
               >
-                <FinalProduct data={websiteData} />
+                <FinalProduct 
+                  data={websiteData}
+                  sectionOrder={sectionOrder}
+                />
               </div>    
             </main>
           </SidebarInset>

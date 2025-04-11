@@ -64,7 +64,7 @@ export function CreateWebsiteModal({ isOpen, onClose }: CreateWebsiteModalProps)
             fontFamily: font
           },
           sections: {
-            hero: { enabled: true },
+            navbar: { enabled: true },
             menu: { enabled: true, items: [] },
             reviews: { enabled: true, items: [] },
             contact: { enabled: true }

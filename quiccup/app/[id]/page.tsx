@@ -6,10 +6,24 @@ import { FinalProduct } from '../dashboard/websites/[id]/edit/FinalProduct'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PreviewThemeProvider } from '@/components/preview-theme-provider'
 
+interface WebsiteData {
+  content: {
+    theme?: 'dark' | 'light'
+    navbar?: any
+    menu?: any
+    about?: any
+    chefs?: any
+    gallery?: any
+    leaderboard?: any
+    contact?: any
+  }
+  section_order: string[]
+}
+
 export default function WebsitePage() {
   const params = useParams()
   const websiteId = params.id as string
-  const [websiteData, setWebsiteData] = useState(null)
+  const [websiteData, setWebsiteData] = useState<WebsiteData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   
   useEffect(() => {
@@ -20,14 +34,16 @@ export default function WebsitePage() {
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         )
         
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('websites')
-          .select('content')
+          .select('content, section_order')
           .eq('id', websiteId)
           .single()
 
-        if (data?.content) {
-          setWebsiteData(data.content)
+        if (error) throw error
+
+        if (data) {
+          setWebsiteData(data)
         }
       } catch (error) {
         console.error('Error loading website data:', error)
@@ -39,7 +55,7 @@ export default function WebsitePage() {
     loadWebsiteData()
   }, [websiteId])
 
-  const theme = websiteData?.theme || 'dark'
+  const theme = websiteData?.content?.theme || 'dark'
   
   return (
     <PreviewThemeProvider initialTheme={theme}>
@@ -66,7 +82,20 @@ export default function WebsitePage() {
         )}
       </AnimatePresence>
 
-      {websiteData && <FinalProduct data={websiteData} />}
+      {websiteData && (
+        <FinalProduct 
+          data={websiteData.content} 
+          sectionOrder={websiteData.section_order || [
+            'about',
+            'chefs',
+            'menu',   
+            'chefs',
+            'gallery',
+            'leaderboard',
+            'contact'
+          ]} 
+        />
+      )}
     </PreviewThemeProvider>
   )
 } 

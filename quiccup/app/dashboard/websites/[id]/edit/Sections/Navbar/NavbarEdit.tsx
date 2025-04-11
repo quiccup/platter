@@ -46,7 +46,7 @@ export function NavbarEdit({ data, onChange }: NavbarEditProps) {
   const handleCoverImageUpload = async (file: File) => {
     try {
       setIsUploading(true)
-      const url = await uploadImage(file, 'hero')
+      const url = await uploadImage(file, 'navbar')
       setTempData({ 
         ...tempData, 
         coverImages: [...(tempData.coverImages || []), url].slice(0, 3) 

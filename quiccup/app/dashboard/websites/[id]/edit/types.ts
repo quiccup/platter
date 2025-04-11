@@ -8,11 +8,12 @@ export interface MenuItem {
 
 export interface ChefPost {
   id: string
-  name?: string
-  avatar?: string
-  content?: string
-  images: string[]
-  tags: string[]
+  name: string
+  content: string
+  author: string
+  customAuthor?: string
+  images?: string[]
+  tags?: string[]
   timestamp?: string
 }
 
@@ -28,7 +29,7 @@ export interface LeaderboardData {
 }
 
 export interface WebsiteData {
-  hero: {
+  navbar: {
     heading: string
     subheading: string
     buttons: Array<{ label: string; url: string; openInNewTab: boolean }>

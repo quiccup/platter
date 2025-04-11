@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { uploadImage } from "@/lib/uploadImage"
@@ -12,6 +12,7 @@ import { ListPlus, Upload, Trash2, PlusCircle, Pencil } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'react-hot-toast'
+import { createClient } from '@supabase/supabase-js'
 
 interface MenuItem {
   title: string
@@ -22,14 +23,30 @@ interface MenuItem {
   tags: string[]
 }
 
+interface BudgetCombo {
+  items: {
+    name: string;
+    description: string;
+    price: number;
+  }[];
+  total: number;
+  comment: string;
+}
+
+interface BudgetCombos {
+  [key: string]: BudgetCombo[];
+}
+
 interface MenuEditorProps {
   data: {
     items: MenuItem[]
+    budgetCombos?: BudgetCombos
   }
   onChange: (data: any) => void
+  websiteId: string
 }
 
-export function MenuEditor({ data, onChange }: MenuEditorProps) {
+export function MenuEditor({ data, onChange, websiteId }: MenuEditorProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [ocrStatus, setOcrStatus] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -39,6 +56,7 @@ export function MenuEditor({ data, onChange }: MenuEditorProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [menuItemsModalOpen, setMenuItemsModalOpen] = useState(false)
+  const [budgetCombosJson, setBudgetCombosJson] = useState('')
 
   const processImage = async (file: File) => {
     setOcrStatus('Processing...')
@@ -223,71 +241,168 @@ export function MenuEditor({ data, onChange }: MenuEditorProps) {
     }
   }
 
+  const saveBudgetCombos = async () => {
+    try {
+      const parsed = JSON.parse(budgetCombosJson)
+      // Basic validation
+      if (typeof parsed !== 'object') throw new Error('Invalid format')
+      
+      // First update local state
+      onChange({
+        ...data,
+        budgetCombos: parsed
+      })
+
+      // Then save to database
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+
+      const { data: websiteData, error: fetchError } = await supabase
+        .from('websites')
+        .select('content')
+        .eq('id', websiteId)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      const updatedContent = {
+        ...websiteData.content,
+        budget: parsed // Save budget combos under 'budget' key
+      }
+
+      const { error: updateError } = await supabase
+        .from('websites')
+        .update({ content: updatedContent })
+        .eq('id', websiteId)
+
+      if (updateError) throw updateError
+      
+      toast.success('Budget combinations saved successfully')
+      setIsModalOpen(false)
+    } catch (error) {
+      console.error('Error saving budget combos:', error)
+      toast.error('Failed to save budget combinations')
+    }
+  }
+
+  // Add this useEffect to load budget combos from content when component mounts
+  useEffect(() => {
+    async function loadBudgetCombos() {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
+
+        const { data: websiteData, error } = await supabase
+          .from('websites')
+          .select('content')
+          .eq('id', websiteId)
+          .single()
+
+        if (error) throw error
+
+        if (websiteData?.content?.budget) {
+          setBudgetCombosJson(JSON.stringify(websiteData.content.budget, null, 2))
+          onChange({
+            ...data,
+            budgetCombos: websiteData.content.budget
+          })
+        }
+      } catch (error) {
+        console.error('Error loading budget combos:', error)
+      }
+    }
+
+    loadBudgetCombos()
+  }, [websiteId])
+
   return (
-    <div>
-      {/* Preview/Summary */}
-      <div className="space-y-4 p-4 border rounded-lg">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-semibold">Menu</h2>
-            <p className="text-sm text-gray-500">
-              {data.items.length} items
-            </p>
-          </div>
-          <Button onClick={() => setIsModalOpen(true)}>
-            <Pencil className="w-4 h-4 mr-2" />
-            Edit Menu
+    <div className="space-y-6">
+      <DialogHeader>
+        <DialogTitle>Edit Menu</DialogTitle>
+      </DialogHeader>
+
+      <div className="space-y-6">
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setMenuItemsModalOpen(true)}>
+            <ListPlus className="h-4 w-4 mr-2" />
+            Add Items
           </Button>
+          <Button variant="outline" onClick={() => setShowJsonImporter(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import JSON
+          </Button>
+        </div>
+
+        {/* Existing menu items list */}
+        <div className="space-y-4">
+          {data?.items.map((item, index) => (
+            <div key={index} className="border rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">{item.title}</h3>
+                  <p className="text-sm text-gray-500">{item.price}</p>
+                </div>
+                {/* Add edit/delete buttons for individual items */}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <Button 
+          onClick={regenerateAiRecommendations} 
+          disabled={isGenerating}
+          variant="outline"
+          className="w-full"
+        >
+          {isGenerating ? 'Updating AI Recommendations...' : 'Update AI Recommendations'}
+        </Button>
+
+        <div className="space-y-4 mt-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Budget Combinations</h3>
+            <Button 
+              onClick={saveBudgetCombos} 
+              variant="outline"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Save Combinations
+            </Button>
+          </div>
+          
+          <Textarea
+            value={budgetCombosJson}
+            onChange={(e) => setBudgetCombosJson(e.target.value)}
+            placeholder="Enter budget combinations JSON..."
+            className="min-h-[300px] font-mono text-sm"
+          />
+
+          <div className="text-sm text-muted-foreground">
+            <p>Format example:</p>
+            <pre className="mt-2 p-2 bg-muted rounded-md overflow-x-auto">
+              {`{
+  "$10": [
+    {
+      "items": [
+        {
+          "name": "Item Name",
+          "description": "Item Description",
+          "price": 9.99
+        }
+      ],
+      "total": 9.99,
+      "comment": "Combo description"
+    }
+  ]
+}`}
+            </pre>
+          </div>
         </div>
       </div>
 
-      {/* Edit Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Menu</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-6">
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setMenuItemsModalOpen(true)}>
-                <ListPlus className="h-4 w-4 mr-2" />
-                Add Items
-              </Button>
-              <Button variant="outline" onClick={() => setShowJsonImporter(true)}>
-                <Upload className="h-4 w-4 mr-2" />
-                Import JSON
-              </Button>
-            </div>
-
-            {/* Existing menu items list */}
-            <div className="space-y-4">
-              {data.items.map((item, index) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">{item.title}</h3>
-                      <p className="text-sm text-gray-500">{item.price}</p>
-                    </div>
-                    {/* Add edit/delete buttons for individual items */}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <Button 
-              onClick={regenerateAiRecommendations} 
-              disabled={isGenerating}
-              variant="outline"
-              className="w-full"
-            >
-              {isGenerating ? 'Updating AI Recommendations...' : 'Update AI Recommendations'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Keep existing modals */}
       <MenuItemsModal 
         open={menuItemsModalOpen}
         onOpenChange={setMenuItemsModalOpen}

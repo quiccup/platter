@@ -27,7 +27,7 @@ export default function CreateWebsitePage() {
             fontFamily: 'Inter'
           },
           sections: {
-            hero: { enabled: true },
+            navbar: { enabled: true },
             menu: { enabled: true, items: [] },
             reviews: { enabled: true, items: [] },
             contact: { enabled: true }

@@ -36,7 +36,7 @@ export default function LandingPage() {
         )}
       </nav>
       
-      {/* Hero Section */}
+      {/* Navbar Section */}
       <section className="container mx-auto px-6 flex flex-col items-center justify-center py-24 text-center">
         <motion.h1 
           className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
@@ -44,16 +44,8 @@ export default function LandingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          A game changing way of showing your restaurant online!
+          A completely new way to showcase your restaurant online!
         </motion.h1>
-        <motion.p 
-          className="text-xl text-gray-400 max-w-3xl mx-auto mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Create, manage, and conquer your restaurant online presence with ease
-        </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

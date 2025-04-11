@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { ChefPost } from '../../types'
 import { usePreviewTheme } from '@/components/preview-theme-provider'
-import { X } from 'lucide-react'
-import { SectionWrapper } from '../../components/SectionWrapper'
+import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface ChefsFeedDisplayProps {
   posts?: ChefPost[]
@@ -12,10 +12,31 @@ interface ChefsFeedDisplayProps {
 
 export function ChefsFeedDisplay({ posts = [] }: ChefsFeedDisplayProps) {
   const { theme } = usePreviewTheme()
-  const [activeStory, setActiveStory] = useState<ChefPost | null>(null)
+  const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null)
   
-  // Don't render if there are no posts
   if (!posts || posts.length === 0) return null
+  
+  const activeStory = activeStoryIndex !== null ? posts[activeStoryIndex] : null
+  
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (activeStoryIndex !== null && activeStoryIndex < posts.length - 1) {
+      setActiveStoryIndex(activeStoryIndex + 1)
+    }
+  }
+
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (activeStoryIndex !== null && activeStoryIndex > 0) {
+      setActiveStoryIndex(activeStoryIndex - 1)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowRight') handleNext(e as any)
+    if (e.key === 'ArrowLeft') handlePrevious(e as any)
+    if (e.key === 'Escape') setActiveStoryIndex(null)
+  }
   
   // Get avatar for a chef (only as fallback if no images)
   const getChefAvatar = (name: string) => {
@@ -28,114 +49,54 @@ export function ChefsFeedDisplay({ posts = [] }: ChefsFeedDisplayProps) {
   }
   
   return (
-    <div >
-      <div className="container mx-auto px-4 py-10">
-        {/* Stories Thumbnails - Showing Food Images */}
-        <div className="flex overflow-x-auto gap-5 pb-4 no-scrollbar">
-          {posts.map((post) => (
-            <div key={post.id} className="flex-none">
-              <button
-                onClick={() => setActiveStory(post)}
-                className="flex flex-col items-center"
-              >
-                {/* Larger rectangular thumbnail - prioritize food images */}
-                <div className="w-36 h-48 rounded-lg overflow-hidden bg-gray-800 relative shadow-lg">
-                  {post.images && post.images.length > 0 ? (
-                    <img 
-                      src={post.images[0]} 
-                      alt="Food"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = 'https://via.placeholder.com/300x400?text=Food';
-                      }}
-                    />
-                  ) : post.image ? (
-                    <img 
-                      src={post.image} 
-                      alt="Chef"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = 'https://via.placeholder.com/300x400';
-                      }}
-                    />
-                  ) : (
-                    getChefAvatar(post.name || 'Chef')
-                  )}
-                  
-                  {/* No name overlay at the bottom */}
-                </div>
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* Full-screen Story - Image fills the screen better */}
-      {activeStory && (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col">
-          {/* Header with chef info */}
-          <div className="p-4 flex items-center z-10">
-            <div className="flex items-center flex-1">
-              {activeStory.image ? (
-                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white">
-                  <img 
-                    src={activeStory.image} 
-                    alt={activeStory.name || 'Chef'} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white">
-                  {getChefAvatar(activeStory.name || 'Chef')}
-                </div>
-              )}
-              
-              <div className="ml-3">
-                <h3 className="font-semibold text-white">
-                  {activeStory.name || 'Chef'}
-                </h3>
-                <p className="text-xs text-gray-300">
-                  {activeStory.timestamp || 'Just now'}
-                </p>
-              </div>
-            </div>
-            
-            <button 
-              onClick={() => setActiveStory(null)}
-              className="text-white p-2"
+    <div className="py-16">
+      <div className="container mx-auto px-4">
+        
+        {/* Stories Grid - Larger, more interactive cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {posts.map((post, index) => (
+            <motion.button
+              key={post.id}
+              onClick={() => setActiveStoryIndex(index)}
+              className="group relative w-full aspect-[3/4] rounded-xl overflow-hidden cursor-pointer"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <X size={24} />
-            </button>
-          </div>
-          
-          {/* Story Content - Full screen image */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            {activeStory.images && activeStory.images.length > 0 ? (
-              <img 
-                src={activeStory.images[0]} 
-                alt={activeStory.content || 'Food image'}
-                className="w-full h-full object-contain"
-              />
-            ) : activeStory.image ? (
-              <img 
-                src={activeStory.image} 
-                alt={activeStory.content || 'Food image'}
-                className="w-full h-full object-contain"
-              />
-            ) : (
-              <div className="max-w-lg p-6 text-center">
-                <p className="text-xl text-white">
-                  {activeStory.content || 'Check out our latest culinary creation!'}
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/30 z-10" />
+              
+              {/* Shine effect on hover */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-20" />
+              
+              {/* Image */}
+              <div className="absolute inset-0 bg-gray-900">
+                {post.images && post.images.length > 0 ? (
+                  <img 
+                    src={post.images[0]} 
+                    alt="Food"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                ) : (
+                  getChefAvatar(post.name || 'Chef')
+                )}
+              </div>
+              
+              {/* Content Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 z-30">
+                <h3 className="text-white font-semibold text-lg mb-1">
+                  {post.name}
+                </h3>
+                <p className="text-gray-200 text-sm line-clamp-2">
+                  {post.content}
                 </p>
                 
-                {activeStory.tags && activeStory.tags.length > 0 && (
-                  <div className="flex flex-wrap justify-center gap-2 mt-4">
-                    {activeStory.tags.map((tag, index) => (
+                {/* Tags */}
+                {post.tags && post.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {post.tags.map((tag, index) => (
                       <span 
                         key={index}
-                        className="text-sm px-3 py-1 rounded-full bg-gray-800 text-gray-300"
+                        className="text-xs px-2 py-1 rounded-full bg-white/20 text-white backdrop-blur-sm"
                       >
                         #{tag}
                       </span>
@@ -143,10 +104,98 @@ export function ChefsFeedDisplay({ posts = [] }: ChefsFeedDisplayProps) {
                   </div>
                 )}
               </div>
-            )}
-          </div>
+            </motion.button>
+          ))}
         </div>
-      )}
+      </div>
+      
+      {/* Updated Full-screen Story View */}
+      <AnimatePresence>
+        {activeStory && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black flex flex-col"
+            onKeyDown={handleKeyDown}
+            tabIndex={0}
+          >
+            {/* Navigation Buttons */}
+            {activeStoryIndex > 0 && (
+              <button
+                onClick={handlePrevious}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/50 text-white hover:bg-black/75 transition-colors"
+              >
+                <ChevronLeft size={24} />
+              </button>
+            )}
+            
+            {activeStoryIndex < posts.length - 1 && (
+              <button
+                onClick={handleNext}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/50 text-white hover:bg-black/75 transition-colors"
+              >
+                <ChevronRight size={24} />
+              </button>
+            )}
+
+            {/* Close Button */}
+            <button 
+              onClick={() => setActiveStoryIndex(null)}
+              className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/50 text-white hover:bg-black/75 transition-colors"
+            >
+              <X size={24} />
+            </button>
+
+            {/* Image Container */}
+            <div className="relative w-full h-full">
+              {activeStory.images && activeStory.images.length > 0 && (
+                <img 
+                  src={activeStory.images[0]} 
+                  alt={activeStory.content || 'Story image'}
+                  className="absolute inset-0 w-full h-full object-contain"
+                />
+              )}
+
+              {/* Content Overlay at Bottom */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6">
+                <div className="container mx-auto max-w-4xl">
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white mr-4">
+                      {/* Chef Avatar */}
+                    </div>
+                    <div>
+                      <h3 className="text-white font-semibold text-lg">
+                        {activeStory.name}
+                      </h3>
+                      <p className="text-gray-300 text-sm">
+                        {activeStory.timestamp}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-white text-lg mb-4">
+                    {activeStory.content}
+                  </p>
+
+                  {activeStory.tags && activeStory.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {activeStory.tags.map((tag, index) => (
+                        <span 
+                          key={index}
+                          className="text-sm px-3 py-1 rounded-full bg-white/20 text-white"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

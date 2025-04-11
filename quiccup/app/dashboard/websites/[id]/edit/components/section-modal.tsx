@@ -18,7 +18,7 @@ export function SectionModal({ isOpen, onClose, section, data, onChange }: Secti
   if (!section) return null
 
   const sectionTitles: Record<string, string> = {
-    hero: "Landing Section",
+    navbar: "Landing Section",
     menu: "Menu Section",
     chefs: "Chefs Feed",
     about: "About Us",
