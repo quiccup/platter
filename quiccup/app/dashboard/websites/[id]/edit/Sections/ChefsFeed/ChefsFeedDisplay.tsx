@@ -8,9 +8,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 interface ChefsFeedDisplayProps {
   posts?: ChefPost[]
+  logo?: string
+  companyName?: string
 }
 
-export function ChefsFeedDisplay({ posts = [] }: ChefsFeedDisplayProps) {
+export function ChefsFeedDisplay({ posts = [], logo, companyName }: ChefsFeedDisplayProps) {
   const { theme } = usePreviewTheme()
   const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null)
   
@@ -49,67 +51,97 @@ export function ChefsFeedDisplay({ posts = [] }: ChefsFeedDisplayProps) {
   }
   
   return (
-    <div className="py-16">
+    <div className="py-16 bg-[#111827] overflow-hidden">
       <div className="container mx-auto px-4">
-        
-        {/* Stories Grid - Larger, more interactive cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {posts.map((post, index) => (
-            <motion.button
-              key={post.id}
-              onClick={() => setActiveStoryIndex(index)}
-              className="group relative w-full aspect-[3/4] rounded-xl overflow-hidden cursor-pointer"
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/30 z-10" />
-              
-              {/* Shine effect on hover */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-20" />
-              
-              {/* Image */}
-              <div className="absolute inset-0 bg-gray-900">
-                {post.images && post.images.length > 0 ? (
-                  <img 
-                    src={post.images[0]} 
-                    alt="Food"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                ) : (
-                  getChefAvatar(post.name || 'Chef')
-                )}
-              </div>
-              
-              {/* Content Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 z-30">
-                <h3 className="text-white font-semibold text-lg mb-1">
-                  {post.name}
-                </h3>
-                <p className="text-gray-200 text-sm line-clamp-2">
-                  {post.content}
-                </p>
-                
-                {/* Tags */}
-                {post.tags && post.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {post.tags.map((tag, index) => (
-                      <span 
-                        key={index}
-                        className="text-xs px-2 py-1 rounded-full bg-white/20 text-white backdrop-blur-sm"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
+        <div className="relative">
+          {/* Scroll buttons remain same */}
+          <button 
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/20 hover:bg-black/40 p-2 rounded-full text-white hidden md:block"
+            onClick={() => {
+              const container = document.getElementById('stories-container')
+              if (container) container.scrollLeft -= 300
+            }}
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          
+          <button 
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/20 hover:bg-black/40 p-2 rounded-full text-white hidden md:block"
+            onClick={() => {
+              const container = document.getElementById('stories-container')
+              if (container) container.scrollLeft += 300
+            }}
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          {/* Scrollable Container */}
+          <div 
+            id="stories-container"
+            className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory scrollbar-hide"
+            style={{
+              scrollBehavior: 'smooth',
+              WebkitOverflowScrolling: 'touch',
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none'
+            }}
+          >
+            {posts.map((post, index) => (
+              <motion.div
+                key={post.id}
+                className="flex-none w-[300px] snap-center"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <div 
+                  onClick={() => setActiveStoryIndex(index)}
+                  className="relative aspect-[3/4] rounded-xl overflow-hidden cursor-pointer group"
+                >
+                  {/* Gradient overlay - lighter now since we have less text */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/0 z-10" />
+                  
+                  {/* Image */}
+                  <div className="absolute inset-0 bg-gray-900">
+                    {post.images && post.images.length > 0 ? (
+                      <img 
+                        src={post.images[0]} 
+                        alt="Story"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl">
+                        🍽️
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </motion.button>
-          ))}
+                  
+                  {/* Author Name Overlay with Logo */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 z-30">
+                    <div className="flex items-center gap-2">
+                      {logo ? (
+                        <img 
+                          src={logo} 
+                          alt={companyName}
+                          className="w-6 h-6 rounded-full object-cover border border-white"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 rounded-full border border-white bg-red-600 flex items-center justify-center text-white text-xs font-bold">
+                          {companyName?.charAt(0)}
+                        </div>
+                      )}
+                      <h3 className="text-white font-semibold text-lg">
+                        {post.author}
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
       
-      {/* Updated Full-screen Story View */}
+      {/* Full-screen Story View - Now with more prominent content */}
       <AnimatePresence>
         {activeStory && (
           <motion.div 
@@ -117,31 +149,14 @@ export function ChefsFeedDisplay({ posts = [] }: ChefsFeedDisplayProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-black flex flex-col"
-            onKeyDown={handleKeyDown}
-            tabIndex={0}
+            onClick={() => setActiveStoryIndex(null)}
           >
-            {/* Navigation Buttons */}
-            {activeStoryIndex > 0 && (
-              <button
-                onClick={handlePrevious}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/50 text-white hover:bg-black/75 transition-colors"
-              >
-                <ChevronLeft size={24} />
-              </button>
-            )}
-            
-            {activeStoryIndex < posts.length - 1 && (
-              <button
-                onClick={handleNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/50 text-white hover:bg-black/75 transition-colors"
-              >
-                <ChevronRight size={24} />
-              </button>
-            )}
-
             {/* Close Button */}
             <button 
-              onClick={() => setActiveStoryIndex(null)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveStoryIndex(null);
+              }}
               className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/50 text-white hover:bg-black/75 transition-colors"
             >
               <X size={24} />
@@ -152,44 +167,36 @@ export function ChefsFeedDisplay({ posts = [] }: ChefsFeedDisplayProps) {
               {activeStory.images && activeStory.images.length > 0 && (
                 <img 
                   src={activeStory.images[0]} 
-                  alt={activeStory.content || 'Story image'}
+                  alt="Story"
                   className="absolute inset-0 w-full h-full object-contain"
                 />
               )}
 
-              {/* Content Overlay at Bottom */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6">
+              {/* Content Overlay at Bottom - Now more prominent */}
+              <div 
+                className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent p-8"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className="container mx-auto max-w-4xl">
-                  <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white mr-4">
-                      {/* Chef Avatar */}
-                    </div>
-                    <div>
-                      <h3 className="text-white font-semibold text-lg">
-                        {activeStory.name}
-                      </h3>
-                      <p className="text-gray-300 text-sm">
-                        {activeStory.timestamp}
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-3 mb-4">
+                    {logo ? (
+                      <img 
+                        src={logo} 
+                        alt={companyName}
+                        className="w-8 h-8 rounded-full object-cover border border-white"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full border border-white bg-red-600 flex items-center justify-center text-white text-sm font-bold">
+                        {companyName?.charAt(0)}
+                      </div>
+                    )}
+                    <h3 className="text-white font-bold text-2xl">
+                      {activeStory.author}
+                    </h3>
                   </div>
-
-                  <p className="text-white text-lg mb-4">
+                  <p className="text-white text-lg leading-relaxed">
                     {activeStory.content}
                   </p>
-
-                  {activeStory.tags && activeStory.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {activeStory.tags.map((tag, index) => (
-                        <span 
-                          key={index}
-                          className="text-sm px-3 py-1 rounded-full bg-white/20 text-white"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -199,3 +206,14 @@ export function ChefsFeedDisplay({ posts = [] }: ChefsFeedDisplayProps) {
     </div>
   )
 }
+
+// Add this to your global CSS file
+`
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+`

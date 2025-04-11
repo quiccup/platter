@@ -7,6 +7,8 @@ import { FullMenuTab } from './Tabs/FullMenuTab'
 import { BudgetBasedTab } from './Tabs/BudgetBasedTab'
 import { SectionWrapper } from '../../components/SectionWrapper'
 import { createClient } from '@supabase/supabase-js'
+import { Search, X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface MenuDisplayProps {
   data: {
@@ -18,7 +20,25 @@ interface MenuDisplayProps {
 export function MenuDisplay({ data, websiteId }: MenuDisplayProps) {
   const { theme } = usePreviewTheme()
   const [budgetCombos, setBudgetCombos] = useState<any>(null)
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filteredItems, setFilteredItems] = useState<MenuItem[]>(data?.items || [])
   
+  // Handle search functionality
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredItems(data?.items || [])
+      return
+    }
+
+    const query = searchQuery.toLowerCase()
+    const filtered = data?.items.filter(item => 
+      item.title.toLowerCase().includes(query) ||
+      item.description?.toLowerCase().includes(query)
+    )
+    setFilteredItems(filtered || [])
+  }, [searchQuery, data?.items])
+
   useEffect(() => {
     async function fetchBudgetCombos() {
       try {
@@ -50,8 +70,7 @@ export function MenuDisplay({ data, websiteId }: MenuDisplayProps) {
   
   return (
     <>
-      {/* Budget Planner in rounded container */}
-      <SectionWrapper>
+      <SectionWrapper darkBackground>
         <div className="mb-12">
           <BudgetBasedTab 
             menuItems={data.items} 
@@ -61,11 +80,9 @@ export function MenuDisplay({ data, websiteId }: MenuDisplayProps) {
         </div>
       </SectionWrapper>
       
-      {/* Full Menu with dark background */}
       <SectionWrapper darkBackground fullWidth>
         <div className="container mx-auto px-4">
-          {/* <h2 className="text-3xl font-bold mb-8 text-white">Our Menu</h2> */}
-          <FullMenuTab items={data.items} />
+          <FullMenuTab items={filteredItems} />
         </div>
       </SectionWrapper>
     </>

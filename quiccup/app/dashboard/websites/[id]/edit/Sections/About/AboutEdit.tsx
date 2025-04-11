@@ -22,6 +22,12 @@ interface AboutData {
     instagram?: string
     youtube?: string
   }
+  sections?: {
+    boldText?: string;
+    paragraph1?: string;
+    paragraph2?: string;
+    sectionImage?: string;
+  }
 }
 
 interface AboutEditProps {
@@ -61,6 +67,15 @@ export function AboutEdit({ data, onChange }: AboutEditProps) {
     }
   }
 
+  const handleSectionChange = (index: number, field: 'title' | 'description' | 'image', value: string) => {
+    const newSections = [...(tempData.sections || [])];
+    if (!newSections[index]) {
+      newSections[index] = { title: '', description: '', image: '' };
+    }
+    newSections[index][field] = value;
+    setTempData({ ...tempData, sections: newSections });
+  };
+
   const saveChanges = () => {
     onChange(tempData)
     setIsModalOpen(false)
@@ -84,13 +99,13 @@ export function AboutEdit({ data, onChange }: AboutEditProps) {
 
       {/* Edit Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-3xl max-h-[85vh] p-0">
+        <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col p-0">
           <DialogHeader className="px-6 pt-6">
             <DialogTitle>Edit About Section</DialogTitle>
           </DialogHeader>
 
-          <div className="overflow-y-auto px-6 pb-6">
-            <div className="space-y-8">
+          <div className="flex-1 overflow-y-auto px-6">
+            <div className="space-y-8 pb-6">
               {/* Title Section */}
               <div>
                 <Label className="text-base">Title</Label>
@@ -243,11 +258,99 @@ export function AboutEdit({ data, onChange }: AboutEditProps) {
                   </div>
                 </div>
               </div>
+
+              {/* Additional Sections */}
+              <div>
+                <h3 className="text-base font-medium mb-4">Additional Sections</h3>
+                <div className="space-y-6 p-4 border rounded-lg">
+                  <div>
+                    <Label>Bold Text Section</Label>
+                    <Textarea
+                      value={tempData.sections?.boldText || ''}
+                      onChange={(e) => setTempData({
+                        ...tempData,
+                        sections: { ...tempData.sections, boldText: e.target.value }
+                      })}
+                      placeholder="Enter bold text section"
+                      className="mt-2"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Section Image</Label>
+                    <div className="mt-2 flex items-center gap-4">
+                      <div className="w-40 aspect-video rounded-lg overflow-hidden bg-gray-100">
+                        {tempData.sections?.sectionImage ? (
+                          <img 
+                            src={tempData.sections.sectionImage} 
+                            alt="Section" 
+                            className="w-full h-full object-cover" 
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ImageIcon className="w-8 h-8 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        id="section-image"
+                        onChange={async (e) => {
+                          if (e.target.files?.[0]) {
+                            const imageUrl = await uploadImage(e.target.files[0], 'about');
+                            setTempData({
+                              ...tempData,
+                              sections: { ...tempData.sections, sectionImage: imageUrl }
+                            });
+                          }
+                        }}
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() => document.getElementById('section-image')?.click()}
+                      >
+                        Upload Image
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Paragraph 1</Label>
+                    <Textarea
+                      value={tempData.sections?.paragraph1 || ''}
+                      onChange={(e) => setTempData({
+                        ...tempData,
+                        sections: { ...tempData.sections, paragraph1: e.target.value }
+                      })}
+                      placeholder="Enter first paragraph"
+                      className="mt-2"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Paragraph 2</Label>
+                    <Textarea
+                      value={tempData.sections?.paragraph2 || ''}
+                      onChange={(e) => setTempData({
+                        ...tempData,
+                        sections: { ...tempData.sections, paragraph2: e.target.value }
+                      })}
+                      placeholder="Enter second paragraph"
+                      className="mt-2"
+                      rows={4}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Footer Actions - Fixed at bottom */}
-          <div className="border-t p-4 flex justify-end gap-2 bg-background">
+          <div className="border-t p-4 flex justify-end gap-2 bg-background mt-auto">
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>

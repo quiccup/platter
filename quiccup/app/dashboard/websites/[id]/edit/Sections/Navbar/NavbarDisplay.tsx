@@ -8,10 +8,20 @@ import { AboutDisplay } from '../About/AboutDisplay'
 interface NavBarProps {
   logo?: string
   companyName: string
-  address?: string
+  address: string
+  onAddressChange?: (address: string) => void
+  isEditing?: boolean
+  aboutData?: any
 }
 
-export function NavbarDisplay({ logo, companyName, address }: NavBarProps) {
+export function NavbarDisplay({ 
+  logo, 
+  companyName, 
+  address, 
+  onAddressChange,
+  isEditing = false,
+  aboutData
+}: NavBarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showStory, setShowStory] = useState(false)
   const { theme } = usePreviewTheme()
@@ -27,51 +37,64 @@ export function NavbarDisplay({ logo, companyName, address }: NavBarProps) {
       {/* Main navigation bar */}
       <div className={`${theme === 'dark' ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100'} border-b transition-colors duration-200 relative z-50`}>
         <div className="container mx-auto flex justify-between items-center py-3 px-4 md:py-4 md:px-6">
-          {/* Left: Menu toggle button */}
-          <button 
-            onClick={toggleMenu} 
-            className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} focus:outline-none`}
-            aria-label="Toggle menu"
-          >
-            <Menu className="w-5 h-5 md:w-6 md:h-6" />
-          </button>
-          
-          {/* Center: Logo & company name */}
-          <div className="flex items-center max-w-[60%]">
-            {logo ? (
-              <img src={logo} alt={companyName} className="h-8 w-auto mr-2 md:h-10 md:mr-3" />
-            ) : (
-              <div className="h-8 w-8 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-base mr-2 md:h-10 md:w-10 md:text-lg md:mr-3 flex-shrink-0">
-                {companyName && companyName.charAt(0)}
-              </div>
-            )}
-            <div className="flex flex-col overflow-hidden">
-              <span className={`font-bold text-base md:text-xl truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          {/* Left: Logo & company name - Simplified */}
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={toggleMenu}
+              className="flex-shrink-0 focus:outline-none transition-transform duration-200 hover:scale-105"
+            >
+              {logo ? (
+                <img 
+                  src={logo} 
+                  alt={companyName} 
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white bg-red-600 flex items-center justify-center text-white font-bold text-lg md:text-xl">
+                  {companyName?.charAt(0)}
+                </div>
+              )}
+            </button>
+
+            <div className="flex flex-col justify-center">
+              <span className={`font-bold text-base md:text-xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                 {companyName}
               </span>
-              <span className={`text-[10px] md:text-xs truncate ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                {address || 'Add your restaurant address'}
-              </span>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => onAddressChange?.(e.target.value)}
+                  placeholder="Enter your address"
+                  className="text-[10px] md:text-xs bg-transparent border-none p-0 focus:outline-none focus:ring-0"
+                />
+              ) : (
+                <span className={`text-[10px] md:text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {address || 'Add your restaurant address'}
+                </span>
+              )}
             </div>
           </div>
           
-          {/* Right: Our Story & Order Online buttons */}
+          {/* Right: Our Story & Order buttons - Show on both mobile and desktop with responsive styling */}
           <div className="flex items-center gap-2">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowStory(true)}
-              className="hidden md:flex items-center px-4 py-2 rounded-full text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-50 transition-colors"
+              className="flex items-center px-3 md:px-4 py-1.5 md:py-2 rounded-full text-sm font-medium border border-orange-500 text-orange-500 hover:bg-orange-50 transition-colors"
             >
-              Our Story
+              <span className="block md:hidden">Story</span>
+              <span className="hidden md:block">Our Story</span>
             </motion.button>
             
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-black text-white px-4 py-2 rounded-full flex items-center text-sm font-medium"
+              className="bg-white text-black px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center text-sm font-medium"
             >
-              Order Online
+              <span className="block md:hidden">Order</span>
+              <span className="hidden md:block">Order Online</span>
             </motion.button>
           </div>
         </div>
@@ -101,19 +124,19 @@ export function NavbarDisplay({ logo, companyName, address }: NavBarProps) {
               >
                 <X className="w-6 h-6" />
               </button>
-              <AboutDisplay />
+              <AboutDisplay data={aboutData} />
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Mobile slide-out menu - improved styling */}
+      {/* Mobile slide-out menu */}
       <div 
         className={`fixed inset-y-0 left-0 z-50 w-64 max-w-[80vw] ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} transform transition-transform duration-300 ease-in-out shadow-xl ${
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="p-4 md:p-6 h-full flex flex-col">
+        <div className="p-4 h-full flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <span className={`font-bold text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               {companyName}
@@ -137,11 +160,22 @@ export function NavbarDisplay({ logo, companyName, address }: NavBarProps) {
             ))}
           </ul>
           
+          {/* Mobile menu footer buttons */}
           <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button className="w-full bg-black text-white py-3 rounded-md flex items-center justify-center gap-2">
-       
-              Order Now
-            </button>
+            <div className="space-y-2">
+              <button 
+                onClick={() => {
+                  setShowStory(true)
+                  setIsMenuOpen(false)
+                }}
+                className="w-full border border-orange-500 text-orange-500 py-2.5 rounded-md flex items-center justify-center gap-2"
+              >
+                Our Story
+              </button>
+              <button className="w-full bg-black text-white py-2.5 rounded-md flex items-center justify-center gap-2">
+                Order Now
+              </button>
+            </div>
           </div>
         </div>
       </div>

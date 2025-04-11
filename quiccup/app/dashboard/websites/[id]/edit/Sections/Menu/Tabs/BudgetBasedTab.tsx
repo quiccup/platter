@@ -31,8 +31,8 @@ interface BudgetBasedTabProps {
 
 export function BudgetBasedTab({ menuItems, websiteId, budgetCombos }: BudgetBasedTabProps) {
   const { theme } = usePreviewTheme()
-  const [inputValue, setInputValue] = useState<string>('30')
-  const [budget, setBudget] = useState<number>(30)
+  const [inputValue, setInputValue] = useState<string>('')
+  const [budget, setBudget] = useState<number>(0)
   const [selectedCombos, setSelectedCombos] = useState<BudgetCombo[]>([])
 
   useEffect(() => {
@@ -59,9 +59,9 @@ export function BudgetBasedTab({ menuItems, websiteId, budgetCombos }: BudgetBas
   }
 
   return (
-    <div className="w-full max-w-xl mx-auto space-y-8">
+    <div className="w-full max-w-xl mx-auto space-y-8 p-7">
       {/* Heading */}
-      <motion.div 
+      {/* <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
@@ -69,10 +69,16 @@ export function BudgetBasedTab({ menuItems, websiteId, budgetCombos }: BudgetBas
         <h2 className="text-4xl font-bold text-black dark:text-white">
           Find the Perfect Combo
         </h2>
-      </motion.div>
+      </motion.div> */}
 
-      {/* Updated Budget input form */}
+      {/* Budget input form */}
       <form onSubmit={handleBudgetSubmit} className="relative">
+        <div className="mb-8 flex">
+          <span className="inline-flex items-center px-4 py-2 bg-yellow-200 text-sm font-semibold text-yellow-900 rounded-2xl">
+            Enter budget to see something cool!
+          </span>
+        </div>
+
         <motion.div 
           className="flex items-center gap-3"
           whileHover={{ scale: 1.01 }}
@@ -84,7 +90,7 @@ export function BudgetBasedTab({ menuItems, websiteId, budgetCombos }: BudgetBas
               type="number"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Enter budget"
+              placeholder="Enter your budget"
               className={`
                 w-full pl-12 pr-4 h-14 text-lg
                 bg-white dark:bg-black
@@ -164,7 +170,7 @@ export function BudgetBasedTab({ menuItems, websiteId, budgetCombos }: BudgetBas
           </motion.div>
         ))}
 
-        {selectedCombos.length === 0 && (
+        {/* {selectedCombos.length === 0 && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -179,7 +185,7 @@ export function BudgetBasedTab({ menuItems, websiteId, budgetCombos }: BudgetBas
               </p>
             </div>
           </motion.div>
-        )}
+        )} */}
       </div>
     </div>
   )

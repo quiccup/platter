@@ -15,6 +15,7 @@ import { AboutDisplay } from './Sections/About/AboutDisplay';
 import { SectionContainer } from './components/SectionContainer';
 import { NavbarDisplay } from "./Sections/Navbar/NavbarDisplay";
 import { SectionWrapper } from './components/SectionWrapper';
+import { Instagram, Mail, Phone, Heart } from 'lucide-react'
 
 interface FinalProductProps {
   data: {
@@ -33,7 +34,24 @@ interface FinalProductProps {
       posts: ChefPost[] 
     }
     about: { 
-      content: string 
+      content?: string
+      title?: string
+      mainImage?: string
+      testimonial?: {
+        quote?: string
+        author?: string
+        authorImage?: string
+      }
+      socials?: {
+        instagram?: string
+        youtube?: string
+      }
+      sections?: {
+        boldText?: string
+        paragraph1?: string
+        paragraph2?: string
+        sectionImage?: string
+      }
     }
     contact: { 
       email: string
@@ -45,6 +63,9 @@ interface FinalProductProps {
     reviews: any[]
     leaderboard: any
     theme?: 'dark' | 'light'
+    social?: {
+      instagram?: string
+    }
   }
   sectionOrder: string[]
 }
@@ -77,7 +98,8 @@ export function FinalProduct({ data, sectionOrder = [] }: FinalProductProps) {
           <NavbarDisplay
             logo={data.navbar?.logo} 
             companyName={data.navbar?.heading || 'Restaurant Name'} 
-            address={data.navbar?.address}
+            address={data.navbar?.address || ''}
+            aboutData={data.about}
           />
         )
       case 'menu':
@@ -89,11 +111,11 @@ export function FinalProduct({ data, sectionOrder = [] }: FinalProductProps) {
         )
       case 'chefs':
         return data.chefs?.posts && data.chefs.posts.length > 0 ? (
-          <ChefsFeedDisplay posts={data.chefs.posts} />
+          <ChefsFeedDisplay posts={data.chefs.posts} logo={data.navbar?.logo} companyName={data.navbar?.heading} />
         ) : null
       case 'leaderboard':
         return data.leaderboard ? (
-          <SectionWrapper darkBackground>
+          <SectionWrapper>
             <LeaderboardDisplay 
               data={data.leaderboard} 
               menuItems={data.menu?.items || []} 
@@ -104,30 +126,7 @@ export function FinalProduct({ data, sectionOrder = [] }: FinalProductProps) {
         return (
           <SectionWrapper darkBackground fullWidth>
             <div className="container mx-auto px-4">
-              <h2 className="text-3xl font-bold mb-8 text-white">Gallery</h2>
               <GallerySection data={ensureGalleryData(data.gallery)} />
-            </div>
-          </SectionWrapper>
-        )
-      // case 'about':
-      //   return (
-      //     <SectionWrapper darkBackground>
-      //       <AboutDisplay data={data.about} />
-      //     </SectionWrapper>
-      //   )
-      case 'contact':
-        return (
-          <SectionWrapper>
-            <div className="max-w-md mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-8">Contact Us</h2>
-              <p className="mb-2">
-                <span className="font-semibold">Email:</span>{' '}
-                {data.contact?.email || 'Add your email'}
-              </p>
-              <p>
-                <span className="font-semibold">Phone:</span>{' '}
-                {data.contact?.phone || 'Add your phone number'}
-              </p>
             </div>
           </SectionWrapper>
         )
@@ -159,6 +158,78 @@ export function FinalProduct({ data, sectionOrder = [] }: FinalProductProps) {
             </div>
           ))}
         </main>
+        <SectionWrapper>
+          <footer className="py-12">
+            <div className="max-w-4xl mx-auto">
+              {/* Main Footer Content */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                {/* Contact Links */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg mb-6">Contact</h3>
+                  <a 
+                    href={`mailto:${data.contact?.email}`} 
+                    className="flex items-center gap-3 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
+                  >
+                    <Mail className="w-5 h-5" />
+                    <span>{data.contact?.email || 'Add your email'}</span>
+                  </a>
+                  <a 
+                    href={`tel:${data.contact?.phone}`}
+                    className="flex items-center gap-3 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
+                  >
+                    <Phone className="w-5 h-5" />
+                    <span>{data.contact?.phone || 'Add your phone number'}</span>
+                  </a>
+                </div>
+
+                {/* Social Media */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg mb-6">Follow Us</h3>
+                  <a 
+                    href={data.social?.instagram || '#'} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
+                  >
+                    <Instagram className="w-5 h-5" />
+                    <span>Instagram</span>
+                  </a>
+                </div>
+
+                {/* Hours or Additional Info */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg mb-6">Hours</h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Monday - Friday<br />
+                    9:00 AM - 10:00 PM
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Saturday - Sunday<br />
+                    10:00 AM - 11:00 PM
+                  </p>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-800 pt-8">
+                {/* Platter.ai Attribution */}
+                <div className="flex items-center justify-center gap-2 text-gray-400 dark:text-gray-500 text-sm">
+                  <span>Made with</span>
+                  <Heart className="w-4 h-4" />
+                  <span>by</span>
+                  <a 
+                    href="https://platter.ai" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
+                  >
+                    platter.ai
+                  </a>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </SectionWrapper>
       </div>
     </>
   )

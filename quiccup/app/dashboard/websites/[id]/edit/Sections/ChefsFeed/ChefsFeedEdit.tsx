@@ -123,11 +123,9 @@ interface PostFormProps {
 function PostForm({ post, defaultAuthor, onSave, onCancel }: PostFormProps) {
   const [formData, setFormData] = useState<Partial<ChefPost>>(
     post || {
-      name: '',
       content: '',
       author: defaultAuthor,
       images: [],
-      tags: [],
     }
   );
 
@@ -138,15 +136,6 @@ function PostForm({ post, defaultAuthor, onSave, onCancel }: PostFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="text-sm font-medium">Title</label>
-        <Input
-          value={formData.name || ''}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="Post title"
-        />
-      </div>
-
       <div>
         <label className="text-sm font-medium">Author</label>
         <Select
@@ -179,18 +168,6 @@ function PostForm({ post, defaultAuthor, onSave, onCancel }: PostFormProps) {
           value={formData.content || ''}
           onChange={(e) => setFormData({ ...formData, content: e.target.value })}
           placeholder="What's cooking in the kitchen?"
-        />
-      </div>
-
-      <div>
-        <label className="text-sm font-medium">Tags</label>
-        <Input
-          value={formData.tags?.join(', ') || ''}
-          onChange={(e) => setFormData({
-            ...formData,
-            tags: e.target.value.split(',').map(tag => tag.trim()).filter(Boolean)
-          })}
-          placeholder="Add tags (comma separated)"
         />
       </div>
 
