@@ -19,39 +19,9 @@ export function ChefsFeedDisplay({ posts = [], logo, companyName }: ChefsFeedDis
   if (!posts || posts.length === 0) return null
   
   const activeStory = activeStoryIndex !== null ? posts[activeStoryIndex] : null
-  
-  const handleNext = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (activeStoryIndex !== null && activeStoryIndex < posts.length - 1) {
-      setActiveStoryIndex(activeStoryIndex + 1)
-    }
-  }
 
-  const handlePrevious = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (activeStoryIndex !== null && activeStoryIndex > 0) {
-      setActiveStoryIndex(activeStoryIndex - 1)
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowRight') handleNext(e as any)
-    if (e.key === 'ArrowLeft') handlePrevious(e as any)
-    if (e.key === 'Escape') setActiveStoryIndex(null)
-  }
-  
-  // Get avatar for a chef (only as fallback if no images)
-  const getChefAvatar = (name: string) => {
-    const firstLetter = name?.charAt(0).toUpperCase() || 'C'
-    return (
-      <div className="flex items-center justify-center bg-gradient-to-br from-orange-400 to-pink-500 text-white text-xl font-bold w-full h-full">
-        {firstLetter}
-      </div>
-    )
-  }
-  
   return (
-    <div className="py-16 bg-[#111827] overflow-hidden">
+    <div className="py-16 overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="relative">
           {/* Scroll buttons remain same */}

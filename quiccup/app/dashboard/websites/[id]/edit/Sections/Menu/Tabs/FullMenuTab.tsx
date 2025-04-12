@@ -26,30 +26,12 @@ export function FullMenuTab({ items }: FullMenuTabProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>(items)
   
-  // Handle search functionality
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredItems(items)
-      return
-    }
-
-    const query = searchQuery.toLowerCase()
-    const filtered = items.filter(item => 
-      item.title.toLowerCase().includes(query) ||
-      item.description?.toLowerCase().includes(query)
-    )
-    setFilteredItems(filtered)
-  }, [searchQuery, items])
-
   // Extract categories from menu items' tags
   useEffect(() => {
     const tagSet = new Set<string>();
-    
-    // Extract all unique tags from items
     items.forEach(item => {
-      const enhancedItem = item as EnhancedMenuItem;
-      if (enhancedItem.tags && Array.isArray(enhancedItem.tags)) {
-        enhancedItem.tags.forEach(tag => {
+      if (item.tags && Array.isArray(item.tags)) {
+        item.tags.forEach(tag => {
           if (tag && tag.trim() !== '') {
             tagSet.add(tag.trim());
           }
@@ -57,25 +39,31 @@ export function FullMenuTab({ items }: FullMenuTabProps) {
       }
     });
     
-    // If no tags are found, add some placeholder categories
-    if (tagSet.size === 0) {
-      tagSet.add('Breakfast');
-      tagSet.add('Lunch');
-      tagSet.add('Dinner');
-    }
-    
     setCategories(['All', ...Array.from(tagSet)]);
   }, [items]);
-  
-  // Filter items by active category tag
-  const filteredItemsByCategory = activeCategory === 'All'
-    ? items
-    : items.filter(item => {
-        const enhancedItem = item as EnhancedMenuItem;
-        return enhancedItem.tags && 
-               Array.isArray(enhancedItem.tags) && 
-               enhancedItem.tags.includes(activeCategory);
-      });
+
+  // Combined filtering for both search and category
+  useEffect(() => {
+    let filtered = [...items];
+
+    // First filter by category
+    if (activeCategory !== 'All') {
+      filtered = filtered.filter(item => 
+        item.tags?.includes(activeCategory)
+      );
+    }
+
+    // Then filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item => 
+        item.title.toLowerCase().includes(query) ||
+        item.description?.toLowerCase().includes(query)
+      );
+    }
+
+    setFilteredItems(filtered);
+  }, [items, activeCategory, searchQuery]);
   
   return (
     <div className="w-full">
@@ -201,7 +189,11 @@ export function FullMenuTab({ items }: FullMenuTabProps) {
       {/* Empty state if no items */}
       {filteredItems.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">No menu items found in this category</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            {searchQuery 
+              ? 'No items found matching your search'
+              : 'No items found in this category'}
+          </p>
         </div>
       )}
     </div>
