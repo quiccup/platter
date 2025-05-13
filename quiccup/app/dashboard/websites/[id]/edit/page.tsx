@@ -11,15 +11,10 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarHeader,
-  SidebarRail,
   SidebarInset,
   SidebarProvider,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarTrigger
+
 } from "@/components/ui/sidebar"
 import { 
   Home,
@@ -37,31 +32,20 @@ import {
 } from 'lucide-react'
 
 import { NavUser } from '@/app/editor/components/nav-user'
-import { NavProjects } from '@/app/editor/components/nav-projects'
 import { Button } from "@/components/ui/button"
 import { PreviewThemeProvider } from '@/components/preview-theme-provider'
 import { PreviewThemeToggle } from '@/components/preview-theme-toggle'
-import { SidebarItem } from '@/components/sidebar-item'
-import { DockMenu } from './components/ui/DockMenu'
-import { EditorSection } from './EditorSection'
-import { sectionsConfig } from './config'
 import { WebsiteData } from './types'
 import { toast } from 'sonner'
-import { MenuEditor } from './Sections/Menu/MenuEdit'
-import { ChefsFeedEdit } from './Sections/ChefsFeed/ChefsFeedEdit'
 
 export default function EditWebsitePage() {
   const params = useParams()
   const router = useRouter()
   const websiteId = params.id as string
-  
-  const [mounted, setMounted] = useState(false)
-  const [activeSection, setActiveSection] = useState<string | null>(null)
+
   const [isMobileView, setIsMobileView] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isPublishing, setIsPublishing] = useState(false)
+
   const [isSaving, setIsSaving] = useState(false)
-  const [data, setData] = useState<any>({})
   const [websiteData, setWebsiteData] = useState<WebsiteData>({
     navbar: {
       heading: '',
@@ -86,7 +70,7 @@ export default function EditWebsitePage() {
       images: []
     },
     reviews: [],
-    theme: 'dark' // Default theme
+    theme: 'light' // Default theme
   })
   const [sidebarWidth, setSidebarWidth] = useState<'collapsed' | 'normal' | 'expanded'>('normal')
   const [sectionOrder, setSectionOrder] = useState([
@@ -115,10 +99,7 @@ export default function EditWebsitePage() {
     { id: 'gallery', label: 'Gallery', icon: Image }
   ]
 
-  // Set mounted on initial client render
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+
 
   // Load initial data - update to also load section_order
   useEffect(() => {
@@ -242,41 +223,6 @@ export default function EditWebsitePage() {
     }
   };
 
-  const handleThemeChange = (newTheme: 'dark' | 'light') => {
-    handleContentChange('theme', newTheme)
-  }
-
-  const publishWebsite = async () => {
-    setIsPublishing(true)
-    
-    try {
-      // Save first
-      await saveAllChanges()
-      
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-      
-      const { error } = await supabase
-        .from('websites')
-        .update({ published: true, published_at: new Date().toISOString() })
-        .eq('id', websiteId)
-        
-      if (error) {
-        console.error('Error publishing website:', error)
-        toast.error('Failed to publish website')
-      } else {
-        toast.success('Website published successfully')
-      }
-    } catch (error) {
-      console.error('Error publishing website:', error)
-      toast.error('Failed to publish website')
-    } finally {
-      setIsPublishing(false)
-    }
-  }
-
   // Show loading state if data hasn't loaded
   if (!websiteData) {
     return (
@@ -287,7 +233,7 @@ export default function EditWebsitePage() {
   }
 
   return (
-    <PreviewThemeProvider initialTheme={websiteData.theme || 'dark'}>
+    <PreviewThemeProvider initialTheme={'light'}>
       <SidebarProvider>
         <div className="grid grid-cols-[auto,1fr] h-screen">
           <div className="relative">

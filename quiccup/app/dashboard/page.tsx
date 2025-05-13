@@ -4,9 +4,15 @@ import { UserButton, useUser } from "@clerk/nextjs"
 import { createClient } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Edit, Settings } from 'lucide-react'
+import { Plus, Edit, Settings, MoreVertical } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { CreateWebsiteModal } from '@/components/create-website-modal'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface Website {
   id: string
@@ -121,12 +127,34 @@ export default function DashboardPage() {
                     <Edit className="h-4 w-4" />
                     <span>Edit Website</span>
                   </Link>
-                  <Link
-                    href={`/dashboard/websites/${website.id}/settings`}
-                    className="px-3 py-2 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors"
-                  >
-                    <Settings className="h-4 w-4" />
-                  </Link>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="px-3 py-2 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors">
+                        <Settings className="h-4 w-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-gray-900 border border-gray-800">
+                      <DropdownMenuItem asChild className="text-gray-200 focus:bg-gray-800 focus:text-white cursor-pointer">
+                        <Link href={`/dashboard/websites/${website.id}/settings?tab=permissions`}>
+                          PERMISSIONS
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="text-gray-200 focus:bg-gray-800 focus:text-white cursor-pointer">
+                        <Link href={`/dashboard/websites/${website.id}/settings?tab=billing`}>
+                          BILLING
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="text-gray-200 focus:bg-gray-800 focus:text-white cursor-pointer">
+                        <Link href={`/dashboard/websites/${website.id}/settings`}>
+                          SETTINGS
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-red-500 focus:bg-gray-800 focus:text-red-500 cursor-pointer">
+                        REMOVE ME
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </motion.div>

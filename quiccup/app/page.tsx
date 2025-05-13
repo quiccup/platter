@@ -3,349 +3,196 @@
 import { SignInButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Check, Github, Twitter, Instagram, ArrowRight, Sparkles, Users, Gift, ChefHat, Brain, PartyPopper, Star, Utensils } from 'lucide-react'
+import { ArrowRight, ChartBar, Users, TrendingUp, ShoppingCart, Clock, ChefHat } from 'lucide-react'
 
 export default function LandingPage() {
   const { isSignedIn, user } = useUser();
   
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
+    <div className="h-screen bg-yellow-400 text-gray-900 flex flex-col overflow-hidden">
       {/* Header */}
       <nav className="container mx-auto px-6 py-6 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center relative">
-            <div className="absolute h-4 w-4 bg-orange-500 rounded-full -translate-x-1 translate-y-1 opacity-80"></div>
-            <div className="absolute h-4 w-4 bg-orange-400 rounded-full translate-x-1 translate-y-1 opacity-80"></div>
-            <div className="absolute h-4 w-4 bg-orange-300 rounded-full translate-y-0 opacity-80"></div>
+          <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center relative shadow-md">
+            <div className="absolute h-4 w-4 bg-orange-500 rounded-full -translate-x-1 translate-y-1"></div>
+            <div className="absolute h-4 w-4 bg-orange-400 rounded-full translate-x-1 translate-y-1"></div>
+            <div className="absolute h-4 w-4 bg-orange-300 rounded-full translate-y-0"></div>
           </div>
-          <div className="text-xl font-medium text-gray-200">platter</div>
+          <div className="text-2xl font-bold text-gray-900">platter</div>
         </div>
         
         {isSignedIn ? (
           <Link 
             href="/dashboard" 
-            className="flex items-center gap-2 px-5 py-2 rounded-full bg-gray-800 text-gray-200 hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-2 px-5 py-3 rounded-full bg-gray-900 text-yellow-400 font-medium hover:bg-gray-800 transition-colors shadow-md"
           >
             Dashboard
             <ArrowRight className="h-4 w-4" />
           </Link>
         ) : (
-          <button className="px-5 py-2 rounded-full bg-gray-800 text-gray-200 hover:bg-gray-700 transition-colors">
-            Download
-          </button>
+          <SignInButton mode="modal">
+            <button className="px-5 py-3 rounded-full bg-gray-900 text-yellow-400 font-medium hover:bg-gray-800 transition-colors shadow-md">
+              Try it free
+            </button>
+          </SignInButton>
         )}
       </nav>
       
-      {/* Navbar Section */}
-      <section className="container mx-auto px-6 flex flex-col items-center justify-center py-24 text-center">
-        <motion.h1 
-          className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          A completely new way to showcase your restaurant online!
-        </motion.h1>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-        >
-          {isSignedIn ? (
-            <Link 
-              href="/dashboard" 
-              className="px-8 py-4 rounded-full bg-gray-800 text-gray-100 font-medium hover:bg-gray-700 transition-colors inline-flex items-center gap-2"
-            >
-              Go to Dashboard
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-          ) : (
-            <SignInButton mode="modal">
-              <button className="px-8 py-4 rounded-full bg-gray-800 text-gray-100 font-medium hover:bg-gray-700 transition-colors">
-                Get started for free
-              </button>
-            </SignInButton>
-          )}
-          <div className="text-gray-500 text-sm mt-3">v1.0.1 • macOS 12+</div>
-        </motion.div>
-      </section>
-      
-      {/* Feature Cards Section */}
-      <section className="container mx-auto px-6 py-24 relative">
-        {/* Background gradient effects */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-1/2 -right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-1/2 -left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
-        </div>
-
-        {/* Floating cards grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
-          {/* AI Recommendations Card */}
+      {/* Main Content */}
+      <div className="flex-1 container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 px-6 items-center">
+        {/* Left Column - Text Content */}
+        <div className="flex flex-col justify-center">
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            whileHover={{ scale: 1.05, rotate: 1 }}
-            className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-xl rounded-2xl p-6 border border-gray-800"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-blue-500/20 rounded-xl">
-                <Brain className="h-6 w-6 text-blue-400" />
-              </div>
-              <h3 className="text-xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                AI Menu Magic
-              </h3>
-            </div>
-            <p className="text-gray-400 mb-4">
-              Smart recommendations that help customers discover their perfect meal combinations
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6 text-gray-900 text-left">
+              Unlock the full potential of your restaurant menu
+            </h1>
+            <p className="text-xl mb-4 text-gray-800 max-w-xl text-left">
+              Get more out of your customers using our intelligent AI food recommendation
             </p>
-            <div className="flex items-center text-sm text-blue-400">
-              <Sparkles className="h-4 w-4 mr-2" />
-              <span>Powered by advanced AI</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-300 text-gray-900 font-medium mb-6 shadow-sm">
+              AI restaurant service !
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <SignInButton mode="modal">
+                <button className="px-8 py-4 rounded-full bg-gray-900 text-yellow-400 font-medium hover:bg-gray-800 transition-colors shadow-md text-lg flex items-center justify-center gap-2">
+                  Get started now
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+              </SignInButton>
+              <Link href="#" className="px-8 py-4 rounded-full bg-white text-gray-900 font-medium hover:bg-gray-100 transition-colors shadow-md text-lg flex items-center justify-center">
+                See demo
+              </Link>
             </div>
           </motion.div>
-
-          {/* Party Orders Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
+          
+          {/* Feature List */}
+          <motion.div 
+            className="grid grid-cols-2 gap-6 mt-12"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            whileHover={{ scale: 1.05, rotate: -1 }}
-            className="bg-gradient-to-br from-orange-500/10 to-red-500/10 backdrop-blur-xl rounded-2xl p-6 border border-gray-800"
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-orange-500/20 rounded-xl">
-                <PartyPopper className="h-6 w-6 text-orange-400" />
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-white rounded-full shadow-sm">
+                <ChartBar className="h-5 w-5 text-yellow-500" />
               </div>
-              <h3 className="text-xl font-semibold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
-                Party Perfect
-              </h3>
-            </div>
-            <p className="text-gray-400 mb-4">
-              Specialized recommendations for group orders and party planning
-            </p>
-            <div className="flex items-center text-sm text-orange-400">
-              <Users className="h-4 w-4 mr-2" />
-              <span>Group ordering made easy</span>
-            </div>
-          </motion.div>
-
-          {/* Rewards Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            whileHover={{ scale: 1.05, rotate: 1 }}
-            className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-xl rounded-2xl p-6 border border-gray-800"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-green-500/20 rounded-xl">
-                <Gift className="h-6 w-6 text-green-400" />
+              <div>
+                <h3 className="font-semibold text-gray-900">Analytics Dashboard</h3>
+                <p className="text-sm text-gray-800">Track customer behavior in real-time</p>
               </div>
-              <h3 className="text-xl font-semibold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                Play & Win
-              </h3>
             </div>
-            <p className="text-gray-400 mb-4">
-              Engage customers with interactive games and reward their loyalty
-            </p>
-            <div className="flex items-center text-sm text-green-400">
-              <Star className="h-4 w-4 mr-2" />
-              <span>Gamified rewards system</span>
-            </div>
-          </motion.div>
-
-          {/* Chef Stories Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            whileHover={{ scale: 1.05, rotate: -1 }}
-            className="bg-gradient-to-br from-yellow-500/10 to-amber-500/10 backdrop-blur-xl rounded-2xl p-6 border border-gray-800"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-yellow-500/20 rounded-xl">
-                <ChefHat className="h-6 w-6 text-yellow-400" />
+            
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-white rounded-full shadow-sm">
+                <Users className="h-5 w-5 text-yellow-500" />
               </div>
-              <h3 className="text-xl font-semibold bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
-                Chef Stories
-              </h3>
+              <div>
+                <h3 className="font-semibold text-gray-900">Customer Profiles</h3>
+                <p className="text-sm text-gray-800">Build detailed preference history</p>
+              </div>
             </div>
-            <p className="text-gray-400 mb-4">
-              Share your culinary journey and connect with your customers personally
-            </p>
-            <div className="flex items-center text-sm text-yellow-400">
-              <Utensils className="h-4 w-4 mr-2" />
-              <span>Behind the scenes</span>
+            
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-white rounded-full shadow-sm">
+                <ShoppingCart className="h-5 w-5 text-yellow-500" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Smart Upselling</h3>
+                <p className="text-sm text-gray-800">AI-powered item recommendations</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-white rounded-full shadow-sm">
+                <Clock className="h-5 w-5 text-yellow-500" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Peak Hour Insights</h3>
+                <p className="text-sm text-gray-800">Optimize staffing & inventory</p>
+              </div>
             </div>
           </motion.div>
         </div>
-
-        {/* Central feature highlight */}
+        
+        {/* Right Column - Image */}
         <motion.div
+          className="flex justify-center items-center"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.8 }}
-          className="mt-16 text-center"
+          transition={{ duration: 0.7 }}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-800/50 backdrop-blur-xl border border-gray-700 mb-8">
-            <Sparkles className="h-4 w-4 text-blue-400" />
-            <span className="text-sm text-gray-300">Powered by advanced AI technology</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-orange-400 bg-clip-text text-transparent mb-6">
-            Everything you need to succeed online
-          </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            From AI-powered recommendations to engaging customer experiences, 
-            Platter provides all the tools you need to take your restaurant to the next level.
-          </p>
-        </motion.div>
-      </section>
-      
-      {/* App Screenshot */}
-      <motion.section 
-        className="container mx-auto px-6 mb-24 flex justify-center"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.6 }}
-      >
-        <div className="relative bg-gray-900 rounded-2xl overflow-hidden shadow-2xl max-w-5xl w-full">
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-30"></div>
-          <div className="relative z-10 flex">
-            {/* Left sidebar */}
-            <div className="w-48 border-r border-gray-800 p-4">
-              <div className="mb-6">
-                <div className="flex items-center gap-2 p-2 rounded hover:bg-gray-800 text-sm">
-                  <div className="h-5 w-5 rounded-full bg-gray-700"></div>
-                  <span>Today</span>
+          <div className="relative w-full max-w-lg">
+            <div className="absolute -inset-0.5 bg-white rounded-2xl blur-md"></div>
+            <div className="relative bg-white p-6 rounded-2xl shadow-xl">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-2">
+                  <ChefHat className="h-5 w-5 text-yellow-500" />
+                  <h3 className="font-bold text-gray-900">Customer Preferences and Trends</h3>
                 </div>
-              </div>
-              <div className="mb-6">
-                <div className="flex items-center gap-2 p-2 rounded hover:bg-gray-800 text-sm">
-                  <div className="h-5 w-5 rounded-full bg-gray-700"></div>
-                  <span>Menu</span>
-                </div>
-              </div>
-              <div className="mb-6">
-                <div className="flex items-center gap-2 p-2 rounded bg-gray-800 text-sm">
-                  <div className="h-5 w-5 rounded-full bg-gray-700"></div>
-                  <span>Feed</span>
-                </div>
-              </div>
-              <div className="mb-6">
-                <div className="flex items-center gap-2 p-2 rounded hover:bg-gray-800 text-sm">
-                  <div className="h-5 w-5 rounded-full bg-gray-700"></div>
-                  <span>Gallery</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Content area */}
-            <div className="flex-1 p-6">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-xl font-medium">Upcoming</h2>
-                <div className="h-8 w-8 rounded-full bg-gray-800 flex items-center justify-center">
-                  <span className="text-lg">+</span>
+                <div className="flex gap-1">
+                  <div className="h-3 w-3 bg-red-500 rounded-full"></div>
+                  <div className="h-3 w-3 bg-yellow-500 rounded-full"></div>
+                  <div className="h-3 w-3 bg-green-500 rounded-full"></div>
                 </div>
               </div>
               
-              {/* Task items */}
               <div className="space-y-4">
-                {[1, 2, 3, 4].map((item) => (
-                  <div key={item} className="flex items-center gap-3 p-3 border border-gray-800 rounded-lg">
-                    <div className="h-6 w-6 rounded-full border border-gray-600"></div>
-                    <span className="flex-1">Update lunch menu items</span>
-                    <div className="flex gap-2">
-                      <div className="h-6 w-6 rounded bg-gray-800"></div>
-                      <div className="h-6 w-6 rounded bg-gray-800"></div>
+                <div className="bg-gray-100 p-4 rounded-lg">
+                  <h4 className="font-semibold text-sm text-gray-900 mb-2">Most Ordered Items</h4>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs text-gray-700">Spicy Tuna Roll</span>
+                    <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full w-4/5 bg-yellow-500 rounded-full"></div>
                     </div>
                   </div>
-                ))}
-              </div>
-              
-              <div className="mt-8 flex items-center text-gray-600 text-sm">
-                <div className="h-4 w-4 rounded-full border border-gray-700 mr-2"></div>
-                <span>COMPLETED 1/5</span>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs text-gray-700">Chicken Parmesan</span>
+                    <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full w-3/5 bg-yellow-500 rounded-full"></div>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-700">Caesar Salad</span>
+                    <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full w-2/5 bg-yellow-500 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-100 p-4 rounded-lg">
+                  <h4 className="font-semibold text-sm text-gray-900 mb-2">Customer Traffic by Hour</h4>
+                  <div className="flex items-end h-20 gap-1">
+                    {[25, 35, 45, 75, 95, 65, 55, 85, 75, 45, 35, 25].map((height, i) => (
+                      <div 
+                        key={i} 
+                        style={{ height: `${height}%` }} 
+                        className="flex-1 bg-yellow-500 rounded-t"
+                      ></div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between mt-2 text-xs text-gray-500">
+                    <span>11am</span>
+                    <span>9pm</span>
+                  </div>
+                </div>
+                
+                <button className="w-full p-3 rounded-lg bg-yellow-500 text-gray-900 font-medium hover:bg-yellow-400 transition-colors">
+                  View Detailed Report
+                </button>
               </div>
             </div>
           </div>
-        </div>
-      </motion.section>
+        </motion.div>
+      </div>
       
       {/* Footer */}
-      <footer className="mt-auto border-t border-gray-800">
-        <div className="container mx-auto px-6 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-              <div className="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center relative">
-            <div className="absolute h-4 w-4 bg-orange-500 rounded-full -translate-x-1 translate-y-1 opacity-80"></div>
-            <div className="absolute h-4 w-4 bg-orange-400 rounded-full translate-x-1 translate-y-1 opacity-80"></div>
-            <div className="absolute h-4 w-4 bg-orange-300 rounded-full translate-y-0 opacity-80"></div>
-          </div>
-                <span className="font-medium">platter</span>
-              </div>
-              <p className="text-gray-400 text-sm">
-                The simplest way to manage your restaurant's online presence.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="font-medium mb-4">Product</h3>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link href="#" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Documentation</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Roadmap</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-medium mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link href="#" className="hover:text-white transition-colors">About</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Careers</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Contact</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-medium mb-4">Legal</h3>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link href="#" className="hover:text-white transition-colors">Terms</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Privacy</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Cookies</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Licenses</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="flex flex-col md:flex-row justify-between items-center mt-16 pt-8 border-t border-gray-800">
-            <p className="text-gray-400 text-sm">© 2023 Platter. All rights reserved.</p>
-            <div className="flex space-x-4 mt-4 md:mt-0">
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Github className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Instagram className="h-5 w-5" />
-              </Link>
-            </div>
-          </div>
-        </div>
+      <footer className="container mx-auto px-6 py-4 text-center text-gray-800 text-sm">
+        <p>© 2024 platter. Helping restaurants increase sales through intelligent website design.</p>
       </footer>
-    </div>
-  )
-}
-
-function FeatureCard({ title, description }: { title: string, description: string }) {
-  return (
-    <div className="p-6 border rounded-lg shadow-sm hover:shadow-md transition-shadow">
-      <h3 className="text-xl font-semibold mb-3">{title}</h3>
-      <p className="text-gray-600">{description}</p>
     </div>
   )
 } 
