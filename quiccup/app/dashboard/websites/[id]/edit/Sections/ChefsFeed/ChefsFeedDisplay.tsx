@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { ChefPost } from '../../types'
-import { usePreviewTheme } from '@/components/preview-theme-provider'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -12,8 +11,8 @@ interface ChefsFeedDisplayProps {
   companyName?: string
 }
 
-export function ChefsFeedDisplay({ posts = [], logo, companyName }: ChefsFeedDisplayProps) {
-  const { theme } = usePreviewTheme()
+export function ChefsFeedDisplay({ posts = [] , logo, companyName }: ChefsFeedDisplayProps) {
+  console.log({posts})
   const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null)
   
   if (!posts || posts.length === 0) return null
@@ -48,7 +47,7 @@ export function ChefsFeedDisplay({ posts = [], logo, companyName }: ChefsFeedDis
           {/* Scrollable Container */}
           <div 
             id="stories-container"
-            className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory scrollbar-hide"
+            className="flex overflow-x-auto gap-6 pb-4 px-2 scrollbar-hide"
             style={{
               scrollBehavior: 'smooth',
               WebkitOverflowScrolling: 'touch',
@@ -57,55 +56,40 @@ export function ChefsFeedDisplay({ posts = [], logo, companyName }: ChefsFeedDis
             }}
           >
             {posts.map((post, index) => (
-              <motion.div
-                key={post.id}
-                className="flex-none w-[300px] snap-center"
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                <div 
+              <div key={post.id} className="flex flex-col items-center w-20">
+                <button
                   onClick={() => setActiveStoryIndex(index)}
-                  className="relative aspect-[3/4] rounded-xl overflow-hidden cursor-pointer group"
+                  className="focus:outline-none"
+                  style={{ background: 'none', border: 'none', padding: 0 }}
                 >
-                  {/* Gradient overlay - lighter now since we have less text */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/0 z-10" />
-                  
-                  {/* Image */}
-                  <div className="absolute inset-0 bg-gray-900">
-                    {post.images && post.images.length > 0 ? (
-                      <img 
-                        src={post.images[0]} 
-                        alt="Story"
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl">
-                        🍽️
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Author Name Overlay with Logo */}
-                  <div className="absolute bottom-0 left-0 right-0 p-4 z-30">
-                    <div className="flex items-center gap-2">
-                      {logo ? (
-                        <img 
-                          src={logo} 
-                          alt={companyName}
-                          className="w-6 h-6 rounded-full object-cover border border-white"
+                  <div
+                    className="p-1 rounded-full"
+                    style={{
+                      background: 'conic-gradient(from 210deg at 50% 50%, #f58529, #dd2a7b, #8134af, #515bd4, #f58529)',
+                      width: 64,
+                      height: 64,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <div className="bg-white rounded-full p-1" style={{ width: 56, height: 56 }}>
+                      {post.images && post.images.length > 0 ? (
+                        <img
+                          src={post.images[0]}
+                          alt={post.author}
+                          className="rounded-full object-cover w-full h-full"
                         />
                       ) : (
-                        <div className="w-6 h-6 rounded-full border border-white bg-red-600 flex items-center justify-center text-white text-xs font-bold">
-                          {companyName?.charAt(0)}
+                        <div className="w-full h-full flex items-center justify-center text-2xl bg-gray-200 rounded-full">
+                          🍽️
                         </div>
                       )}
-                      <h3 className="text-white font-semibold text-lg">
-                        {post.author}
-                      </h3>
                     </div>
                   </div>
-                </div>
-              </motion.div>
+                </button>
+                <div className="mt-2 w-16 text-xs text-center truncate">{post.author}</div>
+              </div>
             ))}
           </div>
         </div>

@@ -8,7 +8,6 @@ export interface MenuItem {
 
 export interface ChefPost {
   id: string
-  name: string
   content: string
   author: string
   customAuthor?: string

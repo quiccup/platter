@@ -10,12 +10,9 @@ interface FullMenuTabProps {
   items: MenuItem[]
 }
 
-// Updated MenuItem type definition to include the missing properties and tags
+// Enhanced version of the MenuItem type with additional properties
 interface EnhancedMenuItem extends MenuItem {
-  title: string;
-  tags?: string[];
   calories?: number;
-  description?: string;
 }
 
 export function FullMenuTab({ items }: FullMenuTabProps) {
@@ -66,7 +63,7 @@ export function FullMenuTab({ items }: FullMenuTabProps) {
   }, [items, activeCategory, searchQuery]);
   
   return (
-    <div className="w-full">
+    <div className="w-full p-6">
       {/* Updated Category Filter Pills container */}
       <div className="relative h-12 mb-8 overflow-hidden">
         <AnimatePresence>
@@ -138,7 +135,7 @@ export function FullMenuTab({ items }: FullMenuTabProps) {
       </div>
       
       {/* Menu items grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filteredItems.map((item, index) => {
           // Type assertion to access the properties safely
           const enhancedItem = item as EnhancedMenuItem;
@@ -164,7 +161,7 @@ export function FullMenuTab({ items }: FullMenuTabProps) {
               </div>
               
               {/* Content section */}
-              <div className="p-3">
+              <div className="p-4">
                 <div className="flex justify-between items-center">
                   <h3 className="font-bold text-gray-900 dark:text-white text-base">
                     {enhancedItem.title}
