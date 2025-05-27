@@ -4,23 +4,16 @@ import { SignInButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, ArrowDown } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import Logo from '@/components/Logo'
 
 export default function LandingPage() {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn } = useUser();
   
   return (
     <div className="min-h-screen bg-black text-white flex flex-col overflow-hidden font-montserrat relative">
       {/* Header */}
       <nav className="container mx-auto px-6 py-6 flex justify-between items-center z-10 relative">
-        <div className="flex items-center gap-1.5">
-          <div className="h-10 w-10 flex items-center justify-center relative">
-            <div className="absolute h-5 w-5 bg-white rounded-full border border-black -translate-x-1 translate-y-1"></div>
-            <div className="absolute h-5 w-5 bg-white rounded-full border border-black translate-x-1 translate-y-1"></div>
-            <div className="absolute h-5 w-5 bg-white rounded-full border border-black translate-y-0"></div>
-          </div>
-          <div className="text-2xl font-bold text-white">platter</div>
-        </div>
+        <Logo />
         
         {isSignedIn ? (
           <Link 
@@ -65,7 +58,7 @@ export default function LandingPage() {
             
             <button onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })} 
               className="px-8 py-4 rounded-full bg-transparent border border-gray-600 text-white font-medium hover:bg-gray-900 transition-colors text-lg flex items-center justify-center gap-2">
-              Learn more
+              Demo it here
               <ArrowDown className="h-5 w-5" />
             </button>
           </div>
