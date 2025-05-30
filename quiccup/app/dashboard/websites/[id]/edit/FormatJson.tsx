@@ -60,13 +60,19 @@ const FormatJson = ({ content, menuItems = [] }: { content: string; menuItems: M
                 }
               }
               return (
-                <div key={idx} className="space-y-4">
-                  <div className="font-bold text-lg">{rec.summary}</div>
-                  <div className="relative">
-                    <div className="flex overflow-x-auto pb-4 space-x-4 scrollbar-hide">
+                <div key={idx} className="space-y-4 w-full overflow-x-hidden">
+                  <div className="flex items-center justify-between">
+                    <div className="font-bold text-lg">{rec.summary}</div>
+                    <div className="bg-green-100 px-3 py-1 rounded-full">
+                      <span className="text-sm font-bold text-green-600">Total - ${rec.totalPrice.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="relative w-full">
+                    <div className="relative flex overflow-x-auto pb-4 space-x-4 scrollbar-hide">
                       {recMenuItems.map((item, index) => (
                         <div key={index} className="flex-shrink-0 w-64">
-                          <div className="rounded-lg overflow-hidden shadow-md">
+                          <div className="rounded-3xl overflow-hidden shadow-md">
                             {item.image ? (
                               <img
                                 src={item.image}
@@ -91,12 +97,6 @@ const FormatJson = ({ content, menuItems = [] }: { content: string; menuItems: M
                           </div>
                         </div>
                       ))}
-                    </div>
-                  </div>
-                  <div className="bg-gray-100 p-4 rounded-lg">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold">Total</span>
-                      <span className="font-bold text-green-600">${rec.totalPrice.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

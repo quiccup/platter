@@ -71,3 +71,63 @@ export function Marquee({
     </div>
   );
 }
+
+export function GalleryMarquee({ images }: { images: string[] }) {
+  if (!images || images.length === 0) return null;
+
+  // Split images into 4 columns as evenly as possible
+  const colCount = 4;
+  const columns: string[][] = Array.from({ length: colCount }, () => []);
+  images.forEach((img, i) => {
+    columns[i % colCount].push(img);
+  });
+
+  // Repeat images if there are not enough to fill the column
+  const repeatImages = (arr: string[], min: number) => {
+    const out = [];
+    while (out.length < min) {
+      out.push(...arr);
+    }
+    return out.slice(0, min);
+  };
+
+  const minImagesPerCol = 8; // Adjust as needed for your Marquee height
+
+  return (
+    <div className="relative bg-transparent flex h-96 w-full flex-row items-center justify-center gap-4 overflow-hidden [perspective:300px]">
+      <div
+        className="flex flex-row items-center gap-4"
+        style={{
+          transform:
+            "translateX(-100px) translateY(0px) translateZ(-100px) rotateX(20deg) rotateY(-10deg) rotateZ(20deg)",
+        }}
+      >
+        {columns.map((col, idx) => (
+          <Marquee
+            key={idx}
+            pauseOnHover
+            vertical
+            reverse={idx % 2 === 1}
+            className="[--duration:20s] flex flex-col gap-4"
+          >
+            {repeatImages(col, minImagesPerCol).map((img, i) => (
+              <img
+                key={img + i}
+                src={img}
+                alt={`Gallery image ${i + 1}`}
+                className="block w-40 h-40 object-cover rounded-2xl border border-gray-200 shadow"
+                style={{ background: "#f3f3f3" }}
+              />
+            ))}
+          </Marquee>
+        ))}
+      </div>
+
+      {/* Fade overlays */}
+      {/* <div className="pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-background"></div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background"></div>
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background"></div>
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-background"></div> */}
+    </div>
+  );
+}

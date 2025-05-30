@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import Logo from '@/components/Logo'
 
 interface Website {
   id: string
@@ -58,12 +59,11 @@ export default function DashboardPage() {
       {/* Header/Nav */}
       <header className="border-b border-gray-800">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center">
-              <span className="text-orange-500 font-bold">P</span>
-            </div>
-            <span className="text-xl font-medium text-gray-200">Platter</span>
+          <div className="flex items-center gap-2">
+            <Logo className="h-10 w-10" />
+            <div className="text-white text-2xl font-semibold">platter</div>
           </div>
+        
           
           <div className="flex items-center gap-8">
             <nav className="hidden md:flex gap-8">
@@ -94,7 +94,7 @@ export default function DashboardPage() {
             </div>
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors"
+              className="flex items-center justify-center gap-2 bg-transparent border border-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-900 transition-colors"
             >
               <Plus className="h-5 w-5" />
               <span>Create New Website</span>

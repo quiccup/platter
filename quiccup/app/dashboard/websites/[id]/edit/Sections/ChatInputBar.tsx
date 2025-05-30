@@ -26,7 +26,6 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   onSuggestionClick,
   inputRef,
   isLoading,
-  className = '',
 }) => {
   // Responsive suggestion bubble classes
   const suggestionBubbleClass =
@@ -35,10 +34,9 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
     'sm:px-2 sm:py-0.5 sm:text-[11px]';
 
   return (
-    <form className={`w-full max-w-md md:max-w-xl lg:max-w-2xl mx-auto sticky bottom-0 z-20 ${className}`} onSubmit={onSubmit}>
-      {/* Recent Queries - smaller, closer, and clickable */}
-      <div className="w-full mb-2 flex flex-col items-end">
-        <div className="text-gray-400 text-xs mb-1">Recent queries</div>
+    <form className='w-full px-[300px] mx-auto sticky bottom-0 z-20' onSubmit={onSubmit}>
+      {/* Suggestions Section*/}
+      <div className="w-full mb-2 flex flex-col items-start">
         <div className="flex gap-2 overflow-x-auto no-scrollbar w-full md:w-auto px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
           {suggestions.map((q, i) => (
             <button
@@ -54,16 +52,17 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
           ))}
         </div>
       </div>
-      <div className="flex items-center bg-gray-900 rounded-full px-4 py-2">
+      {/* Input Section*/}
+      <div className="flex border border-gray-400 items-center bg-white rounded-full px-4 py-2">
         <input
           ref={inputRef}
           value={input}
           onChange={e => setInput(e.target.value)}
-          placeholder="Type your message..."
-          className="pl-4 flex-1 bg-transparent text-white placeholder:text-gray-400 placeholder:text-xs md:placeholder:text-base border-0 focus:ring-0 focus:outline-none text-base md:text-lg min-h-[2.5rem] md:min-h-[3rem]"
+          placeholder="Welcome! What would you like to order?"
+          className="pl-4 flex-1 bg-transparent text-gray-900 placeholder:text-gray-400 placeholder:text-xs md:placeholder:text-base border-0 focus:ring-0 focus:outline-none text-base md:text-lg min-h-[2.5rem] md:min-h-[3rem]"
         />
-        <button type="submit" className="ml-2 bg-white rounded-full p-2 flex items-center justify-center" disabled={isLoading}>
-          <Logo className="h-8 w-8" />
+        <button type="submit" className="ml-2 bg-black h-10 w-10 rounded-full p-2 flex items-center justify-center" disabled={isLoading}>
+          <Logo className="h-2 w-2" color="white" border="black" />
         </button>
       </div>
     </form>

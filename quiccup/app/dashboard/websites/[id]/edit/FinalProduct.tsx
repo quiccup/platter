@@ -1,10 +1,12 @@
 'use client'
-import { Mic, MessageSquare, Image as ImageIcon } from 'lucide-react'
+import { Image as ImageIcon, Mic, Drumstick, MessageSquare, Drum } from 'lucide-react'
 import Logo from '@/components/Logo'
 import { useState, useRef, useEffect } from 'react'
 import FormatJson from './FormatJson'
 import { GalleryMarquee } from './Sections/Gallery/GalleryMarquee'
 import { ChatInputBar } from './Sections/ChatInputBar'
+import AnimatedLogoSpinner from '@/components/AnimatedLogoSpinner'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -31,16 +33,19 @@ const FEATURE_CARDS = [
 
 const RECENT_QUERIES = [
   {
-    icon: <MessageSquare className="w-5 h-5 text-purple-600" />, bg: 'bg-purple-100',
+    icon: <span className="inline-block w-2 h-2 rounded-full bg-green-600" />,
+    bg: 'bg-purple-100',
     text: 'What can I get under 25 dollars?'
   },
   {
-    icon: <Mic className="w-5 h-5 text-blue-600" />, bg: 'bg-blue-100',
+    icon: <span className="inline-block w-2 h-2 rounded-full bg-blue-500" />,
+    bg: 'bg-blue-100',
     text: 'What can I get for a table of 5?'
   },
   {
-    icon: <MessageSquare className="w-5 h-5 text-purple-600" />, bg: 'bg-purple-100',
-    text: 'What\'s special here?'
+    icon: <span className="inline-block w-2 h-2 rounded-full bg-pink-500" />,
+    bg: 'bg-pink-100',
+    text: "What's special here?"
   }
 ]
 
@@ -121,111 +126,91 @@ export function FinalProduct({ data }: any) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col w-full p-3">
-      {!isChatView ? (
-        <>
-        {/* Top Section */}
-        <div className="flex flex-col items-center justify-between">
-        <div className="w-full mx-auto flex flex-col items-center flex-1">
-          <div className="text-md font-bold text-center mb-2 mt-4 md:mt-8">
-            Welcome to {data.navbar?.heading || 'our restaurant'}. How may I help you?
-          </div>
-
-          {data?.gallery?.images?.length > 0 && (
-        <div className="w-full bg-transparent mx-auto mb-6">
-          <GalleryMarquee images={data.gallery.images} captions={data.gallery.captions} />
-        </div>
-      )}
-        
-    
-          {/* Chat History */}
-          <div className="w-full max-w-md md:max-w-xl lg:max-w-2xl mx-auto flex flex-col flex-1 overflow-y-auto" ref={chatContainerRef} style={{ minHeight: 200, maxHeight: 320 }}>
-            {messages.map((message, index) => (
-              <div key={index} className={`flex ${message.role === 'assistant' ? 'justify-start' : 'justify-end'} mb-2`}>
-                <div className={message.role === 'assistant'
-                  ? 'bg-white border border-gray-200 text-black px-4 py-3 rounded-2xl shadow-sm max-w-[80%] text-base'
-                  : 'bg-blue-100 text-black px-4 py-3 rounded-2xl max-w-[80%] text-base'}
-                  style={{
-                    borderBottomRightRadius: message.role === 'user' ? '0.5rem' : '1.5rem',
-                    borderBottomLeftRadius: message.role === 'assistant' ? '0.5rem' : '1.5rem',
-                  }}
-                >
-                  {message.role === 'assistant'
-                    ? <FormatJson content={message.content} menuItems={data.menu?.items || []} />
-                    : message.content}
+    <div className="min-h-screen p-20 flex flex-col w-full">
+      <AnimatePresence mode="wait">
+        {!isChatView ? (
+          <motion.div
+            key="centered-chatbot"
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="flex flex-col items-center justify-center min-h-[60vh] w-full"
+          >
+            {data?.gallery?.images?.length > 0 && (
+              <div className="w-full bg-transparent mx-auto mb-6 p-5">
+                <GalleryMarquee images={data.gallery.images}  />
+              </div>
+            )}
+            <ChatInputBar
+              input={input}
+              setInput={setInput}
+              onSubmit={handleSubmit}
+              suggestions={RECENT_QUERIES}
+              onSuggestionClick={handleSuggestionClick}
+              inputRef={inputRef}
+              isLoading={isLoading}
+            />
+          </motion.div>
+        ) : (
+          <>
+          <motion.div
+            key="bottom-chatbot"
+            initial={{ y: 0, opacity: 1 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="h-[calc(100vh-210px)] flex flex-col bg-white justify-between border border-rounded-l border-gray-200 text-white rounded-lg overflow-hidden"
+            style={{ position: 'relative', zIndex: 10 }}
+          >
+            {/* Chat History */}
+            <div className="flex-1 overflow-y-auto px-[100px] py-6" ref={chatContainerRef}>
+              {messages.map((message, index) => (
+                <div key={index} className="flex w-full">
+                  <div className={`flex ${message.role === 'assistant' ? 'justify-start w-full' : 'justify-end'} mb-2`}>
+                    <div className={message.role === 'assistant'
+                      ? 'text-black px-4 py-3 text-base w-full overflow-x-hidden'
+                      : 'bg-blue-100 text-black px-4 py-3 rounded-2xl max-w-[80%] text-base'}
+                      style={{
+                        borderBottomRightRadius: message.role === 'user' ? '0.5rem' : '1.5rem',
+                        borderBottomLeftRadius: message.role === 'assistant' ? '0.5rem' : '1.5rem',
+                      }}
+                    >
+                      {message.role === 'assistant'
+                        ? <FormatJson content={message.content} menuItems={data.menu?.items || []} />
+                        : message.content}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex items-center gap-2 text-sm text-gray-500 ml-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500" />
-                Thinking...
-              </div>
-            )}
-            {errorMessage && (
-              <div className="text-red-600 text-sm p-2 rounded bg-red-100">
-                {errorMessage}
-              </div>
-            )}
-          </div>
-        </div>
-        {/* Bottom Search Input */}
-        <ChatInputBar
-          input={input}
-          setInput={setInput}
-          onSubmit={handleSubmit}
-          suggestions={RECENT_QUERIES}
-          onSuggestionClick={handleSuggestionClick}
-          inputRef={inputRef}
-          isLoading={isLoading}
-        />
-        </div>
-        </>
-      ) : (
-        <div className="h-screen grid grid-rows-[auto_1fr_auto] bg-gray-100 justify-betwee">
-          {/* Chat History */}
-          <div className="w-full max-w-md md:max-w-xl lg:max-w-2xl mx-auto flex flex-col flex-1 overflow-y-auto px-2 py-4" ref={chatContainerRef}>
-            {messages.map((message, index) => (
-              <div key={index} className={`flex ${message.role === 'assistant' ? 'justify-start' : 'justify-end'} mb-2`}>
-                <div className={message.role === 'assistant'
-                  ? 'bg-white border border-gray-200 text-black px-4 py-3 rounded-2xl shadow-sm max-w-[80%] text-base'
-                  : 'bg-blue-100 text-black px-4 py-3 rounded-2xl max-w-[80%] text-base'}
-                  style={{
-                    borderBottomRightRadius: message.role === 'user' ? '0.5rem' : '1.5rem',
-                    borderBottomLeftRadius: message.role === 'assistant' ? '0.5rem' : '1.5rem',
-                  }}
-                >
-                  {message.role === 'assistant'
-                    ? <FormatJson content={message.content} menuItems={data.menu?.items || []} />
-                    : message.content}
+              ))}
+              {isLoading && (
+                <div className="flex items-center gap-2 text-sm text-gray-500 ml-2">
+                  <AnimatedLogoSpinner />
                 </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex items-center gap-2 text-sm text-gray-500 ml-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500" />
-                Thinking...
-              </div>
-            )}
-            {errorMessage && (
-              <div className="text-red-600 text-sm p-2 rounded bg-red-100">
-                {errorMessage}
-              </div>
-            )}
+              )}
+              {errorMessage && (
+                <div className="text-red-600 text-sm p-2 rounded bg-red-100">
+                  {errorMessage}
+                </div>
+              )}
+            </div>
+            {/* Bottom Search Input */}
+          
+          </motion.div>
+            <div className="px-[100px] py-6 bg-white border-t border-gray-100">
+            <ChatInputBar
+              input={input}
+              setInput={setInput}
+              onSubmit={handleSubmit}
+              suggestions={RECENT_QUERIES}
+              onSuggestionClick={handleSuggestionClick}
+              inputRef={inputRef}
+              isLoading={isLoading}
+            />
           </div>
-          {/* Bottom Search Input */}
-          <ChatInputBar
-            input={input}
-            setInput={setInput}
-            onSubmit={handleSubmit}
-            suggestions={RECENT_QUERIES}
-            onSuggestionClick={handleSuggestionClick}
-            inputRef={inputRef}
-            isLoading={isLoading}
-            className="px-4 pb-4"
-          />
-        </div>
-      )}
+          </>
+        )}
+      </AnimatePresence>
     </div>
   )
 } 
