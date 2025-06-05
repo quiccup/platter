@@ -302,7 +302,7 @@ export default function EditWebsitePage() {
               </div>
               
               <div className="flex items-center gap-2">
-                <PreviewThemeToggle />
+                {/* <PreviewThemeToggle /> */}
                 
                 {/* Add Save Button */}
                 <Button 

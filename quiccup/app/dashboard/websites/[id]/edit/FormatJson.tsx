@@ -1,115 +1,93 @@
-import React from 'react';
-import { Utensils } from 'lucide-react';
+import { useState } from 'react'
 
 interface MenuItem {
-  id?: string;
-  title: string;
-  price: number;
-  description?: string;
-  category?: string;
-  image?: string;
+  id: string
+  name: string
+  price: string | number
+  image?: string
 }
 
-interface ApiMenuItem {
-  title: string;
-  price: number;
-  category: string;
-  description?: string;
+interface PreferenceOption {
+  id: string
+  name: string
 }
 
-interface ApiRecommendation {
-  summary: string;
-  item1?: ApiMenuItem;
-  item2?: ApiMenuItem;
-  item3?: ApiMenuItem;
-  item4?: ApiMenuItem;
-  item5?: ApiMenuItem;
-  totalPrice: number;
+interface ChatResponse {
+  type: 'menu' | 'keywords'
+  question: string
+  options: (MenuItem | PreferenceOption)[]
 }
 
-const FormatJson = ({ content, menuItems = [] }: { content: string; menuItems: MenuItem[] }) => {
+const isMenuItem = (option: any): option is MenuItem => {
+  return 'price' in option
+}
+
+const MenuItemCard = ({ item }: { item: MenuItem }) => (
+  <div className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-gray-200 transition-colors">
+    {item.image && (
+      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+        <img 
+          src={item.image} 
+          alt={item.name}
+          className="w-full h-full object-cover"
+        />
+      </div>
+    )}
+    <div className="flex-1 min-w-0">
+      <h3 className="font-medium text-gray-900 truncate">{item.name}</h3>
+      <p className="text-orange-500 font-medium">
+        ${typeof item.price === 'string' ? parseFloat(item.price).toFixed(2) : item.price.toFixed(2)}
+      </p>
+    </div>
+  </div>
+)
+
+const KeywordOption = ({ option }: { option: PreferenceOption }) => (
+  <div className="px-4 py-2 rounded-full text-sm bg-gray-50 text-gray-800 border border-gray-200 hover:bg-gray-100 transition-colors">
+    {option.name}
+  </div>
+)
+
+const FormatJson = ({ content, menuItems = [] }: { content: string; menuItems: any[] }) => {
   try {
-    const jsonMatch = content.match(/\[\s*\{[\s\S]*\}\s*\]/);
-    if (jsonMatch) {
-      const jsonStr = jsonMatch[0];
-      const recommendations = JSON.parse(jsonStr) as ApiRecommendation[];
-      if (recommendations && recommendations.length > 0) {
-        const introText = content.substring(0, content.indexOf(jsonMatch[0])).trim();
+    let cleanContent = content.trim()
+    
+    if (cleanContent.startsWith('{')) {
+      try {
+        const parsedContent = JSON.parse(cleanContent) as ChatResponse
+        
         return (
-          <div className="w-full space-y-4">
-            {introText && (
-              <div className="text-gray-800 text-base mb-4">{introText}</div>
+          <div className="space-y-4">
+            <p className="text-gray-800 font-medium mb-4">{parsedContent.question}</p>
+            {parsedContent.type === 'menu' ? (
+              <div className="grid gap-3 grid-cols-1">
+                {parsedContent.options.map((option) => (
+                  <div key={option.id}>
+                    {isMenuItem(option) && <MenuItemCard item={option} />}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {parsedContent.options.map((option) => (
+                  <div key={option.id}>
+                    {!isMenuItem(option) && <KeywordOption option={option} />}
+                  </div>
+                ))}
+              </div>
             )}
-            {recommendations.map((rec, idx) => {
-              // Only collect items for this recommendation
-              const recMenuItems: MenuItem[] = [];
-              for (let i = 1; i <= 5; i++) {
-                const itemKey = `item${i}` as keyof ApiRecommendation;
-                const item = rec[itemKey] as ApiMenuItem | undefined;
-                if (item) {
-                  const menuItem = menuItems.find(
-                    (mi: any) => mi.title.toLowerCase() === item.title.toLowerCase()
-                  );
-                  recMenuItems.push({
-                    title: item.title,
-                    price: item.price,
-                    description: item.description || '',
-                    category: item.category,
-                    image: menuItem?.image
-                  });
-                }
-              }
-              return (
-                <div key={idx} className="space-y-4 w-full overflow-x-hidden">
-                  <div className="flex items-center justify-between">
-                    <div className="font-bold text-lg">{rec.summary}</div>
-                    <div className="bg-green-100 px-3 py-1 rounded-full">
-                      <span className="text-sm font-bold text-green-600">Total - ${rec.totalPrice.toFixed(2)}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="relative w-full">
-                    <div className="relative flex overflow-x-auto pb-4 space-x-4 scrollbar-hide">
-                      {recMenuItems.map((item, index) => (
-                        <div key={index} className="flex-shrink-0 w-64">
-                          <div className="rounded-3xl overflow-hidden shadow-md">
-                            {item.image ? (
-                              <img
-                                src={item.image}
-                                alt={item.title}
-                                className="w-full h-40 object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-40 bg-[#c27c36] flex items-center justify-center">
-                                <Utensils className="h-8 w-8 text-white" />
-                              </div>
-                            )}
-                            <div className="p-3 bg-white">
-                              <div className="flex justify-between items-start">
-                                <h3 className="font-bold text-base">{item.title}</h3>
-                                <span className="text-green-600 font-bold">${item.price.toFixed(2)}</span>
-                              </div>
-                              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                                {item.description || 'No description available'}
-                              </p>
-                              <div className="text-xs text-gray-500 mt-1">{item.category}</div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
-        );
+        )
+      } catch (e) {
+        return <div>{content}</div>
       }
     }
-  } catch (e) {
-    console.error('Error parsing JSON response:', e);
+    
+    return <div>{content}</div>
+  } catch (error) {
+    console.error('Error formatting JSON:', error)
+    return <div>{content}</div>
   }
-  return <div className="whitespace-pre-wrap text-base">{content}</div>;
-};
+}
 
-export default FormatJson; 
+export default FormatJson 

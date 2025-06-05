@@ -5,6 +5,7 @@ interface Suggestion {
   icon: React.ReactNode;
   bg: string;
   text: string;
+  subtext?: string;
 }
 
 interface ChatInputBarProps {
@@ -16,6 +17,9 @@ interface ChatInputBarProps {
   inputRef: React.RefObject<HTMLInputElement | null>;
   isLoading?: boolean;
   className?: string;
+  disabled?: boolean;
+  data: any;
+  isChatView: boolean;
 }
 
 export const ChatInputBar: React.FC<ChatInputBarProps> = ({
@@ -26,45 +30,58 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   onSuggestionClick,
   inputRef,
   isLoading,
+  disabled,
+  data,
+  isChatView
 }) => {
-  // Responsive suggestion bubble classes
-  const suggestionBubbleClass =
-    'flex items-center gap-1 rounded-full px-3 py-1 text-xs bg-white border border-gray-200 shadow-sm hover:bg-gray-100 transition whitespace-nowrap ' +
-    'md:px-3 md:py-1 md:text-xs ' +
-    'sm:px-2 sm:py-0.5 sm:text-[11px]';
-
   return (
-    <form className='w-full px-[300px] mx-auto sticky bottom-0 z-20' onSubmit={onSubmit}>
-      {/* Suggestions Section*/}
-      <div className="w-full mb-2 flex flex-col items-start">
-        <div className="flex gap-2 overflow-x-auto no-scrollbar w-full md:w-auto px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {suggestions.map((q, i) => (
-            <button
-              key={i}
-              type="button"
-              className={suggestionBubbleClass + ' ' + q.bg}
-              onClick={() => onSuggestionClick(q.text)}
-              style={{ minHeight: 24 }}
-            >
-              <span className="w-4 h-4 flex items-center justify-center">{q.icon}</span>
-              <span className="text-xs text-black whitespace-nowrap">{q.text}</span>
-            </button>
-          ))}
+    <div className='w-full max-w-[700px] mx-auto'>
+      {!isChatView && (
+        <>
+        <div className="flex flex-col items-start justify-start w-full mb-8">
+          <h1 className="text-[25px] font-bold text-orange-500">Welcome to {data?.navbar?.heading}</h1>
+          <p className="text-[25px] font-light text-gray-500">What can I get you started with?</p>
         </div>
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        {suggestions.map((suggestion, i) => (
+          <button
+            key={i}
+            onClick={() => onSuggestionClick(suggestion.text)}
+            className="bg-white rounded-2xl p-3 text-left shadow-sm hover:bg-white-500 hover:border-gray-900 transition-all duration-200 border border-gray-300 group"
+          >
+            <h3 className="text-md font-semibold text-gray-900 mb-1 group-hover:text-black transition-colors">{suggestion.text}</h3>
+            {suggestion.subtext && (
+              <p className="text-grey-500 group-hover:text-black transition-colors">{suggestion.subtext}</p>
+            )}
+          </button>
+        ))}
       </div>
-      {/* Input Section*/}
-      <div className="flex border border-gray-400 items-center bg-white rounded-full px-4 py-2">
-        <input
-          ref={inputRef}
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="Welcome! What would you like to order?"
-          className="pl-4 flex-1 bg-transparent text-gray-900 placeholder:text-gray-400 placeholder:text-xs md:placeholder:text-base border-0 focus:ring-0 focus:outline-none text-base md:text-lg min-h-[2.5rem] md:min-h-[3rem]"
-        />
-        <button type="submit" className="ml-2 bg-black h-10 w-10 rounded-full p-2 flex items-center justify-center" disabled={isLoading}>
-          <Logo className="h-2 w-2" color="white" border="black" />
-        </button>
-      </div>
-    </form>
+      </>
+      )}
+  
+
+      {/* Input Section */}
+      <form onSubmit={onSubmit} className="relative">
+        <div className="relative">
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            placeholder="How can I help you?"
+            className="w-full bg-gray-50 border border-gray-300 rounded-2xl py-6 px-8 text-gray-600 placeholder:text-gray-500 focus:ring-0 focus:outline-none text-lg"
+            disabled={disabled}
+          />
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            <button
+              type="submit"
+              className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+              disabled={isLoading || disabled}
+            >
+            <Logo className="w-6 h-6" color="black" border="white" />
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }; 
