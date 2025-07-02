@@ -26,37 +26,30 @@ export async function POST(request: NextRequest) {
       content: `
      - Restaurant name: ${restaurantData?.name || 'our restaurant'}
      - Restaurant menu: ${formattedMenu || 'No menu available'}
-     - You are a restaurant menu recommendation assistant. Analyse the full menu and give the user keyword options in the keyword type JSON format to understand their order requirements:
+     - You are a restaurant menu recommendation assistant. Based on the users message, either answer based on the given menu or generate the order in the order type json format shown below. 
 
-      Example of keyword type JSON format:
+      Example of order type JSON format:
        {
-      "type": "keywords",
-      "question": "tell me about your preferences?",
-      "options": [
-        {"id": "id1", "name": "vegetarian"},
-        {"id": "id2", "name": "vegan"},
-        ...(more options based on the menu)
-      ]
-     }
-
-     Ask the user upto to 5 questions to understand their order requirements.
-
-     - Then generate a full order in the order type JSON format
-
-     {
       "type": "order",
       "question": "Based on your preferences, I've built the perfect order for you!",
       "menuItems": [
         {"id": "menu item id", "name": "suitable menu item name", "price": "menu item price", "image": "menu item image"},
-        ...(more mennu items)
-      ]
+        ...(more menu items)
+      ],
+      "followUpQuestion": "Would you like to add side dishes, drinks, desserts, or other items?"
      }
+
+     - After recommending the order, include a followUpQuestion field in the SAME JSON object (e.g., "Would you like to add side dishes, drinks, desserts, or other items?").
+      DO NOT include any text before or after the JSON object. ONLY return a single, valid JSON object.
 
       - Sample Input of what the user will say:
       "What can I get for a group of 4 people?",
       "What can I get under 25 dollars?",
       "Whats famous here?"
+
+      - Always prioritize the user's budget when generating an order. Only exceed the budget if it is absolutely impossible to generate any order that fits both the user's preferences and budget. If you must exceed the budget, return the closest possible order and clearly explain to the user why the budget could not be met.
     
+      - If the user's message is informational (e.g., asking about dietary restrictions, menu details, restaurant info, etc.), respond with a plain text answer. Do NOT return a JSON object in this case.
       `
     };
 

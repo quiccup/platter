@@ -41,3 +41,6 @@ yarn-error.log*
 .envrc
 next-env.d.ts
 .DS_Store
+
+# clerk configuration (can include secrets)
+/.clerk/

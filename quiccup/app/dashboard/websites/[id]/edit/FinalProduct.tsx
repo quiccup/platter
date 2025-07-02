@@ -30,6 +30,7 @@ interface ChatResponse {
     image?: string
   }[]
   totalPrice?: string | number
+  followUpQuestion?: string
 }
 
 interface OrderItem {
@@ -86,7 +87,7 @@ const RECENT_QUERIES = [
 
 const ChatOrderSummary = ({ content }: { content: string }) => {
   try {
-    const parsedContent = JSON.parse(content) as ChatResponse
+    const parsedContent = JSON.parse(content) as ChatResponse & { followUpQuestion?: string };
     if (parsedContent.type === 'order' && parsedContent.menuItems) {
       const orderItems = parsedContent.menuItems.map(item => ({
         id: item.id,
@@ -94,11 +95,7 @@ const ChatOrderSummary = ({ content }: { content: string }) => {
         price: typeof item.price === 'string' ? parseFloat(item.price.replace('$', '')) : item.price,
         quantity: 1
       }))
-      
-      const total = typeof parsedContent.totalPrice === 'string' 
-        ? parseFloat(parsedContent.totalPrice.replace('$', ''))
-        : orderItems.reduce((sum, item) => sum + item.price, 0)
-
+      const total = orderItems.reduce((sum, item) => sum + item.price, 0)
       return (
         <div className="space-y-4">
           <p className="text-gray-800 font-medium mb-4">{parsedContent.question}</p>
@@ -118,6 +115,9 @@ const ChatOrderSummary = ({ content }: { content: string }) => {
               </div>
             </div>
           </div>
+          {parsedContent.followUpQuestion && (
+            <div className="mt-4 text-blue-700 font-medium">{parsedContent.followUpQuestion}</div>
+          )}
         </div>
       )
     }
