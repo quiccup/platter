@@ -1,26 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from "openai";
+import { NextRequest, NextResponse } from 'next/server'
+import OpenAI from 'openai'
 
 // Initialize the OpenAI client with X.AI configuration
 const client = new OpenAI({
   apiKey: process.env.XAI_API_KEY,
-  baseURL: "https://api.x.ai/v1",
-});
+  baseURL: 'https://api.x.ai/v1',
+})
 
 export async function POST(request: NextRequest) {
   try {
-    const { messages, restaurantData , order} = await request.json();
+    const { messages, restaurantData } = await request.json()
 
-    console.log(restaurantData.menu);
+    const formattedMenu = Array.isArray(restaurantData?.menu)
+      ? restaurantData.menu
+          .map(
+            (item: any, index: number) =>
+              `${index + 1}. ${item.title} - $${item.price} (${item.category}): ${item.description || ''}`
+          )
+          .join('\n')
+      : ''
 
-    // Format menu items for better readability
-    const formattedMenu = Array.isArray(restaurantData?.menu) 
-      ? restaurantData.menu.map((item: any, index: number) => 
-          `${index + 1}. ${item.title} - $${item.price} (${item.category}): ${item.description || ''}`
-        ).join('\n')
-      : '';
-
-    // Add a system prompt for restaurant context using the developer message pattern
     const systemPrompt = {
       role: 'system',
       content: `
@@ -50,26 +49,19 @@ export async function POST(request: NextRequest) {
       - Always prioritize the user's budget when generating an order. Only exceed the budget if it is absolutely impossible to generate any order that fits both the user's preferences and budget. If you must exceed the budget, return the closest possible order and clearly explain to the user why the budget could not be met.
     
       - If the user's message is informational (e.g., asking about dietary restrictions, menu details, restaurant info, etc.), respond with a plain text answer. Do NOT return a JSON object in this case.
-      `
-    };
-
-    try {
-      const completion = await client.chat.completions.create({
-        model: "grok-3-latest",
-        messages: [systemPrompt, ...messages],
-        temperature: 0,
-      });
-
-      const response = completion.choices[0]?.message?.content || "Sorry, I couldn't process your request.";
-      return NextResponse.json({ response });
-      
-    } catch (apiError) {
-      console.error('X.AI API error:', apiError);
-      return NextResponse.json({ error: 'Failed to get response from X.AI' }, { status: 500 });
+      `,
     }
 
+    const completion = await client.chat.completions.create({
+      model: 'grok-3-latest',
+      messages: [systemPrompt, ...messages],
+      temperature: 0,
+    })
+
+    const response = completion.choices[0]?.message?.content || "Sorry, I couldn't process your request."
+    return NextResponse.json({ response })
   } catch (err) {
-    console.error('Error in chat API:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error in chat API:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-} 
+}
