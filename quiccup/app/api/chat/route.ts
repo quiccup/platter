@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
-// Initialize the OpenAI client with X.AI configuration
 const client = new OpenAI({
-  apiKey: process.env.XAI_API_KEY,
-  baseURL: 'https://api.x.ai/v1',
+  apiKey: process.env.OPENAI_API_KEY,
 })
 
 export async function POST(request: NextRequest) {
@@ -23,22 +21,22 @@ export async function POST(request: NextRequest) {
     const systemPrompt = {
       role: 'system',
       content: `
-     - Restaurant name: ${restaurantData?.name || 'our restaurant'}
-     - Restaurant menu: ${formattedMenu || 'No menu available'}
-     - You are a restaurant menu recommendation assistant. Based on the users message, either answer based on the given menu or generate the order in the order type json format shown below. 
+      - Restaurant name: ${restaurantData?.name || 'our restaurant'}
+      - Restaurant menu: ${formattedMenu || 'No menu available'}
+      - You are a restaurant menu recommendation assistant. Based on the users message, either answer based on the given menu or generate the order in the order type json format shown below. 
 
       Example of order type JSON format:
-       {
-      "type": "order",
-      "question": "Based on your preferences, I've built the perfect order for you!",
-      "menuItems": [
-        {"id": "menu item id", "name": "suitable menu item name", "price": "menu item price", "image": "menu item image"},
-        ...(more menu items)
-      ],
-      "followUpQuestion": "Would you like to add side dishes, drinks, desserts, or other items?"
-     }
+      {
+        "type": "order",
+        "question": "Based on your preferences, I've built the perfect order for you!",
+        "menuItems": [
+          {"id": "menu item id", "name": "suitable menu item name", "price": "menu item price", "image": "menu item image"},
+          ...(more menu items)
+        ],
+        "followUpQuestion": "Would you like to add side dishes, drinks, desserts, or other items?"
+      }
 
-     - After recommending the order, include a followUpQuestion field in the SAME JSON object (e.g., "Would you like to add side dishes, drinks, desserts, or other items?").
+      - After recommending the order, include a followUpQuestion field in the SAME JSON object (e.g., "Would you like to add side dishes, drinks, desserts, or other items?").
       DO NOT include any text before or after the JSON object. ONLY return a single, valid JSON object.
 
       - Sample Input of what the user will say:
@@ -47,13 +45,13 @@ export async function POST(request: NextRequest) {
       "Whats famous here?"
 
       - Always prioritize the user's budget when generating an order. Only exceed the budget if it is absolutely impossible to generate any order that fits both the user's preferences and budget. If you must exceed the budget, return the closest possible order and clearly explain to the user why the budget could not be met.
-    
+      
       - If the user's message is informational (e.g., asking about dietary restrictions, menu details, restaurant info, etc.), respond with a plain text answer. Do NOT return a JSON object in this case.
       `,
     }
 
     const completion = await client.chat.completions.create({
-      model: 'grok-3-latest',
+      model: 'gpt-3.5-turbo', // Use OpenAI's model
       messages: [systemPrompt, ...messages],
       temperature: 0,
     })
