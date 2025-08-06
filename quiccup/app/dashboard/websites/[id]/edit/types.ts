@@ -1,9 +1,16 @@
 export interface MenuItem {
+  id: string
   title: string
   description: string
   price: string
   image?: string
   tags: string[]
+}
+
+export interface RestaurantInfo {
+  id: string
+  restaurantName: string
+  menuItems: MenuItem[]
 }
 
 export interface ChefPost {

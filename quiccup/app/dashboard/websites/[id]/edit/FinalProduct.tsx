@@ -6,6 +6,7 @@ import AnimatedLogoSpinner from '@/components/AnimatedLogoSpinner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChatInputBar } from './Sections/ChatInputBar'
 import { OrderSummary } from './components/OrderSummary'
+import { RestaurantInfo } from './types'
 
 const RECENT_QUERIES = [
   {
@@ -63,11 +64,15 @@ interface State {
   orderTotal: number
 }
 
+export interface MenuItem {
+  id: string
+  name: string
+  price: number | string
+  image?: string
+}
+
 interface FinalProductProps {
-  data: {
-    navbar?: { heading?: string; address?: string }
-    menu?: { items?: Array<{ id: string; name: string; price: string|number; image?: string }> }
-  }
+  data: RestaurantInfo
 }
 
 type Action =
@@ -149,9 +154,9 @@ function useChat(data: data) {
         body: JSON.stringify({
           messages: history,
           restaurantData: {
-            name: data.navbar?.heading ?? 'Our Restaurant',
-            address: data.navbar?.address,
-            menu: data.menu?.items ?? [],
+            id: data.id,
+            name: data.name,
+            menu: data.menuItems
           },
         }),
       })
@@ -260,12 +265,12 @@ const MessageBubble = ({ message }: { message: Message }) => {
 }
 
 /** --- FinalProduct (glues it all together) --- **/
-export function FinalProduct({ data }: { data: FinalProductProps }) {
+export function FinalProduct({ data }: { data: RestaurantInfo }) {
+  const { state, dispatch, sendMessage } = useChat(data)
   const chatContainerRef = useRef<HTMLDivElement>(null)
-   const inputRef = useRef<HTMLInputElement>(null)
-  const chat = useChat(data)
-  const { state, sendMessage, dispatch } = chat
+  const inputRef = useRef<HTMLInputElement>(null)
 
+  // Memoize your submit handler
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()

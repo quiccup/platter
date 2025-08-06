@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -8,15 +14,45 @@ const client = new OpenAI({
 export async function POST(request: NextRequest) {
   try {
     const { messages, restaurantData } = await request.json()
+    console.log('restaurantData.menu:', restaurantData.menu)
+    const userMessage = messages[messages.length-1]?.content || ''
+    let items = []
 
-    const formattedMenu = Array.isArray(restaurantData?.menu)
-      ? restaurantData.menu
-          .map(
-            (item: any, index: number) =>
-              `${index + 1}. ${item.title} - $${item.price} (${item.category}): ${item.description || ''}`
-          )
-          .join('\n')
-      : ''
+    try {
+      const response = await client.embeddings.create({
+        model: 'text-embedding-3-small',
+        input: userMessage
+      })
+
+      const queryEmbedding = response.data[0].embedding
+
+      const { data, error } = await supabase.rpc('match_menu_items', {
+        query_embedding: queryEmbedding,
+        match_count: 10,
+        restaurant_id: restaurantData.id
+      })
+
+      if (error) {
+        console.error('❌ Supabase RPC error:', {
+        message: error.message,
+        code: error.code,
+        details: error.details
+        })
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+
+      items = data
+
+    } catch (err) {
+      console.error('🔥 Unexpected error in /api/chat:', err)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+    
+    const formattedMenu = items
+    .map((item: any, index: number) =>
+      `${index + 1}. ${item.name} - $${item.price}: ${item.description}`
+    )
+    .join('\n')
 
     const systemPrompt = {
       role: 'system',

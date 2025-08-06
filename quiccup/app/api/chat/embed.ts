@@ -20,12 +20,12 @@ async function embed(menuItems: any[]) {
 
   for (const menuItem of menuItems) {
     const inputText = `
-id: ${menuItem.id}
-name: ${menuItem.name}
-price: ${menuItem.price}
-description: ${menuItem.description}
-tags: ${menuItem.tags.join(', ')}
-    `.trim()
+        id: ${menuItem.id}
+        name: ${menuItem.name}
+        price: ${menuItem.price}
+        description: ${menuItem.description}
+        tags: ${menuItem.tags.join(', ')}
+        `.trim()
 
     texts.push(inputText)
 
