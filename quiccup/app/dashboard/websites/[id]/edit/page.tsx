@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { debounce } from 'lodash'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/utils/supabase/client'
 import { SectionEditor } from './SectionEditor'
 import { FinalProduct } from './FinalProduct'
 import { 
@@ -53,8 +53,7 @@ export default function EditWebsitePage() {
       buttons: [],
     },
     menu: {
-      items: [],
-      budgetCombos: {}
+      items: []
     },
     chefs: {
       posts: []
@@ -67,10 +66,10 @@ export default function EditWebsitePage() {
       phone: ''
     },
     gallery: {
-      images: []
+      images: [],
+      captions: {}
     },
-    reviews: [],
-    theme: 'light' // Default theme
+    reviews: []
   })
   const [sidebarWidth, setSidebarWidth] = useState<'collapsed' | 'normal' | 'expanded'>('normal')
   const [sectionOrder, setSectionOrder] = useState([
@@ -99,32 +98,57 @@ export default function EditWebsitePage() {
     { id: 'gallery', label: 'Gallery', icon: Image }
   ]
 
-
-
-  // Load initial data - update to also load section_order
+  // Load initial data - update to also load section_order and menu items from dedicated table
   useEffect(() => {
     async function loadWebsiteData() {
       try {
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        )
+        const supabase = createClient()
         
-        const { data, error } = await supabase
+        // Load website data
+        const { data: websiteData, error: websiteError } = await supabase
           .from('websites')
           .select('content, section_order')
           .eq('id', websiteId)
           .single()
 
-        if (error) throw error
+        if (websiteError) throw websiteError
 
-        if (data?.content) {
-          setWebsiteData(data.content)
+        // Load menu items from dedicated table
+        const { data: menuItems, error: menuError } = await supabase
+          .from('menu_items')
+          .select('*')
+          .eq('website_id', websiteId)
+
+        if (menuError) throw menuError
+
+        // Transform menu items to match the expected format
+        const transformedMenuItems = menuItems?.map(item => ({
+          title: item.name,
+          description: item.description || '',
+          price: item.price?.toString() || '',
+          image: item.image_url || '',
+          tags: [], // We'll need to add tags support later if needed
+        })) || []
+
+        if (websiteData?.content) {
+          setWebsiteData({
+            ...websiteData.content,
+            menu: {
+              items: transformedMenuItems
+            }
+          })
+        } else {
+          setWebsiteData(prev => ({
+            ...prev,
+            menu: {
+              items: transformedMenuItems
+            }
+          }))
         }
         
         // Set section order if it exists in database
-        if (data?.section_order) {
-          setSectionOrder(data.section_order)
+        if (websiteData?.section_order) {
+          setSectionOrder(websiteData.section_order)
         }
       } catch (error) {
         console.error('Error loading website data:', error)
@@ -136,7 +160,7 @@ export default function EditWebsitePage() {
   }, [websiteId])
 
   // Update handleContentChange to better handle nested updates
-  const handleContentChange = (sectionId: keyof WebsiteData, newData: any) => {
+  const handleContentChange = (sectionId: string, newData: any) => {
     console.log('Content change:', sectionId, newData); // Debug log
     
     setWebsiteData(prev => {
@@ -146,14 +170,23 @@ export default function EditWebsitePage() {
       if (sectionId === 'chefs') {
         // Special handling for chefs section
         updatedSection = {
-          ...prev[sectionId],
+          ...prev[sectionId as keyof WebsiteData],
           ...newData,
-          posts: Array.isArray(newData.posts) ? newData.posts : prev[sectionId].posts
+          posts: Array.isArray(newData.posts) ? newData.posts : (prev[sectionId as keyof WebsiteData] as any)?.posts
         };
+      } else if (sectionId === 'menu') {
+        // Special handling for menu section - save to dedicated table
+        updatedSection = {
+          ...prev[sectionId as keyof WebsiteData],
+          ...newData
+        };
+        
+        // Save menu items to dedicated table
+        saveMenuItemsToDatabase(newData.items || []);
       } else {
         // General handling for other sections
         updatedSection = typeof newData === 'object' && newData !== null
-          ? { ...prev[sectionId], ...newData }
+          ? { ...(prev[sectionId as keyof WebsiteData] as any), ...newData }
           : newData;
       }
 
@@ -168,6 +201,42 @@ export default function EditWebsitePage() {
     });
   };
 
+  // Function to save menu items to the dedicated table
+  const saveMenuItemsToDatabase = async (menuItems: any[]) => {
+    try {
+      const supabase = createClient()
+
+      // First, delete existing menu items for this website
+      await supabase
+        .from('menu_items')
+        .delete()
+        .eq('website_id', websiteId)
+
+      // Then insert new menu items
+      if (menuItems.length > 0) {
+        const itemsToInsert = menuItems.map(item => ({
+          website_id: websiteId,
+          name: item.title,
+          price: parseFloat(item.price) || 0,
+          description: item.description || '',
+          image_url: item.image || '',
+        }))
+
+        const { error: insertError } = await supabase
+          .from('menu_items')
+          .insert(itemsToInsert)
+
+        if (insertError) {
+          console.error('Error saving menu items:', insertError)
+          toast.error('Failed to save menu items')
+        }
+      }
+    } catch (error) {
+      console.error('Error saving menu items:', error)
+      toast.error('Failed to save menu items')
+    }
+  }
+
   // Update section order handler
   const handleSectionOrderChange = (newOrder: string[]) => {
     setSectionOrder(newOrder)
@@ -180,10 +249,7 @@ export default function EditWebsitePage() {
     console.log('Saving website data:', websiteData); // Debug log
     
     try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      const supabase = createClient();
       
       // First, validate the data structure
       if (!websiteData.chefs?.posts) {
@@ -192,10 +258,14 @@ export default function EditWebsitePage() {
         return;
       }
 
+      // Save website content (excluding menu items which are saved separately)
       const { data, error } = await supabase
         .from('websites')
         .update({ 
-          content: websiteData,
+          content: {
+            ...websiteData,
+            menu: { items: [] } // Don't save menu items in content
+          },
           section_order: sectionOrder 
         })
         .eq('id', websiteId)
@@ -284,7 +354,7 @@ export default function EditWebsitePage() {
                   </div>
 
                   <SidebarFooter className="px-4 py-4 mt-auto">
-                    <NavUser collapsed={isCollapsed} />
+                    <NavUser />
                   </SidebarFooter>
                 </div>
               </SidebarContent>
@@ -355,8 +425,22 @@ export default function EditWebsitePage() {
                 isMobileView ? 'max-w-md mx-auto shadow-xl' : ''}`}
               >
                 <FinalProduct 
-                  data={websiteData}
-                  sectionOrder={sectionOrder}
+                  data={{
+                    data: {
+                      navbar: {
+                        heading: websiteData.navbar.heading,
+                        address: websiteData.navbar.subheading
+                      },
+                      menu: {
+                        items: websiteData.menu.items.map((item, index) => ({
+                          id: index.toString(),
+                          name: item.title,
+                          price: item.price,
+                          image: item.image
+                        }))
+                      }
+                    }
+                  }}
                 />
               </div>    
             </main>
