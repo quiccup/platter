@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
+import { debounce } from 'lodash'
+import { createClient } from '@/utils/supabase/client'
 import { SectionEditor } from './SectionEditor'
 import { FinalProduct } from './FinalProduct'
 import { NavUser } from '@/app/editor/components/nav-user'
@@ -20,96 +21,126 @@ import {
   DevicePhoneMobileIcon,
   ArrowsPointingOutIcon,
 } from '@heroicons/react/24/outline'
+import {
+  Trophy, Home, UtensilsCrossed, ChefHat, Info, PhoneCall, Star,
+  Image, Smartphone, Expand
+} from "lucide-react"
 import { WebsiteData, MenuItem, RestaurantInfo } from './types'
 import { toast } from 'sonner'
 
-// Default data structures
-const DEFAULT_WEBSITE_DATA: WebsiteData = {
-  navbar: { heading: '', subheading: '', buttons: [] },
-  menu: { items: [] },
-  chefs: { posts: [] },
-  about: { content: '' },
-  contact: { email: '', phone: '' },
-  gallery: { images: [] },
-  reviews: [],
-  theme: 'light'
-}
+export default function EditWebsitePage() {
+  const params = useParams()
+  const router = useRouter()
+  const websiteId = params.id as string
 
-const DEFAULT_SECTION_ORDER = [
-  'navbar',
-  'leaderboard',
-  'menu',
-  'chefs',
-  'gallery',
-  'about',
-  'contact',
-  'reviews'
-]
+  const [isMobileView, setIsMobileView] = useState(false)
 
-export const useWebsiteData = (websiteId: string) => {
-  const [websiteData, setWebsiteData] = useState<WebsiteData | null>(null)
-  const [restaurantInfo, setRestaurantInfo] = useState<RestaurantInfo | null>(null)
-  const [sectionOrder, setSectionOrder] = useState<string[]>([])
   const [isSaving, setIsSaving] = useState(false)
+  const [websiteData, setWebsiteData] = useState<WebsiteData>({
+    navbar: {
+      heading: '',
+      subheading: '',
+      buttons: [],
+    },
+    menu: {
+      items: []
+    },
+    chefs: {
+      posts: []
+    },
+    about: {
+      content: ''
+    },
+    contact: {
+      email: '',
+      phone: ''
+    },
+    gallery: {
+      images: [],
+      captions: {}
+    },
+    reviews: [],
+})
+  const [sidebarWidth, setSidebarWidth] = useState<'collapsed' | 'normal' | 'expanded'>('normal')
+  const [sectionOrder, setSectionOrder] = useState([
+    'navbar',
+    'leaderboard',
+    'menu',
+    'chefs',
+    'gallery',
+    'about',
+    'contact',
+    'reviews'
+  ])
+  const [isCollapsed, setIsCollapsed] = useState(false)
+
+  // Track if there are unsaved changes
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
-  // Load initial data
+  const sections = [
+    { id: 'leaderboard', label: 'Top Dishes', icon: Trophy },
+    { id: 'navbar', label: 'Navbar', icon: Home },
+    { id: 'menu', label: 'Menu', icon: UtensilsCrossed },
+    { id: 'chefs', label: 'Chefs Feed', icon: ChefHat },
+    { id: 'about', label: 'About Us', icon: Info },
+    { id: 'contact', label: 'Contact', icon: PhoneCall },
+    { id: 'reviews', label: 'Reviews', icon: Star },
+    { id: 'gallery', label: 'Gallery', icon: Image }
+  ]
+
+  // Load initial data - update to also load section_order and menu items from dedicated table
   useEffect(() => {
     const loadWebsiteData = async () => {
       try {
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        )
+        const supabase = createClient()
         
-        const { data, error } = await supabase
+        // Load website data
+        const { data: websiteData, error: websiteError } = await supabase
           .from('websites')
           .select('content, section_order')
           .eq('id', websiteId)
           .single()
 
-        if (error) throw error
-        
-        // retrieve menu data
-        const { data: menu, error: menuError } = await supabase
-          .from('websites')
-          .select(`
-            id,
-            name,
-            menu_items (
-              id,
-              name,
-              price,
-              description,
-              menu_item_tag_map (
-                tags(name)
-              )
-            )
-          `)
-          .eq('id', websiteId)
-          .single()
+        if (websiteError) throw websiteError
+
+        // Load menu items from dedicated table
+        const { data: menuItems, error: menuError } = await supabase
+          .from('menu_items')
+          .select('*')
+          .eq('website_id', websiteId)
 
         if (menuError) throw menuError
 
-        const normalizedMenu: MenuItem[] = (menu.menu_items || []).map((item: any) => ({
-          id: item.id,
+        // Transform menu items to match the expected format
+        const transformedMenuItems = menuItems?.map(item => ({
+          id: item.id?.toString() ?? String(idx),
           title: item.name,
-          description: item.description,
-          price: item.price.toString(),
-          image: '',
-          tags: item.menu_item_tag_map?.map((m: any) => m.tags.name) || []
-        }))
-        
-        setRestaurantInfo({ id: menu.id, restaurantName: menu.name, menuItems: normalizedMenu })
+          description: item.description || '',
+          price: item.price?.toString() || '',
+          image: item.image_url || '',
+          tags: [], // We'll need to add tags support later if needed
+        })) || []
 
-        // Merge into legacy blob
-        const mergedContent: WebsiteData = {
-          ...(data.content || DEFAULT_WEBSITE_DATA),
-          menu: { items: normalizedMenu }
+        if (websiteData?.content) {
+          setWebsiteData({
+            ...websiteData.content,
+            menu: {
+              items: transformedMenuItems
+            }
+          })
+        } else {
+          setWebsiteData(prev => ({
+            ...prev,
+            menu: {
+              items: transformedMenuItems
+            }
+          }))
         }
-
-        setWebsiteData(mergedContent)
-        setSectionOrder(data.section_order || DEFAULT_SECTION_ORDER)
+        
+        // Set section order if it exists in database
+        if (websiteData?.section_order) {
+          setSectionOrder(websiteData.section_order)
+        }
       } catch (error) {
         console.error('Error loading website data:', error)
         toast.error('Failed to load website data')
@@ -118,18 +149,85 @@ export const useWebsiteData = (websiteId: string) => {
     loadWebsiteData()
   }, [websiteId])
 
-
-  const handleContentChange = (sectionId: keyof WebsiteData, newData: any) => {
+  // Update handleContentChange to better handle nested updates
+  const handleContentChange = (sectionId: string, newData: any) => {
+    console.log('Content change:', sectionId, newData); // Debug log
+    
     setWebsiteData(prev => {
-      if (!prev) return prev
-      return {
-        ...prev,
-        [sectionId]: { ...prev[sectionId], ...newData }
+      if (!prev) return prev;
+
+      let updatedSection;
+      if (sectionId === 'chefs') {
+        // Special handling for chefs section
+        updatedSection = {
+          ...prev[sectionId as keyof WebsiteData],
+          ...newData,
+          posts: Array.isArray(newData.posts) ? newData.posts : (prev[sectionId as keyof WebsiteData] as any)?.posts
+        };
+      } else if (sectionId === 'menu') {
+        // Special handling for menu section - save to dedicated table
+        updatedSection = {
+          ...prev[sectionId as keyof WebsiteData],
+          ...newData
+        };
+        
+        // Save menu items to dedicated table
+        saveMenuItemsToDatabase(newData.items || []);
+      } else {
+        // General handling for other sections
+        updatedSection = typeof newData === 'object' && newData !== null
+          ? { ...(prev[sectionId as keyof WebsiteData] as any), ...newData }
+          : newData;
       }
-    })
-    setHasUnsavedChanges(true)
+
+      const updatedData = {
+        ...prev,
+        [sectionId]: updatedSection
+      };
+
+      console.log('Updated website data:', updatedData); // Debug log
+      setHasUnsavedChanges(true);
+      return updatedData;
+    });
+  };
+
+  // Function to save menu items to the dedicated table
+  const saveMenuItemsToDatabase = async (menuItems: any[]) => {
+    try {
+      const supabase = createClient()
+
+      // First, delete existing menu items for this website
+      await supabase
+        .from('menu_items')
+        .delete()
+        .eq('website_id', websiteId)
+
+      // Then insert new menu items
+      if (menuItems.length > 0) {
+        const itemsToInsert = menuItems.map(item => ({
+          website_id: websiteId,
+          name: item.title,
+          price: parseFloat(item.price) || 0,
+          description: item.description || '',
+          image_url: item.image || '',
+        }))
+
+        const { error: insertError } = await supabase
+          .from('menu_items')
+          .insert(itemsToInsert)
+
+        if (insertError) {
+          console.error('Error saving menu items:', insertError)
+          toast.error('Failed to save menu items')
+        }
+      }
+    } catch (error) {
+      console.error('Error saving menu items:', error)
+      toast.error('Failed to save menu items')
+    }
   }
 
+  // Update section order handler
   const handleSectionOrderChange = (newOrder: string[]) => {
     setSectionOrder(newOrder)
     setHasUnsavedChanges(true)
@@ -140,15 +238,23 @@ export const useWebsiteData = (websiteId: string) => {
     
     setIsSaving(true)
     try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient();
       
-      const { error } = await supabase
+      // First, validate the data structure
+      if (!websiteData.chefs?.posts) {
+        console.error('Invalid chefs data structure');
+        toast.error('Invalid data structure');
+        return;
+      }
+
+      // Save website content (excluding menu items which are saved separately)
+      const { data, error } = await supabase
         .from('websites')
         .update({ 
-          content: websiteData,
+          content: {
+            ...websiteData,
+            menu: { items: [] } // Don't save menu items in content
+          },
           section_order: sectionOrder 
         })
         .eq('id', websiteId)
@@ -165,16 +271,48 @@ export const useWebsiteData = (websiteId: string) => {
     }
   }
 
-  return {
-    websiteData,
-    restaurantInfo,
-    sectionOrder,
-    isSaving,
-    hasUnsavedChanges,
-    handleContentChange,
-    handleSectionOrderChange,
-    saveAllChanges
+  const restaurantInfo = {
+    id: websiteId,
+    name: websiteData?.navbar?.heading ?? '',
+    menuItems: (websiteData?.menu?.items ?? []).map((item, i) => ({
+      id: item?.id ?? String(i),
+      title: item?.title ?? '',
+      description: item?.description ?? '',
+      price: item?.price ?? '',
+      image: item?.image ?? '',
+      tags: item?.tags ?? [],
+    })),
   }
+  return (
+    <PreviewThemeProvider>
+      <SidebarProvider>
+        <div className="flex w-full">
+          <EditorSidebar
+            isCollapsed={isCollapsed}
+            setIsCollapsed={setIsCollapsed}
+            websiteData={websiteData}
+            sectionOrder={sectionOrder}
+            handleContentChange={handleContentChange}
+            handleSectionOrderChange={handleSectionOrderChange}
+            websiteId={websiteId}
+          />
+
+          <PreviewArea
+            isMobileView={isMobileView}
+            isSaving={isSaving}
+            hasUnsavedChanges={hasUnsavedChanges}
+            saveAllChanges={saveAllChanges}
+            sectionOrder={sectionOrder}
+            websiteData={websiteData}
+            setIsMobileView={setIsMobileView}
+            websiteId={websiteId}
+            restaurantInfo={restaurantInfo}
+          />
+        </div>
+      </SidebarProvider>
+    </PreviewThemeProvider>
+  )
+
 }
 
 
@@ -319,15 +457,12 @@ const EditorSidebar = ({
   return (
     <div className="relative">
       <Sidebar className={`transition-all duration-200 ${isCollapsed ? 'w-16' : 'w-64'}`}>
-        <div 
+        <div
           className="absolute -right-3 top-6 z-50 cursor-pointer"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           <div className="h-6 w-6 rounded-full bg-background border shadow-sm hover:bg-accent flex items-center justify-center">
-            {isCollapsed 
-              ? <ChevronRightIcon className="h-3 w-3" /> 
-              : <ChevronLeftIcon className="h-3 w-3" />
-            }
+            {isCollapsed ? <ChevronRightIcon className="h-3 w-3" /> : <ChevronLeftIcon className="h-3 w-3" />}
           </div>
         </div>
 
@@ -335,8 +470,8 @@ const EditorSidebar = ({
           <div className="flex flex-col h-full">
             <div className="py-3 px-4">
               {!isCollapsed && (
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="w-full justify-start -ml-2 text-sm"
                   onClick={() => router.push('/dashboard')}
                 >
@@ -347,7 +482,7 @@ const EditorSidebar = ({
             </div>
 
             <div className="px-2 flex-1">
-              <SectionEditor 
+              <SectionEditor
                 sectionOrder={sectionOrder}
                 onOrderChange={handleSectionOrderChange}
                 data={websiteData}
@@ -358,70 +493,11 @@ const EditorSidebar = ({
             </div>
 
             <SidebarFooter className="px-4 py-4 mt-auto">
-              <NavUser collapsed={isCollapsed} />
+              <NavUser />
             </SidebarFooter>
           </div>
         </SidebarContent>
       </Sidebar>
     </div>
-  )
-}
-
-// Main component
-export default function EditWebsitePage() {
-  const params = useParams()
-  const router = useRouter()
-  const websiteId = params.id as string
-  
-  const {
-    websiteData,
-    restaurantInfo,
-    sectionOrder,
-    isSaving,
-    hasUnsavedChanges,
-    handleContentChange,
-    handleSectionOrderChange,
-    saveAllChanges
-  } = useWebsiteData(websiteId)
-
-  const [isMobileView, setIsMobileView] = useState(false)
-  const [isCollapsed, setIsCollapsed] = useState(false)
-
-  if (!websiteData || !restaurantInfo) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    )
-  }
-
-  return (
-    <PreviewThemeProvider initialTheme="light">
-      <SidebarProvider>
-        <div className="grid grid-cols-[auto,1fr] h-screen">
-          <EditorSidebar 
-            isCollapsed={isCollapsed}
-            setIsCollapsed={setIsCollapsed}
-            websiteData={websiteData}
-            sectionOrder={sectionOrder}
-            handleContentChange={handleContentChange}
-            handleSectionOrderChange={handleSectionOrderChange}
-            websiteId={websiteId}
-          />
-          
-          <PreviewArea
-            isMobileView={isMobileView}
-            isSaving={isSaving}
-            hasUnsavedChanges={hasUnsavedChanges}
-            saveAllChanges={saveAllChanges}
-            sectionOrder={sectionOrder}
-            websiteData={websiteData}
-            restaurantInfo={restaurantInfo}
-            setIsMobileView={setIsMobileView}
-            websiteId={websiteId}
-          />
-        </div>
-      </SidebarProvider>
-    </PreviewThemeProvider>
   )
 }
