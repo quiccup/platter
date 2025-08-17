@@ -1,6 +1,6 @@
 // This is the dashboard layout that will wrap all dashboard pages
 'use client'
-import { UserButton, useUser } from "@clerk/nextjs"
+import { useAuth } from "@/providers/auth-provider"
 import Link from "next/link"
 
 export default function DashboardLayout({
@@ -8,7 +8,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user } = useUser()
+  const { user } = useAuth()
 
   return (
     <div className="min-h-screen bg-gray-50">

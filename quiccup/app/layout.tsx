@@ -1,6 +1,5 @@
 // This remains a Server Component (no 'use client')
-import { ClerkProvider } from "@clerk/nextjs";
-import { ClientWrapper } from '@/components/client-wrapper';
+import { AuthProvider } from '@/providers/auth-provider';
 import './globals.css';
 import { Montserrat, Playfair_Display, Lato } from 'next/font/google';
 
@@ -36,17 +35,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning className={`${playfair.variable} ${lato.variable} ${montserrat.variable}`}>
-        <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-        </head>
-        <body className="font-sans">
-          <ClientWrapper>
-            {children}
-          </ClientWrapper>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" suppressHydrationWarning className={`${playfair.variable} ${lato.variable} ${montserrat.variable}`}>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body className="font-montserrat antialiased">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
+    </html>
   )
 }

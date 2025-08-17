@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { uploadImage } from "@/lib/uploadImage"
@@ -228,9 +228,24 @@ export function MenuEditor({ data, onChange, websiteId }: MenuEditorProps) {
 
   return (
     <div className="space-y-6">
-      <DialogHeader>
-        <DialogTitle>Edit Menu</DialogTitle>
-      </DialogHeader>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Menu Editor</h3>
+        <Button 
+          onClick={regenerateAiRecommendations}
+          disabled={isGenerating}
+          variant="outline"
+          size="sm"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            'Regenerate AI Recommendations'
+          )}
+        </Button>
+      </div>
 
       <div className="space-y-6">
         <div className="flex gap-2">
@@ -246,7 +261,7 @@ export function MenuEditor({ data, onChange, websiteId }: MenuEditorProps) {
 
         {/* Existing menu items list */}
         <div className="space-y-4">
-          {data?.items.map((item, index) => (
+          {data?.items?.map((item, index) => (
             <div key={index} className="border rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -260,6 +275,33 @@ export function MenuEditor({ data, onChange, websiteId }: MenuEditorProps) {
         </div>
       </div>
 
+      {/* JSON Import Modal */}
+      <Dialog open={showJsonImporter} onOpenChange={setShowJsonImporter}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Import Menu from JSON</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              placeholder="Paste your JSON menu data here..."
+              value={jsonInput}
+              onChange={(e) => setJsonInput(e.target.value)}
+              rows={10}
+            />
+            {jsonError && (
+              <p className="text-red-500 text-sm">{jsonError}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button onClick={processJsonMenuItems}>Import</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Menu Items Modal */}
       <MenuItemsModal 
         open={menuItemsModalOpen}
         onOpenChange={setMenuItemsModalOpen}

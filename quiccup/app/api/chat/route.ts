@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
-// Initialize the OpenAI client with X.AI configuration
+// Initialize the OpenAI client with OpenAI configuration
 const client = new OpenAI({
-  apiKey: process.env.XAI_API_KEY,
-  baseURL: 'https://api.x.ai/v1',
+  apiKey: process.env.OPENAI_API_KEY,
+  // No baseURL override for OpenAI
 })
 
 export async function POST(request: NextRequest) {
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     const completion = await client.chat.completions.create({
-      model: 'grok-3-latest',
+      model: 'gpt-3.5-turbo', // Use OpenAI's model
       messages: [systemPrompt, ...messages],
       temperature: 0,
     })

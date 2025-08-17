@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useUser } from '@clerk/nextjs'
+import { useAuth } from '@/providers/auth-provider'
 import { createClient } from '@supabase/supabase-js'
 import { generateUniqueSubdomain } from '@/lib/utils'
 import { X } from 'lucide-react'
@@ -13,7 +13,7 @@ interface CreateWebsiteModalProps {
 }
 
 export function CreateWebsiteModal({ isOpen, onClose }: CreateWebsiteModalProps) {
-  const { user } = useUser()
+  const { user } = useAuth()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [name, setName] = useState('')
@@ -52,31 +52,35 @@ export function CreateWebsiteModal({ isOpen, onClose }: CreateWebsiteModalProps)
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       )
       
-      // Create website
-      const { data: website, error } = await supabase
-        .from('websites')
-        .insert({
-          user_id: user?.id,
-          name,
+      // Update user with website data
+      const { data: userData, error } = await supabase
+        .from('users')
+        .update({
+          restaurant_name: name,
           subdomain,
           settings: {
             theme,
             fontFamily: font
           },
-          sections: {
-            navbar: { enabled: true },
-            menu: { enabled: true, items: [] },
-            reviews: { enabled: true, items: [] },
-            contact: { enabled: true }
-          }
+          content: {
+            navbar: { heading: name, subheading: '', buttons: [] },
+            menu: { items: [] },
+            chefs: { posts: [] },
+            about: { content: '' },
+            contact: { email: '', phone: '' },
+            gallery: { images: [], captions: {} },
+            reviews: []
+          },
+          is_published: false
         })
+        .eq('id', user?.id)
         .select()
         .single()
       
       if (error) throw error
       
-      // Redirect to the new website's edit page
-      router.push(`/dashboard/websites/${website.id}/edit`)
+      // Redirect to the dashboard
+      router.push('/dashboard')
       onClose()
     } catch (error: any) {
       console.error('Error creating website:', error)

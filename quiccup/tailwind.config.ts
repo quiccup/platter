@@ -10,13 +10,18 @@ const config = {
   ],
   prefix: "",
   theme: {
-  	container: {
-  		center: true,
-  		padding: '2rem',
-  		screens: {
-  			'2xl': '1400px'
-  		}
-  	},
+    container: {
+      center: true,
+      padding: '2rem',
+      screens: {
+        '2xl': '1400px'
+      }
+    },
+    fontFamily: {
+      montserrat: ['var(--font-montserrat)', 'sans-serif'],
+      playfair: ['var(--font-playfair)', 'serif'],
+      lato: ['var(--font-lato)', 'sans-serif'],
+    },
   	extend: {
   		colors: {
   			border: 'hsl(var(--border))',

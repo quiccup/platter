@@ -41,39 +41,45 @@ export interface Database {
           address?: string | null
         }
       }
-      websites: {
+      users: {
         Row: {
           id: string
           created_at: string
           updated_at: string
-          name: string
-          subdomain: string
+          email: string
+          restaurant_name: string | null
+          subdomain: string | null
           custom_domain: string | null
-          theme: string
-          is_published: boolean
-          restaurant_id: string
+          theme: string | null
+          is_published: boolean | null
+          content: Json | null
+          settings: Json | null
         }
         Insert: {
           id?: string
           created_at?: string
           updated_at?: string
-          name: string
-          subdomain: string
+          email?: string
+          restaurant_name?: string | null
+          subdomain?: string | null
           custom_domain?: string | null
-          theme?: string
-          is_published?: boolean
-          restaurant_id: string
+          theme?: string | null
+          is_published?: boolean | null
+          content?: Json | null
+          settings?: Json | null
         }
         Update: {
           id?: string
           created_at?: string
           updated_at?: string
-          name?: string
-          subdomain?: string
+          email?: string
+          restaurant_name?: string | null
+          subdomain?: string | null
           custom_domain?: string | null
-          theme?: string
-          is_published?: boolean
-          restaurant_id?: string
+          theme?: string | null
+          is_published?: boolean | null
+          content?: Json | null
+          settings?: Json | null
         }
       }
     }

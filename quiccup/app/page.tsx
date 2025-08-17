@@ -1,122 +1,145 @@
-// This is the main landing page
 'use client'
-import { SignInButton, useUser } from '@clerk/nextjs'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { ArrowRight, ArrowDown } from 'lucide-react'
-import Logo from '@/components/Logo'
 
-export default function LandingPage() {
-  const { isSignedIn } = useUser();
-  
-  return (
-    <div className="min-h-screen bg-black text-white flex flex-col overflow-hidden font-montserrat relative">
-      {/* Header */}
-      <nav className="container mx-auto px-6 py-6 flex justify-between items-center z-10 relative">
-        <div className="flex items-center gap-2">
-        <Logo />
-        <div className="text-white text-2xl font-semibold">platter</div>
-        </div>
-  
-        
-        {isSignedIn ? (
-          <Link 
-            href="/dashboard" 
-            className="flex items-center gap-2 px-5 py-3 rounded-full bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors shadow-md"
-          >
-            Dashboard
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        ) : (
-          <SignInButton mode="modal">
-            <button className="px-5 py-3 rounded-full bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors shadow-md">
-              Try it free
-            </button>
-          </SignInButton>
-        )}
-      </nav>
-      
-      {/* Main Content */}
-      <div className="flex-1 container mx-auto flex flex-col items-center justify-center px-6 z-10 relative">
-        <motion.div
-          className="max-w-4xl mx-auto text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-        >
-          <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
-            Conversational AI for better food ordering
-          </h1>
-          
-          <p className="text-xl mb-10 text-gray-400 max-w-3xl mx-auto">
-            Drive restaurant sales by showing customers the full potential of your menu.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <SignInButton mode="modal">
-              <button className="px-8 py-4 rounded-full bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors shadow-lg text-lg flex items-center justify-center gap-2">
-                Get started now
-                <ArrowRight className="h-5 w-5" />
-              </button>
-            </SignInButton>
-            
-            <button onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })} 
-              className="px-8 py-4 rounded-full bg-transparent border border-gray-600 text-white font-medium hover:bg-gray-900 transition-colors text-lg flex items-center justify-center gap-2">
-              Request a demo
-              <ArrowDown className="h-5 w-5" />
-            </button>
-          </div>
-        </motion.div>
-        
-        {/* Example chat interface */}
-        <motion.div
-          className="w-full max-w-md bg-gray-900 rounded-2xl shadow-2xl overflow-hidden mb-12"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.3 }}
-        >
-          <div className="p-4 border-b border-gray-800">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <div className="ml-2 text-sm text-gray-400">Restaurant AI Assistant</div>
-            </div>
-          </div>
-          
-          <div className="p-4 space-y-4">
-            <div className="bg-gray-800 text-white p-3 rounded-xl rounded-tl-none max-w-[80%]">
-              What are your best options for a group of 4 with a budget of $60?
-            </div>
-            
-            <div className="bg-orange-500 text-white p-3 rounded-xl rounded-tr-none max-w-[80%] ml-auto">
-              For a group of 4 with a $60 budget, I'd recommend our Family Feast which includes:
-              <ul className="mt-2 pl-4 list-disc">
-                <li>1 large pizza (choice of 3 toppings)</li>
-                <li>6 chicken wings</li>
-                <li>1 family size salad</li>
-                <li>4 soft drinks</li>
-              </ul>
-              <p className="mt-2">Total: $52.99 + tax</p>
-            </div>
-          </div>
-          
-          <div className="p-4 border-t border-gray-800 flex gap-2">
-            <input 
-              type="text" 
-              placeholder="Ask anything about our menu..."
-              className="bg-gray-800 border-none outline-none flex-1 p-2 rounded-full text-white text-sm px-4"
-            />
-            <button className="bg-orange-500 text-white p-2 rounded-full w-10 h-10 flex items-center justify-center">
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-        </motion.div>
+import { useAuth } from '@/providers/auth-provider'
+import { Button } from "@/components/ui/button"
+import { ArrowRight } from 'lucide-react'
+import Logo from '@/components/Logo'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
+export default function HomePage() {
+  const { user, loading, signOut } = useAuth()
+  const router = useRouter()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
       </div>
+    )
+  }
+
+  if (user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200">
+          <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+            <Logo className="h-8 w-8" color="white" />
+            <div className="text-white text-2xl font-semibold">platter</div>
+          </div>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">Welcome, {user.email}</span>
+              <Button onClick={() => router.push('/dashboard')}>
+                Go to Dashboard
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => signOut().then(() => router.push('/'))}
+                className="text-red-600 border-red-600 hover:bg-red-50"
+              >
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Hero Section */}
+        <main className="container mx-auto px-6 py-16">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-6">
+              Welcome to Your Restaurant Dashboard
+            </h1>
+            <p className="text-xl text-gray-600 mb-8">
+              Manage your restaurant website, menu, and online presence all in one place.
+            </p>
+            <Button size="lg" onClick={() => router.push('/dashboard')}>
+              <ArrowRight className="h-5 w-5 mr-2" />
+              Get Started
+            </Button>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#1a0f00] via-[#2d1810] to-[#1a0f00] relative overflow-hidden">
+      {/* Subtle Background Glow */}
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-orange-500/5 via-orange-900/10 to-transparent"></div>
+      {/* Radial Gradient for depth */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,94,0,0.05)_0%,transparent_100%)]"></div>
       
+      {/* Header */}
+      <header className="relative z-10 bg-black/10 backdrop-blur-sm border-b border-orange-500/10">
+        <div className="container mx-auto px-6 py-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Logo className="h-8 w-8" color="white" border="white" />
+            <div className="text-white text-xl font-medium">platter</div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/sign-in">
+              <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-orange-500/10 px-4 py-2">
+                Sign In
+              </Button>
+            </Link>
+            <Link href="/sign-up">
+              <Button className="bg-orange-500 text-white hover:bg-orange-600 px-6 py-2 text-sm font-medium">
+                Get Started
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="relative z-10 container mx-auto px-6 py-32">
+        {/* Hero Section */}
+        <div className="text-center">
+          
+          {/* Main Heading */}
+                      <h1 className="text-[85px] font-montserrat font-bold text-white mb-8 tracking-tight leading-[1.1] max-w-[900px] mx-auto">
+              Conversational AI for better food ordering
+            </h1>
+
+            <p className="text-white/60 text-xl font-lato mb-12 max-w-xl mx-auto leading-relaxed">
+            A new kind of restaurant website.
+            </p>
+
+          
+        </div>
+
+        {/* Waitlist Section */}
+        <div className="max-w-sm mx-auto">
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+            <h2 className="text-lg font-semibold text-white mb-2 text-left">
+              Join the waitlist
+            </h2>
+            <p className="text-white/50 text-sm mb-5 text-left leading-relaxed">
+              Sign up to be one of the first to use Platter.
+            </p>
+            <div className="flex gap-2">
+              <input 
+                type="email" 
+                placeholder="Email address" 
+                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white placeholder-white/30 text-sm focus:outline-none focus:ring-1 focus:ring-white/20"
+              />
+              <Button className="w-9 h-9 bg-white text-slate-900 hover:bg-gray-100 rounded-lg p-0 flex-shrink-0">
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </main>
+
       {/* Footer */}
-      <footer className="container mx-auto px-6 py-4 text-center text-gray-500 text-sm z-10 relative border-t border-gray-800">
-        <p>© 2024 platter. AI-powered chatbot for restaurants that helps customers discover dishes they'll love.</p>
+      <footer className="relative z-10 text-center py-12">
+        <div className="text-white/30 text-xs">
+          <span>Designer & Developer</span>
+          <span className="mx-2">•</span>
+          <span>Platter Team</span>
+        </div>
       </footer>
     </div>
   )

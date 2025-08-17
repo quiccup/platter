@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser } from '@clerk/nextjs'
+import { useAuth } from '@/providers/auth-provider'
 import { supabase } from '@/lib/supabase'
 
 export default function CreateWebsitePage() {
   const router = useRouter()
-  const { user } = useUser()
+  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   
   async function createWebsite() {
@@ -16,30 +16,35 @@ export default function CreateWebsitePage() {
     setIsLoading(true)
     
     try {
-      // Create website directly tied to user_id
-      const { data, error } = await supabase
-        .from('websites')
-        .insert({
-          name: 'New Website',
-          user_id: user.id, // Use Clerk user ID directly
+      // Update user with website data
+      const { data: userData, error } = await supabase
+        .from('users')
+        .update({
+          restaurant_name: 'New Website',
+          subdomain: `user-${user.id.slice(0, 8)}`,
           settings: {
             theme: 'light',
             fontFamily: 'Inter'
           },
-          sections: {
-            navbar: { enabled: true },
-            menu: { enabled: true, items: [] },
-            reviews: { enabled: true, items: [] },
-            contact: { enabled: true }
-          }
+          content: {
+            navbar: { heading: 'New Website', subheading: '', buttons: [] },
+            menu: { items: [] },
+            chefs: { posts: [] },
+            about: { content: '' },
+            contact: { email: '', phone: '' },
+            gallery: { images: [], captions: {} },
+            reviews: []
+          },
+          is_published: false
         })
+        .eq('id', user.id)
         .select()
         .single()
       
       if (error) throw error
       
-      // Redirect to edit page
-      router.push(`/dashboard/websites/${data.id}/edit`)
+      // Redirect to dashboard
+      router.push('/dashboard')
     } catch (error) {
       console.error('Error creating website:', error)
       alert('Failed to create website. Please try again.')
