@@ -14,6 +14,37 @@ export interface MenuItem {
 export class MenuService {
   private supabase = createClient()
 
+  private generateEmbeddingText(item: MenuItem): string {
+    const parts = [
+      item.name,
+      item.description || '',
+      item.tags?.join(' ') || ''
+    ];
+    return parts.filter(Boolean).join(' ');
+  }
+
+  private async generateEmbedding(text: string): Promise<number[]> {
+    try {
+      const response = await fetch('/api/menu', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text })
+      });
+
+      const result = await response.json();
+      
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      return result.embedding;
+    } catch (error) {
+      console.error('Error generating embedding:', error);
+      throw error;
+    }
+  }
+
   private validateMenuItem(item: Omit<MenuItem, 'id' | 'created_at'>): string | null {
     if (!item.name?.trim()) {
       return 'Name is required'
@@ -77,6 +108,10 @@ export class MenuService {
       return { data: null, error: { message: validationError } }
     }
 
+    // Generate embedding
+    const text = this.generateEmbeddingText(item as MenuItem)
+    const embedding = await this.generateEmbedding(text)
+    
     const { data, error } = await this.supabase
       .from('menu_items')
       .insert([{
@@ -85,7 +120,8 @@ export class MenuService {
         price: item.price,
         description: item.description ?? null,
         image_url: item.image_url ?? null,
-        tags: item.tags ?? []
+        tags: item.tags ?? [],
+        embedding: embedding
       }])
       .select()
       .single()
@@ -117,12 +153,16 @@ export class MenuService {
       return { data: null, error: { message: validationError } }
     }
 
+    // Generate new embedding for the updated item
+    const text = this.generateEmbeddingText(mergedItem)
+    const embedding = await this.generateEmbedding(text)
+
     // Remove user_id from updates to prevent changing it
     const { user_id, ...updateFields } = updates
 
     const { data, error } = await this.supabase
       .from('menu_items')
-      .update(updateFields)
+      .update({ ...updateFields, embedding: embedding })
       .eq('id', id)
       .select()
       .single()
@@ -147,15 +187,25 @@ export class MenuService {
       return { data: null, error: { message: validationError } }
     }
 
+    // Generate embeddings for each item
+    const itemsWithEmbeddings = await Promise.all(
+      items.map(async (item) => {
+        const text = this.generateEmbeddingText(item as MenuItem)
+        const embedding = await this.generateEmbedding(text)
+        return { ...item, embedding }
+      })
+    )
+
     const { data, error } = await this.supabase
       .from('menu_items')
-      .insert(items.map(item => ({
+      .insert(itemsWithEmbeddings.map(item => ({
         user_id: item.user_id,
         name: item.name,
         price: item.price,
         description: item.description ?? null,
         image_url: item.image_url ?? null,
-        tags: item.tags ?? []
+        tags: item.tags ?? [],
+        embedding: item.embedding
       })))
       .select()
 
