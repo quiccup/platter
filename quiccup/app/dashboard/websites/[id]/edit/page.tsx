@@ -83,6 +83,7 @@ export default function EditWebsitePage() {
     'reviews'
   ])
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [userId, setUserId] = useState<string>('')
 
   // Track if there are unsaved changes
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
@@ -107,17 +108,20 @@ export default function EditWebsitePage() {
         // Load website data
         const { data: websiteData, error: websiteError } = await supabase
           .from('websites')
-          .select('content, section_order')
+          .select('content, section_order, user_id')
           .eq('id', websiteId)
           .single()
 
         if (websiteError) throw websiteError
 
+        // Store user_id for later use
+        setUserId(websiteData.user_id)
+
         // Load menu items from dedicated table
         const { data: menuItems, error: menuError } = await supabase
           .from('menu_items')
           .select('*')
-          .eq('website_id', websiteId)
+          .eq('user_id', websiteData.user_id)
 
         if (menuError) throw menuError
 
@@ -182,7 +186,7 @@ export default function EditWebsitePage() {
         };
         
         // Save menu items to dedicated table
-        saveMenuItemsToDatabase(newData.items || []);
+        saveMenuItemsToDatabase(newData.items || [], userId);
       } else {
         // General handling for other sections
         updatedSection = typeof newData === 'object' && newData !== null
@@ -202,20 +206,20 @@ export default function EditWebsitePage() {
   };
 
   // Function to save menu items to the dedicated table
-  const saveMenuItemsToDatabase = async (menuItems: any[]) => {
+  const saveMenuItemsToDatabase = async (menuItems: any[], userId: string) => {
     try {
       const supabase = createClient()
 
-      // First, delete existing menu items for this website
+      // First, delete existing menu items for this user
       await supabase
         .from('menu_items')
         .delete()
-        .eq('website_id', websiteId)
+        .eq('user_id', userId)
 
       // Then insert new menu items
       if (menuItems.length > 0) {
         const itemsToInsert = menuItems.map(item => ({
-          website_id: websiteId,
+          user_id: userId,
           name: item.title,
           price: parseFloat(item.price) || 0,
           description: item.description || '',

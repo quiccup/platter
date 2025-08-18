@@ -10,13 +10,14 @@ export interface WebsiteData {
   }
   menu: {
     items: Array<{
-      id: string
-      title: string
-      description: string
-      price: string
-      image?: string
-      category?: string
-      tags: string[]
+      id?: string
+      user_id: string
+      name: string
+      description?: string
+      price: number
+      image_url?: string
+      tags?: string[]
+      created_at?: string
     }>
   }
   chefs: {

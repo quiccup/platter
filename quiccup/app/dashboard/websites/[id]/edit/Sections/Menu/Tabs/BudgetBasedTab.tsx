@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { usePreviewTheme } from '@/components/preview-theme-provider'
-import { MenuItem } from '../../../types'
+import { MenuItem } from '@/lib/services/menuService'
 import { ArrowRight, DollarSign } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -126,16 +126,16 @@ export function BudgetBasedTab({ menuItems, websiteId, budgetCombos }: BudgetBas
               {/* Items row with capsules */}
               <div className="flex flex-wrap gap-2">
                 {combo.items.map((item, itemIndex) => {
-                  const menuItem = menuItems.find(mi => mi.title === item.name)
+                  const menuItem = menuItems.find(mi => mi.name === item.name)
                   return (
                     <div
                       key={itemIndex}
                       className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-50 dark:bg-gray-800 shadow-sm"
                     >
-                      {menuItem?.image && (
+                      {menuItem?.image_url && (
                         <div className="relative w-6 h-6 rounded-full overflow-hidden">
                           <img
-                            src={menuItem.image}
+                            src={menuItem.image_url}
                             alt={item.name}
                             className="w-full h-full object-cover"
                           />

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { usePreviewTheme } from '@/components/preview-theme-provider'
-import { MenuItem } from '../../types'
+import { MenuItem } from '@/lib/services/menuService'
 import { FullMenuTab } from './Tabs/FullMenuTab'
 import { BudgetBasedTab } from './Tabs/BudgetBasedTab'
 import { SectionWrapper } from '../../components/SectionWrapper'
@@ -33,7 +33,7 @@ export function MenuDisplay({ data, websiteId }: MenuDisplayProps) {
 
     const query = searchQuery.toLowerCase()
     const filtered = data?.items.filter(item => 
-      item.title.toLowerCase().includes(query) ||
+      item.name.toLowerCase().includes(query) ||
       item.description?.toLowerCase().includes(query)
     )
     setFilteredItems(filtered || [])

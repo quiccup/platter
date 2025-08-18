@@ -113,11 +113,18 @@ export default function DashboardPage() {
         const supabase = createClient()
 
         // Get the user's website data directly from users table
-        const { data: userData } = await supabase
+        // First get the user record
+        const { data: userData, error: userError } = await supabase
           .from('users')
           .select('*')
           .eq('user_id', user.id)
           .single()
+
+        if (userError) {
+          console.error('Error fetching user data:', userError)
+          setLoading(false)
+          return
+        }
 
         if (userData) {
           setUserWebsite({
@@ -197,7 +204,7 @@ export default function DashboardPage() {
           content: websiteData,
           updated_at: new Date().toISOString()
         })
-        .eq('id', user.id)
+        .eq('id', userWebsite.id)
 
       if (error) throw error
       
@@ -464,11 +471,7 @@ export default function DashboardPage() {
               </TabsContent>
               
               <TabsContent value="menu">
-                                  <MenuEditor 
-                    data={websiteData.menu} 
-                    onChange={(data) => handleContentChange('menu', data)} 
-                    websiteId={userWebsite.id}
-                  />
+                <MenuEditor userId={userWebsite.id} />
               </TabsContent>
               
               <TabsContent value="chefs">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { usePreviewTheme } from '@/components/preview-theme-provider'
-import { MenuItem } from '../../../types'
+import { MenuItem } from '@/lib/services/menuService'
 import { Search, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -54,7 +54,7 @@ export function FullMenuTab({ items }: FullMenuTabProps) {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(item => 
-        item.title.toLowerCase().includes(query) ||
+        item.name.toLowerCase().includes(query) ||
         item.description?.toLowerCase().includes(query)
       );
     }
@@ -147,10 +147,10 @@ export function FullMenuTab({ items }: FullMenuTabProps) {
             >
               {/* Image container - Square aspect ratio */}
               <div className="aspect-square relative">
-                {enhancedItem.image ? (
+                {enhancedItem.image_url ? (
                   <img 
-                    src={enhancedItem.image} 
-                    alt={enhancedItem.title || 'Menu item'} 
+                    src={enhancedItem.image_url} 
+                    alt={enhancedItem.name || 'Menu item'} 
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -164,10 +164,10 @@ export function FullMenuTab({ items }: FullMenuTabProps) {
               <div className="p-4">
                 <div className="flex justify-between items-center">
                   <h3 className="font-bold text-gray-900 dark:text-white text-base">
-                    {enhancedItem.title}
+                    {enhancedItem.name}
                   </h3>
                   <span className="bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-1 rounded">
-                    {enhancedItem.price}
+                    ${enhancedItem.price}
                   </span>
                 </div>
                 
