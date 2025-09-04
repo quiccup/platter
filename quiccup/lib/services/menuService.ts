@@ -12,9 +12,13 @@ export interface MenuItem {
 }
 
 export class MenuService {
-  private supabase = createClient()
+  protected supabase;
 
-  private generateEmbeddingText(item: MenuItem): string {
+  constructor(customClient?: any) {
+    this.supabase = customClient || createClient();
+  }
+
+  protected generateEmbeddingText(item: MenuItem): string {
     const parts = [
       item.name,
       item.description || '',
@@ -23,7 +27,7 @@ export class MenuService {
     return parts.filter(Boolean).join(' ');
   }
 
-  private async generateEmbedding(text: string): Promise<number[]> {
+  protected async generateEmbedding(text: string): Promise<number[]> {
     try {
       const response = await fetch('/api/menu', {
         method: 'POST',
