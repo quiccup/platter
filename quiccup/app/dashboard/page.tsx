@@ -257,7 +257,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-8">
             <nav className="hidden md:flex gap-8">
               <Link href="/dashboard" className="text-orange-500 border-b-2 border-orange-500 pb-2">Dashboard</Link>
-              <Link href="/settings" className="text-gray-600 hover:text-gray-900 transition-colors">Settings</Link>
+              <Link href={`/dashboard/settings`} className="text-gray-600 hover:text-gray-900 transition-colors">Settings</Link>
             </nav>
             
             <div className="flex items-center gap-3">
