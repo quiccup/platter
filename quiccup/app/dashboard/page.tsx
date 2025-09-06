@@ -246,34 +246,6 @@ export default function DashboardPage() {
   
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header/Nav */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Logo className="h-10 w-10" />
-            <div className="text-gray-900 text-2xl font-semibold">platter</div>
-          </div>
-        
-          <div className="flex items-center gap-8">
-            <nav className="hidden md:flex gap-8">
-              <Link href="/dashboard" className="text-orange-500 border-b-2 border-orange-500 pb-2">Dashboard</Link>
-              <Link href={`/dashboard/settings`} className="text-gray-600 hover:text-gray-900 transition-colors">Settings</Link>
-            </nav>
-            
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">{user?.email}</span>
-              <Button 
-                onClick={() => signOut().then(() => router.push('/sign-in'))}
-                variant="outline"
-                size="sm"
-              >
-                Sign Out
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-      
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
         {/* Welcome Section */}
