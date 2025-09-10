@@ -19,7 +19,6 @@ import {
   Info,
   PhoneCall,
   Trophy,
-  Home
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Logo from '@/components/Logo'
@@ -30,7 +29,6 @@ import { GalleryEdit } from './components/GalleryEdit'
 import { AboutEdit } from './components/AboutEdit'
 import { ContactEdit } from './components/ContactEdit'
 import { ReviewsEdit } from './components/ReviewsEdit'
-import { NavbarEdit } from './components/NavbarEdit'
 import { LeaderboardEdit } from './components/LeaderboardEdit'
 import { ChefsFeedEdit } from './components/ChefsFeedEdit'
 import { WebsiteData } from './types'
@@ -389,13 +387,9 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
         >
-          <Tabs defaultValue="navbar" className="w-full">
+          <Tabs defaultValue="leaderboard" className="w-full">
             <div className="border-b border-gray-200 px-6 pt-6">
-              <TabsList className="grid w-full grid-cols-8">
-                <TabsTrigger value="navbar" className="flex items-center gap-2">
-                  <Home className="h-4 w-4" />
-                  <span className="hidden sm:inline">Navbar</span>
-                </TabsTrigger>
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="leaderboard" className="flex items-center gap-2">
                   <Trophy className="h-4 w-4" />
                   <span className="hidden sm:inline">Top Dishes</span>
@@ -428,13 +422,6 @@ export default function DashboardPage() {
             </div>
 
             <div className="p-6">
-              <TabsContent value="navbar">
-                <NavbarEdit 
-                  data={websiteData.navbar} 
-                  onChange={(data) => handleContentChange('navbar', data)} 
-                />
-              </TabsContent>
-              
               <TabsContent value="leaderboard">
                 <LeaderboardEdit 
                   data={websiteData.leaderboard} 

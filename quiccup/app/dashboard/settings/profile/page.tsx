@@ -7,66 +7,79 @@ import { Button } from '@/components/ui/button'
 export default function ProfileSettings() {
   const { user } = useAuth()
   const [restaurantName, setRestaurantName] = useState('')
-  const [tagline, setTagline] = useState('')
-  const [isSaving, setIsSaving] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [description, setDescription] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
 
+  // Load profile data when component mounts
   useEffect(() => {
     async function loadProfileData() {
-      if (!user) return
+      if (!user) {
+        setLoading(false)
+        return
+      }
 
       try {
         const supabase = createClient()
+        
+        // Query the users table to get restaurant data
         const { data, error } = await supabase
           .from('users')
-          .select('restaurant_name, tagline')
+          .select('restaurant_name, description')
           .eq('user_id', user.id)
           .single()
 
-        if (error) throw error
+        if (error) {
+          console.error('Error loading profile data:', error)
+          return
+        }
 
+        // Set the data in state
         if (data) {
           setRestaurantName(data.restaurant_name || '')
-          setTagline(data.tagline || '')
+          setDescription(data.description || '')
         }
       } catch (error) {
-        console.error('Error loading profile data:', error)
+        console.error('Error:', error)
       } finally {
-        setIsLoading(false)
+        setLoading(false)
       }
     }
 
     loadProfileData()
-  }, [user])
+  }, [user]) // Run when user changes (null -> user object)
 
+  // Save profile data when user clicks save
   const handleSave = async () => {
     if (!user) return
 
     try {
-      setIsSaving(true)
+      setSaving(true)
       const supabase = createClient()
       
+      // Update the profile data in the users table
       const { error } = await supabase
         .from('users')
-        .update({
+        .update({ 
           restaurant_name: restaurantName,
-          tagline: tagline,
-          updated_at: new Date().toISOString()
+          description: description
         })
         .eq('user_id', user.id)
 
-      if (error) throw error
-      
-      // You could add a success toast here
+      if (error) {
+        console.error('Error saving profile data:', error)
+        return
+      }
+
+      console.log('Profile saved successfully!')
     } catch (error) {
-      console.error('Error saving profile:', error)
-      // You could add an error toast here
+      console.error('Error:', error)
     } finally {
-      setIsSaving(false)
+      setSaving(false)
     }
   }
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
@@ -80,10 +93,10 @@ export default function ProfileSettings() {
         <h2 className="text-2xl font-semibold text-gray-900">Profile Settings</h2>
         <Button
           onClick={handleSave}
-          disabled={isSaving}
+          disabled={saving}
           className="bg-orange-500 hover:bg-orange-600 text-white"
         >
-          {isSaving ? (
+          {saving ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               Saving...
@@ -93,46 +106,50 @@ export default function ProfileSettings() {
           )}
         </Button>
       </div>
-
+      
       <div className="space-y-6">
+        {/* Email Field (Read-only) */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Email</label>
-          <div className="mt-1">
-            <input
-              type="email"
-              disabled
-              value={user?.email || ''}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm bg-gray-50"
-            />
-          </div>
-          <p className="mt-1 text-sm text-gray-500">Your email cannot be changed.</p>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Email Address
+          </label>
+          <input
+            type="email"
+            value={user?.email || ''}
+            disabled
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500"
+          />
+          <p className="mt-1 text-sm text-gray-500">Your email address cannot be changed.</p>
         </div>
 
+        {/* Restaurant Name Field */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Restaurant Name</label>
-          <div className="mt-1">
-            <input
-              type="text"
-              value={restaurantName}
-              onChange={(e) => setRestaurantName(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-              placeholder="Enter your restaurant name"
-            />
-          </div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Restaurant Name
+          </label>
+          <input
+            type="text"
+            value={restaurantName}
+            onChange={(e) => setRestaurantName(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+            placeholder="Enter your restaurant name"
+          />
+          <p className="mt-1 text-sm text-gray-500">This will be displayed on your restaurant website.</p>
         </div>
 
+        {/* Description Field */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Tagline</label>
-          <div className="mt-1">
-            <input
-              type="text"
-              value={tagline}
-              onChange={(e) => setTagline(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-              placeholder="Enter a catchy tagline for your restaurant"
-            />
-          </div>
-          <p className="mt-1 text-sm text-gray-500">A short, memorable phrase that describes your restaurant.</p>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Restaurant Description
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={4}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+            placeholder="Tell customers about your restaurant, your story, specialties, etc."
+          />
+          <p className="mt-1 text-sm text-gray-500">A brief description of your restaurant that will appear on your website.</p>
         </div>
       </div>
     </div>
