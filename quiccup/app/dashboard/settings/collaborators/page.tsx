@@ -15,9 +15,10 @@ interface CollaboratorCardProps {
   collaborator: Collaborator
   onRemove: (id: string) => void
   onPermissionChange: (id: string, permission: 'view' | 'edit') => void
+  onSendTestEmail: (email: string, permission: 'view' | 'edit') => void
 }
 
-function CollaboratorCard({ collaborator, onRemove, onPermissionChange }: CollaboratorCardProps) {
+function CollaboratorCard({ collaborator, onRemove, onPermissionChange, onSendTestEmail }: CollaboratorCardProps) {
   return (
     <div className="p-6 flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -54,6 +55,19 @@ function CollaboratorCard({ collaborator, onRemove, onPermissionChange }: Collab
           </Select>
         </div>
 
+        {/* Test Email Button */}
+        <div className="flex flex-col gap-1">
+          <div className="h-4"></div> {/* Spacer to align with dropdown */}
+          <Button
+            onClick={() => onSendTestEmail(collaborator.email, collaborator.permission)}
+            variant="outline"
+            size="sm"
+            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+          >
+            📧 Test
+          </Button>
+        </div>
+
         {/* Remove Button */}
         <div className="flex flex-col gap-1">
           <div className="h-4"></div> {/* Spacer to align with dropdown */}
@@ -73,23 +87,56 @@ function CollaboratorCard({ collaborator, onRemove, onPermissionChange }: Collab
 
 export default function CollaboratorsPage() {
   const [emailInput, setEmailInput] = useState('')
+  const [selectedPermission, setSelectedPermission] = useState<'view' | 'edit'>('view')
   const [collaborators, setCollaborators] = useState<Collaborator[]>([
     // Demo data
     { id: '1', email: 'john@example.com', permission: 'edit' },
     { id: '2', email: 'sarah@example.com', permission: 'view' },
   ])
 
-  const handleAddCollaborator = () => {
+  const sendInvitationEmail = async (email: string, permission: 'view' | 'edit') => {
+    try {
+      const response = await fetch('/api/collaborators', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          restaurantName: 'Your Restaurant Name',
+          permission: permission,
+        }),
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        alert(`✅ Invitation sent to ${email}!`)
+      } else if (result.isTestMode) {
+        alert(`⚠️ Test Mode: ${result.error}\n\nFor now, you can only send test emails to ${result.allowedEmail}. To send to other recipients, verify a domain at resend.com/domains.`)
+      } else {
+        alert(`❌ Failed to send invitation: ${result.error}`)
+      }
+    } catch (error) {
+      alert(`❌ Error sending invitation: ${error}`)
+    }
+  }
+
+  const handleAddCollaborator = async () => {
     if (!emailInput.trim()) return
 
     const newCollaborator: Collaborator = {
       id: Date.now().toString(),
       email: emailInput.trim(),
-      permission: 'view' // Default to view permission
+      permission: selectedPermission
     }
 
     setCollaborators(prev => [...prev, newCollaborator])
+    
+    await sendInvitationEmail(emailInput.trim(), selectedPermission)
+    
     setEmailInput('')
+    setSelectedPermission('view') // Reset to default
   }
 
   const handleRemoveCollaborator = (id: string) => {
@@ -102,6 +149,11 @@ export default function CollaboratorsPage() {
         collab.id === id ? { ...collab, permission } : collab
       )
     )
+  }
+
+  // Test email function for existing collaborators
+  const sendTestEmail = async (email: string, permission: 'view' | 'edit') => {
+    await sendInvitationEmail(email, permission)
   }
 
   return (
@@ -127,13 +179,27 @@ export default function CollaboratorsPage() {
               onKeyPress={(e) => e.key === 'Enter' && handleAddCollaborator()}
             />
           </div>
+          <div className="w-32">
+            <Select
+              value={selectedPermission}
+              onValueChange={(value: 'view' | 'edit') => setSelectedPermission(value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="view">View Only</SelectItem>
+                <SelectItem value="edit">Can Edit</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button
             onClick={handleAddCollaborator}
             disabled={!emailInput.trim()}
             className="bg-orange-500 hover:bg-orange-600 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add
+            Add & Send Invite
           </Button>
         </div>
       </div>
@@ -161,6 +227,7 @@ export default function CollaboratorsPage() {
                 collaborator={collaborator}
                 onRemove={handleRemoveCollaborator}
                 onPermissionChange={handlePermissionChange}
+                onSendTestEmail={sendTestEmail}
               />
             ))}
           </div>

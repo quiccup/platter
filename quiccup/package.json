@@ -44,6 +44,7 @@
     "react-dom": "19.0.0",
     "react-hot-toast": "^2.5.2",
     "react-tweet": "^3.2.1",
+    "resend": "^6.0.3",
     "sonner": "^2.0.1",
     "tesseract.js": "^6.0.0",
     "typewriter-effect": "^2.22.0"
