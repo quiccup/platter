@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Site - Platter Chatbot Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+        }
+        
+        .widget-demo {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background: #f9f9f9;
+            margin: 2rem 0;
+        }
+        
+        .widget-code {
+            background: #f4f4f4;
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            border-left: 4px solid #667eea;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .feature {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            margin: 1rem 0;
+        }
+        
+        .cta-button:hover {
+            background: #5a6fd8;
+        }
+        
+        footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 3rem;
+        }
+        
+        /* Dynamic iframe styles */
+        #platter-widget {
+            transition: all 0.3s ease;
+            border-radius: 50%;
+        }
+        
+        #platter-widget.closed {
+            width: 64px !important;
+            height: 64px !important;
+            border-radius: 50% !important;
+        }
+        
+        #platter-widget.open {
+            width: 320px !important;
+            height: 400px !important;
+            border-radius: 8px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍽️ Platter Chatbot Widget</h1>
+            <p class="subtitle">Drop our AI-powered restaurant assistant into your website</p>
+        </header>
+        
+        <div class="content">
+            <h2>🚀 Easy Integration</h2>
+            <p>Add our restaurant chatbot to your website with just a few lines of code. Your customers can get instant menu recommendations and answers to their questions.</p>
+            
+            <div class="widget-demo">
+                <h3>📱 Live Widget Demo</h3>
+                <p>Click the chat button in the bottom right to try our chatbot!</p>
+                <div class="widget-code">
+&lt;iframe 
+  src="http://localhost:3000/widget" 
+  width="320" 
+  height="400" 
+  frameborder="0"
+  style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;"
+&gt;
+&lt;/iframe&gt;
+                </div>
+                <p><small>💡 This widget is currently embedded on this page</small></p>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <h3>🤖 AI-Powered Recommendations</h3>
+                    <p>Our chatbot understands your menu and can make intelligent recommendations based on customer preferences, budget, and dietary requirements.</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>📱 Mobile-Friendly</h3>
+                    <p>Fully responsive design that works perfectly on desktop, tablet, and mobile devices. Your customers get a seamless experience everywhere.</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>⚡ Lightning Fast</h3>
+                    <p>Built with modern web technologies for instant responses. No loading delays, no waiting around for your customers.</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>🎨 Customizable</h3>
+                    <p>Match your brand colors and styling. The widget adapts to your website's design language while maintaining functionality.</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin: 2rem 0;">
+                <a href="http://localhost:3000/widget" class="cta-button" target="_blank">
+                    View Widget Standalone
+                </a>
+            </div>
+        </div>
+        
+        <div class="content">
+            <h2>🔧 Integration Guide</h2>
+            <p>Getting started is simple. Here's how to add the Platter chatbot to your website:</p>
+            
+            <h3>Step 1: Add the iframe</h3>
+            <div class="widget-code">
+&lt;iframe 
+  src="https://your-platter-domain.com/widget" 
+  width="320" 
+  height="400" 
+  frameborder="0"
+  style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;"
+&gt;
+&lt;/iframe&gt;
+            </div>
+            
+            <h3>Step 2: Customize (Optional)</h3>
+            <div class="widget-code">
+&lt;iframe 
+  src="https://your-platter-domain.com/widget?theme=dark&color=red" 
+  width="320" 
+  height="400" 
+  frameborder="0"
+  style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;"
+&gt;
+&lt;/iframe&gt;
+            </div>
+            
+            <h3>Step 3: Test & Launch</h3>
+            <p>That's it! Test the widget on your site and launch it to your customers. They'll love the instant, helpful responses about your menu.</p>
+        </div>
+        
+        <footer>
+            <p>&copy; 2024 Platter. Making restaurant websites more interactive, one chatbot at a time.</p>
+        </footer>
+    </div>
+    
+    <!-- Embedded Widget with Dynamic Sizing -->
+    <iframe 
+        id="platter-widget"
+        src="http://localhost:3000/widget" 
+        width="64" 
+        height="64" 
+        frameborder="0"
+        class="closed"
+        style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden;"
+    >
+    </iframe>
+    
+    <script>
+        // Listen for messages from the iframe to resize it
+        window.addEventListener('message', function(event) {
+            if (event.origin !== 'http://localhost:3000') return;
+            
+            const iframe = document.getElementById('platter-widget');
+            if (event.data.type === 'widget-toggle') {
+                if (event.data.isOpen) {
+                    iframe.classList.remove('closed');
+                    iframe.classList.add('open');
+                    iframe.width = '320';
+                    iframe.height = '400';
+                } else {
+                    iframe.classList.remove('open');
+                    iframe.classList.add('closed');
+                    iframe.width = '64';
+                    iframe.height = '64';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
