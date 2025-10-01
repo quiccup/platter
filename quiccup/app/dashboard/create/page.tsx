@@ -66,7 +66,7 @@ export default function CreateWebsitePage() {
       const { data, error } = await supabase
         .from('users')
         .insert({
-          user_id: user.id, // Foreign key to auth.users
+          id: user.id, // Use auth ID as primary key
           restaurant_name: formData.restaurant_name,
           subdomain: formData.subdomain,
           description: formData.description,

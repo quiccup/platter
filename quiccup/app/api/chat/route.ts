@@ -11,11 +11,13 @@ export async function POST(request: NextRequest) {
   try {
     const { messages, restaurantData } = await request.json()
 
+    console.log("here!", restaurantData)
+
     const formattedMenu = Array.isArray(restaurantData?.menu)
       ? restaurantData.menu
           .map(
             (item: any, index: number) =>
-              `${index + 1}. ${item.title} - $${item.price} (${item.category}): ${item.description || ''}`
+              `${index}. ${item.name} - $${item.price} (${item.category}): ${item.description || ''}`
           )
           .join('\n')
       : ''

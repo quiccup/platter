@@ -113,11 +113,11 @@ export default function DashboardPage() {
         const supabase = createClient()
 
         // Get the user's website data directly from users table
-        // First get the user record
+        // First get the user record - now using the auth ID directly
         const { data: userData, error: userError } = await supabase
           .from('users')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('id', user.id)
           .single()
 
         if (userError) {
@@ -128,7 +128,7 @@ export default function DashboardPage() {
 
         if (userData) {
           setUserWebsite({
-            id: userData.id,
+            id: userData.id, // This is now the auth ID
             subdomain: userData.subdomain,
             restaurant_name: userData.restaurant_name,
             created_at: userData.created_at,

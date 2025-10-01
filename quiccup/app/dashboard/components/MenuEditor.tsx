@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Loader2, ListPlus } from "lucide-react"
 import { MenuItemsModal } from './MenuItemsModal'
+import { MenuItemsTable } from './MenuItemsTable'
 import { toast } from 'react-hot-toast'
 import { menuService, MenuItem } from '@/lib/services/menuService'
 
@@ -43,6 +44,32 @@ export function MenuEditor({ userId }: MenuEditorProps) {
     setMenuItems(items)
   }
 
+  const handleEditItem = (item: MenuItem) => {
+    // TODO: Implement edit functionality
+    console.log('Edit item:', item)
+  }
+
+  const handleDeleteItem = async (itemId: string) => {
+    try {
+      const { error } = await menuService.deleteMenuItem(itemId)
+      if (error) {
+        console.error('Error deleting menu item:', error)
+        toast.error('Failed to delete menu item')
+        return
+      }
+      toast.success('Menu item deleted successfully')
+      loadMenuItems() // Reload the list
+    } catch (error) {
+      console.error('Error deleting menu item:', error)
+      toast.error('Failed to delete menu item')
+    }
+  }
+
+  const handleViewItem = (item: MenuItem) => {
+    // TODO: Implement view functionality
+    console.log('View item:', item)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -62,34 +89,12 @@ export function MenuEditor({ userId }: MenuEditorProps) {
         </Button>
       </div>
 
-      <div className="space-y-4">
-        {menuItems.map((item) => (
-          <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
-            <div>
-              <h4 className="font-medium">{item.name}</h4>
-              <p className="text-sm text-gray-500">${item.price}</p>
-              {item.description && (
-                <p className="text-sm text-gray-600 mt-1">{item.description}</p>
-              )}
-              {item.tags?.length > 0 && (
-                <div className="flex gap-2 mt-2">
-                  {item.tags.map((tag, i) => (
-                    <span key={i} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-        
-        {menuItems.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            <p>No menu items yet. Add your first item above!</p>
-          </div>
-        )}
-      </div>
+      <MenuItemsTable
+        items={menuItems}
+        onEdit={handleEditItem}
+        onDelete={handleDeleteItem}
+        onView={handleViewItem}
+      />
 
       <MenuItemsModal 
         open={menuItemsModalOpen}
