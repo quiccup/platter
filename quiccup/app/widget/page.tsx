@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChatMessage, OrderResponse, ChatApiResponse } from '@/types/chat'
+import { Message, OrderResponse, ChatApiResponse } from '@/types/chat'
 
-function MessageBubble({ message }: { message: ChatMessage }) {
+function MessageBubble({ message }: { message: Message }) {
     const isUser = message.role === 'user'
   
     let parsedOrder: OrderResponse | null = null
@@ -80,7 +80,7 @@ function ChatWindow({
     isLoading 
   }: { 
     onClose: () => void
-    messages: ChatMessage[]
+    messages: Message[]
     input: string
     onInputChange: (value: string) => void
     onSend: () => void
@@ -149,7 +149,7 @@ function ChatWindow({
   
   
 export default function ChatbotWidget() {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
@@ -179,7 +179,7 @@ export default function ChatbotWidget() {
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return
 
-    const userMessage: ChatMessage = {
+    const userMessage: Message = {
         id: Date.now().toString(),
         content: input.trim(),
         role: 'user',
@@ -213,7 +213,7 @@ export default function ChatbotWidget() {
         const data = await response.json()
         if (data.error) throw new Error(data.error)
     
-        const assistantMessage: ChatMessage = {
+        const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           content: data.response,
           role: 'assistant',
@@ -222,7 +222,7 @@ export default function ChatbotWidget() {
         setMessages(prev => [...prev, assistantMessage])
       } catch (error) {
         console.error('Error sending message:', error)
-        const errorMessage: ChatMessage = {
+        const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
           content: 'Sorry, I encountered an error. Please try again.',
           role: 'assistant',

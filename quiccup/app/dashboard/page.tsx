@@ -19,7 +19,8 @@ import {
   Info,
   PhoneCall,
   Trophy,
-  Home
+  Home,
+  Key
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Logo from '@/components/Logo'
@@ -33,6 +34,7 @@ import { ReviewsEdit } from './components/ReviewsEdit'
 import { NavbarEdit } from './components/NavbarEdit'
 import { LeaderboardEdit } from './components/LeaderboardEdit'
 import { ChefsFeedEdit } from './components/ChefsFeedEdit'
+import { ApiKeyEdit } from './components/ApiKeyEdit'
 import { WebsiteData } from './types'
 
 interface UserWebsite {
@@ -419,7 +421,7 @@ export default function DashboardPage() {
         >
           <Tabs defaultValue="navbar" className="w-full">
             <div className="border-b border-gray-200 px-6 pt-6">
-              <TabsList className="grid w-full grid-cols-8">
+              <TabsList className="grid w-full grid-cols-9">
                 <TabsTrigger value="navbar" className="flex items-center gap-2">
                   <Home className="h-4 w-4" />
                   <span className="hidden sm:inline">Navbar</span>
@@ -451,6 +453,10 @@ export default function DashboardPage() {
                 <TabsTrigger value="reviews" className="flex items-center gap-2">
                   <Star className="h-4 w-4" />
                   <span className="hidden sm:inline">Reviews</span>
+                </TabsTrigger>
+                <TabsTrigger value="api-key" className="flex items-center gap-2">
+                  <Key className="h-4 w-4" />
+                  <span className="hidden sm:inline">API Key</span>
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -507,6 +513,10 @@ export default function DashboardPage() {
                   data={websiteData.reviews} 
                   onChange={(data) => handleContentChange('reviews', data)} 
                 />
+              </TabsContent>
+              
+              <TabsContent value="api-key">
+                <ApiKeyEdit userId={userWebsite.id} />
               </TabsContent>
             </div>
           </Tabs>
