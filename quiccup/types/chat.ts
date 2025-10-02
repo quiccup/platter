@@ -8,6 +8,12 @@ export interface MenuItem {
     tags?: string[]
     category?: string
   }
+
+export interface RestaurantData {
+    name: string
+    description?: string
+    menu: MenuItem[]
+  }
   
   // Chat-specific types
   export interface Message {

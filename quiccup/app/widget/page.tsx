@@ -179,6 +179,10 @@ export default function ChatbotWidget() {
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return
 
+    // Get API key from URL params
+    const urlParams = new URLSearchParams(window.location.search)
+    const apiKey = urlParams.get('api_key') || 'demo_key_123' // fallback to demo
+
     const userMessage: Message = {
         id: Date.now().toString(),
         content: input.trim(),
@@ -190,7 +194,7 @@ export default function ChatbotWidget() {
     setIsLoading(true)
 
     try {
-        const response = await fetch('/api/chat', {
+        const response = await fetch('/api/widget-chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -198,15 +202,7 @@ export default function ChatbotWidget() {
               role: m.role,
               content: m.content,
             })),
-            restaurantData: {
-              name: 'Demo Restaurant',
-              menu: [
-                { id: '1', title: 'Margherita Pizza', price: '15.99', category: 'Pizza', description: 'Fresh mozzarella, tomato sauce, basil' },
-                { id: '2', title: 'Caesar Salad', price: '12.99', category: 'Salad', description: 'Romaine lettuce, parmesan, croutons' },
-                { id: '3', title: 'Grilled Salmon', price: '24.99', category: 'Main Course', description: 'Atlantic salmon with herbs' },
-                { id: '4', title: 'Chocolate Cake', price: '8.99', category: 'Dessert', description: 'Rich chocolate layer cake' },
-              ],
-            },
+            apiKey
           }),
         })
     
