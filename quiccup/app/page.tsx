@@ -65,27 +65,23 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1a0f00] via-[#2d1810] to-[#1a0f00] relative overflow-hidden">
-      {/* Subtle Background Glow */}
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-orange-500/5 via-orange-900/10 to-transparent"></div>
-      {/* Radial Gradient for depth */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,94,0,0.05)_0%,transparent_100%)]"></div>
+    <div className="min-h-screen bg-slate-50 relative overflow-hidden">
       
       {/* Header */}
-      <header className="relative z-10 bg-black/10 backdrop-blur-sm border-b border-orange-500/10">
+      <header className="relative z-10 bg-white/80 backdrop-blur-sm border-b border-slate-200">
         <div className="container mx-auto px-6 py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Logo className="h-8 w-8" color="white" border="white" />
-            <div className="text-white text-xl font-medium">platter</div>
+            <Logo className="h-8 w-8" color="slate-900" border="slate-900" />
+            <div className="text-slate-900 text-xl font-medium">platter</div>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/sign-in">
-              <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-orange-500/10 px-4 py-2">
+              <Button variant="ghost" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 px-4 py-2">
                 Sign In
               </Button>
             </Link>
             <Link href="/sign-up">
-              <Button className="bg-orange-500 text-white hover:bg-orange-600 px-6 py-2 text-sm font-medium">
+              <Button className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 text-sm font-medium">
                 Get Started
               </Button>
             </Link>
@@ -99,11 +95,11 @@ export default function HomePage() {
         <div className="text-center">
           
           {/* Main Heading */}
-                      <h1 className="text-[85px] font-montserrat font-bold text-white mb-8 tracking-tight leading-[1.1] max-w-[900px] mx-auto">
+                      <h1 className="text-[85px] font-montserrat font-bold text-slate-900 mb-8 tracking-tight leading-[1.1] max-w-[900px] mx-auto">
               AI Chatbots to upsell your menu!
             </h1>
 
-            <p className="text-white/60 text-xl font-lato mb-12 max-w-xl mx-auto leading-relaxed">
+            <p className="text-slate-600 text-xl font-lato mb-12 max-w-xl mx-auto leading-relaxed">
             Let us show your customers what your menu is really about!
             </p>
 
@@ -112,20 +108,20 @@ export default function HomePage() {
 
         {/* Waitlist Section */}
         <div className="max-w-sm mx-auto">
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-            <h2 className="text-lg font-semibold text-white mb-2 text-left">
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+            <h2 className="text-lg font-semibold text-slate-900 mb-2 text-left">
               Join the waitlist
             </h2>
-            <p className="text-white/50 text-sm mb-5 text-left leading-relaxed">
+            <p className="text-slate-600 text-sm mb-5 text-left leading-relaxed">
               Sign up to be one of the first to use Platter.
             </p>
             <div className="flex gap-2">
               <input 
                 type="email" 
                 placeholder="Email address" 
-                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white placeholder-white/30 text-sm focus:outline-none focus:ring-1 focus:ring-white/20"
+                className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <Button className="w-9 h-9 bg-white text-slate-900 hover:bg-gray-100 rounded-lg p-0 flex-shrink-0">
+              <Button className="w-9 h-9 bg-blue-600 text-white hover:bg-blue-700 rounded-lg p-0 flex-shrink-0">
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
@@ -135,7 +131,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="relative z-10 text-center py-12">
-        <div className="text-white/30 text-xs">
+        <div className="text-slate-400 text-xs">
           <span>Designer & Developer</span>
           <span className="mx-2">•</span>
           <span>Platter Team</span>
