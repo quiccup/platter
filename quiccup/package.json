@@ -1,8 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "test": "dotenv -e .env.test jest",
     "test:watch": "dotenv -e .env.test jest --watch"

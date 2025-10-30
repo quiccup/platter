@@ -30,8 +30,6 @@ import {
   Smartphone,
   Trophy,
 } from 'lucide-react'
-
-import { NavUser } from '@/app/editor/components/nav-user'
 import { Button } from "@/components/ui/button"
 import { PreviewThemeProvider } from '@/components/preview-theme-provider'
 import { PreviewThemeToggle } from '@/components/preview-theme-toggle'
@@ -356,10 +354,6 @@ export default function EditWebsitePage() {
                       isCollapsed={isCollapsed}
                     />
                   </div>
-
-                  <SidebarFooter className="px-4 py-4 mt-auto">
-                    <NavUser />
-                  </SidebarFooter>
                 </div>
               </SidebarContent>
             </Sidebar>
