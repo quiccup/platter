@@ -3,12 +3,10 @@
 import { useState, useEffect, useRef, useCallback, useReducer } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { menuService } from '@/lib/services/menuService'
-import { ChatInputBar } from '@/app/dashboard/websites/[id]/edit/Sections/ChatInputBar'
+import { ChatInputBar } from '@/app/dashboard/ChatInputBar'
 import AnimatedLogoSpinner from '@/components/AnimatedLogoSpinner'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
-import { MenuDock } from '@/components/ui/shadcn-io/menu-dock'
 
 const RECENT_QUERIES = [
   {
