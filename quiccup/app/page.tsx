@@ -100,11 +100,11 @@ export default function HomePage() {
           
           {/* Main Heading */}
                       <h1 className="text-[85px] font-montserrat font-bold text-white mb-8 tracking-tight leading-[1.1] max-w-[900px] mx-auto">
-              Conversational AI to upsell your menu!
+              AI Chatbots to upsell your menu!
             </h1>
 
             <p className="text-white/60 text-xl font-lato mb-12 max-w-xl mx-auto leading-relaxed">
-            A new kind of restaurant website.
+            Let us show your customers what your menu is really about!
             </p>
 
           
