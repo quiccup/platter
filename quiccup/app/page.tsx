@@ -71,7 +71,7 @@ export default function HomePage() {
       <header className="relative z-10 bg-white/80 backdrop-blur-sm border-b border-slate-200">
         <div className="container mx-auto px-6 py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Logo className="h-8 w-8" color="slate-900" border="slate-900" />
+            <Logo className="h-8 w-8" />
             <div className="text-slate-900 text-xl font-medium">platter</div>
           </div>
           <div className="flex items-center gap-3">
