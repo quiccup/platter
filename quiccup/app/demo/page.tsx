@@ -20,7 +20,7 @@ const demoMessages: DemoMessage[] = [
   {
     id: 1,
     sender: 'bot',
-    text: "Welcome to Resteros! I'm Platter, your AI host. I'm here to get your order started while you settle in. What are you in the mood for tonight?"
+    text: "Welcome to Larrys! I'm Platter, I know this menu really well! What are you in the mood for tonight?"
   },
   {
     id: 2,
@@ -321,7 +321,7 @@ const FloatingChatWidget = ({
           <div className="flex items-center gap-3">
             <Logo className="h-6 w-6 text-white" />
             <div>
-              <p className="text-sm font-semibold text-white">Resteros</p>
+              <p className="text-sm font-semibold text-white">Larrys Italian Bistro</p>
               <p className="text-xs text-slate-300">Powered by Platter</p>
             </div>
           </div>
