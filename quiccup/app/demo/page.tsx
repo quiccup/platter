@@ -30,7 +30,14 @@ const demoMessages: DemoMessage[] = [
   {
     id: 3,
     sender: 'bot',
-    text: 'Great choice. Our Citrus Chile Salmon comes with charred broccolini and pineapple salsa for $24. Guests love pairing it with our jalapeño-mango margarita or garlic-parmesan fries.'
+    text: 'Great choice. Our Citrus Chile Salmon comes with charred broccolini and pineapple salsa for $24. Guests love pairing it with our jalapeño-mango margarita or garlic-parmesan fries.',
+    items: [
+      {
+        name: 'Citrus Chile Salmon',
+        description: 'Charred broccolini, pineapple salsa, citrus glaze',
+        price: '$24.00'
+      }
+    ]
   },
   {
     id: 4,
@@ -40,7 +47,19 @@ const demoMessages: DemoMessage[] = [
   {
     id: 5,
     sender: 'bot',
-    text: "Absolutely. If you’d like something richer, the fire-roasted shrimp pasta has a Calabrian chili cream sauce that brings the heat and it’s $21. I can also build you a duet plate with half shrimp pasta and half salmon so you don't have to choose—plus a side of citrus slaw to keep things bright."
+    text: "Absolutely. If you’d like something richer, the fire-roasted shrimp pasta has a Calabrian chili cream sauce that brings the heat and it’s $21. I can also build you a duet plate with half shrimp pasta and half salmon so you don't have to choose—plus a side of citrus slaw to keep things bright.",
+    items: [
+      {
+        name: 'Fire-Roasted Shrimp Pasta',
+        description: 'Calabrian chili cream, blistered tomatoes, basil',
+        price: '$21.00'
+      },
+      {
+        name: 'Salmon + Shrimp Duet Plate',
+        description: 'Half salmon, half shrimp pasta, citrus slaw',
+        price: '$26.00'
+      }
+    ]
   },
   {
     id: 6,
@@ -50,7 +69,19 @@ const demoMessages: DemoMessage[] = [
   {
     id: 7,
     sender: 'bot',
-    text: 'The truffle lobster mac is the fan favorite—it turns the duet into a signature combo. I can knock $4 off if we bundle the lobster mac with your duet, and most guests follow it with our burnt honey cheesecake for something light and sweet.'
+    text: 'The truffle lobster mac is the fan favorite—it turns the duet into a signature combo. I can knock $4 off if we bundle the lobster mac with your duet, and most guests follow it with our burnt honey cheesecake for something light and sweet.',
+    items: [
+      {
+        name: 'Truffle Lobster Mac',
+        description: 'Butter-poached lobster, black truffle crumb',
+        price: '$12.00'
+      },
+      {
+        name: 'Burnt Honey Cheesecake',
+        description: 'Passionfruit curd, sesame brittle',
+        price: '$8.00'
+      }
+    ]
   },
   {
     id: 8,
