@@ -76,7 +76,7 @@ export default function HomePage() {
             <div className="text-slate-900 text-xl font-medium">platter</div>
           </div>
           <Link href="/demo">
-            <Button className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 text-sm font-medium">
+            <Button className="bg-black text-white px-6 py-2 text-sm font-medium">
               View Demo
             </Button>
           </Link>
@@ -94,7 +94,7 @@ export default function HomePage() {
             </h1>
 
             <p className="text-slate-600 text-lg font-lato mb-10 max-w-xl mx-auto leading-relaxed">
-            Let us show your customers what your menu is really about!
+            We show customers what your menu is really about!
             </p>
 
           
